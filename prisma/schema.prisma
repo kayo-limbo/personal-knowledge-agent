@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+
+  conversations Conversation[]
+  prompts       Prompt[]
+  knowledgeDocs KnowledgeDoc[]
+}
+
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  title         String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+
+  promptId      String?
+  prompt        Prompt?   @relation(fields: [promptId], references: [id])
+
+  messages      Message[]
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  role           String    // "user" | "assistant" | "system"
+  content        String
+  createdAt      DateTime  @default(now())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model Prompt {
+  id            String    @id @default(cuid())
+  title         String
+  content       String
+  isPublic      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+
+  conversations Conversation[] 
+}
+
+model KnowledgeDoc {
+  id            String    @id @default(cuid())
+  title         String
+  content       String    // V1先存纯文本,V2再考虑文件解析后存储
+  createdAt     DateTime  @default(now())
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+}
+                                          
