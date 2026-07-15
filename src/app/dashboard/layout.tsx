@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-
 import Sidebar from "@/app/components/dashboard/Sidebar";
 import Header from "@/app/components/dashboard/Header";
+
 
 // Inline nav items to workaround Turbopack RSC compilation issue
 type UserRole = "ADMIN" | "USER" | "GUEST";
@@ -43,7 +43,7 @@ export default async function DashboardLayout({
       <Sidebar items={filteredNavItems} />
       <div className="flex flex-1 flex-col">
         <Header user={session.user} />
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-2">{children}</main>
       </div>
     </div>
   );

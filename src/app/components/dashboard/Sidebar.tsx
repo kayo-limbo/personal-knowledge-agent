@@ -8,7 +8,7 @@ interface Props {
 
 export default function Sidebar({ items }: Props) {
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white">
+    <aside className="flex h-screen w-56 flex-col border-r border-gray-200 bg-white">
       <div className="border-b px-6 py-6">
         <h1 className="text-xl font-bold">
           Knowledge Agent

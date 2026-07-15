@@ -17,8 +17,8 @@ export default function UserDropdown({user}:Props){
     signOut();
   }
     return(
-       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-2">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white">
+       <div className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-2 h-16">
+      <div className="flex h-9 w-10 items-center justify-center rounded-full bg-black text-white">
         {(user.name ?? user.email ?? "U")
           .charAt(0)
           .toUpperCase()}
