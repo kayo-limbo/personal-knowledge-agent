@@ -36,7 +36,7 @@ model Conversation {
   title         String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+  summary       String?
   userId        String
   user          User      @relation(fields: [userId], references: [id])
 
@@ -62,20 +62,29 @@ model Prompt {
   content       String
   isPublic      Boolean   @default(false)
   createdAt     DateTime  @default(now())
-
+  favorite      Boolean   @default(false)
   userId        String
   user          User      @relation(fields: [userId], references: [id])
-
+  
   conversations Conversation[] 
 }
 
 model KnowledgeDoc {
-  id            String    @id @default(cuid())
-  title         String
-  content       String    // V1先存纯文本,V2再考虑文件解析后存储
-  createdAt     DateTime  @default(now())
+  id          String   @id @default(cuid())
 
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
+  title       String
+  content     String
+
+  summary     String?      // AI总结
+
+  tags        String?      // V1先字符串
+
+  source      String?      // conversation / upload / manual
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId       String
+  user         User @relation(fields:[userId],references:[id])
 }
                                           
