@@ -1,6 +1,11 @@
 import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  DEFAULT_DEEPSEEK_MODEL,
+  isDeepSeekModel,
+  type DeepSeekModel,
+} from "@/lib/deepseek-models";
 
 /**
  * DeepSeek 同时兼容 OpenAI 和 Anthropic 两套接口。
@@ -11,10 +16,12 @@ const DEEPSEEK_ANTHROPIC_BASE_URL = "https://api.deepseek.com/anthropic";
 
 /**
  * Flash 成本低、速度快，适合作为个人知识库 MVP 的默认模型。
- * 生产环境仍建议通过环境变量固定模型名，方便升级和回滚。
+ * 环境变量只控制页面初始选择；每次请求的模型仍会经过服务端白名单校验。
  */
-export const DEEPSEEK_MODEL =
-  process.env.DEEPSEEK_MODEL?.trim() || "deepseek-v4-flash";
+const configuredModel = process.env.DEEPSEEK_MODEL?.trim();
+export const DEEPSEEK_DEFAULT_MODEL: DeepSeekModel = isDeepSeekModel(configuredModel)
+  ? configuredModel
+  : DEFAULT_DEEPSEEK_MODEL;
 
 export function getDeepSeekClient(): Anthropic {
   const apiKey = process.env.DEEPSEEK_API_KEY?.trim();

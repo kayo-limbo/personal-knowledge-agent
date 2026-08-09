@@ -15,7 +15,7 @@ V3:Multi-Agent + Workflow（后期）
 - Credentials 登录、JWT Session 和角色导航
 - 紧凑型登录页、注册页、注册输入校验和 bcrypt 密码哈希
 - Dashboard 数据概览
-- DeepSeek V4 Flash 对话、SSE 流式输出和会话历史持久化
+- DeepSeek V4 Flash/Pro 多模型选择、普通/深度思考模式、SSE 流式输出和会话历史持久化
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
 - Prisma SQLite 数据模型、迁移和种子数据
 
@@ -26,7 +26,7 @@ V3:Multi-Agent + Workflow（后期）
 
 ## 配置 DeepSeek API
 
-本项目默认使用低成本、低延迟的 `deepseek-v4-flash`。为了用最少改动复用现有流式聊天代码，服务端通过 Anthropic SDK 调用 DeepSeek 官方提供的 Anthropic 兼容接口；SDK 只是协议客户端，实际请求仍直接发送到 `https://api.deepseek.com/anthropic`。
+本项目默认使用低成本、低延迟的 `deepseek-v4-flash`，聊天输入区也允许用户按每次请求切换 `deepseek-v4-pro`，并选择普通或深度思考模式。为了复用现有流式聊天代码，服务端通过 Anthropic SDK 调用 DeepSeek 官方提供的 Anthropic 兼容接口；SDK 只是协议客户端，实际请求仍直接发送到 `https://api.deepseek.com/anthropic`。
 
 1. 复制 `.env.example` 为 `.env`。
 2. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。
@@ -38,9 +38,9 @@ DEEPSEEK_API_KEY="sk-..."
 DEEPSEEK_MODEL="deepseek-v4-flash"
 ```
 
-API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息，关闭思考模式并最多生成 1024 tokens，用于控制开发阶段的费用。
+API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；普通模式最多生成 1024 tokens，深度思考模式最多生成 4096 tokens。
 
-官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。需要更强推理能力时，可以把 `DEEPSEEK_MODEL` 改成 `deepseek-v4-pro`；改完环境变量必须重启开发服务器。
+`DEEPSEEK_MODEL` 决定页面首次打开时的默认模型，用户之后可以在聊天输入区切换。官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。
 
 > 完整的聊天代码职责、数据流、面试问题和易错点见 [`docs/chat-deepseek-interview-guide.md`](docs/chat-deepseek-interview-guide.md)。
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { DEEPSEEK_MODEL, getDeepSeekClient } from "@/lib/deepseek";
+import { getDeepSeekClient } from "@/lib/deepseek";
 import {
   completeAssistantMessage,
   createConversationMessage,
@@ -97,6 +97,7 @@ export async function POST(request: Request) {
     // 先创建空的 assistant 消息，流结束后再一次性写入完整内容。
     const assistantMessage = await createConversationMessage(conversation.id, "assistant", "");
     const context = await getModelContext(conversation.id);
+    const thinkingEnabled = parsed.data.thinkingMode === "enabled";
 
     let upstream: ReturnType<typeof deepSeek.messages.stream> | undefined;
     const stream = new ReadableStream<Uint8Array>({
@@ -106,17 +107,20 @@ export async function POST(request: Request) {
         try {
           upstream = deepSeek.messages.stream(
             {
-              model: DEEPSEEK_MODEL,
-              // MVP 关闭思考模式并限制输出长度，降低首字延迟和开发阶段的 token 成本。
-              thinking: { type: "disabled" },
-              max_tokens: 1024,
+              model: parsed.data.model,
+              // DeepSeek 会忽略 budget_tokens，但 Anthropic SDK 的 enabled 类型要求提供该字段。
+              thinking: thinkingEnabled
+                ? { type: "enabled", budget_tokens: 2048 }
+                : { type: "disabled" },
+              // 思考会占用更多输出空间；普通模式继续使用更低上限控制成本。
+              max_tokens: thinkingEnabled ? 4096 : 1024,
               system: SYSTEM_PROMPT,
               messages: context,
             },
             { signal: request.signal }
           );
 
-          // DeepSeek 的 Anthropic 兼容流包含多种事件；MVP 只转发普通文字增量。
+          // 不把模型的内部思考过程展示给用户，只转发最终回答的文字增量。
           for await (const event of upstream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
               fullText += event.delta.text;
@@ -153,7 +157,8 @@ export async function POST(request: Request) {
         "X-Conversation-Title": encodeURIComponent(conversation.title),
         "X-User-Message-Id": userMessage.id,
         "X-Assistant-Message-Id": assistantMessage.id,
-        "X-Model": DEEPSEEK_MODEL,
+        "X-Model": parsed.data.model,
+        "X-Thinking-Mode": parsed.data.thinkingMode,
       },
     });
   } catch (error: unknown) {

@@ -51,6 +51,16 @@ Next.js 将事件转换为 SSE（delta / done / error）
 
 这也是适配器思想的一个简单例子：下游代码依赖稳定协议，上游供应商可以替换。
 
+### `src/lib/deepseek-models.ts`
+
+前后端共享的公开模型元数据层：
+
+- 定义 Flash/Pro 模型白名单和 TypeScript 联合类型。
+- 定义页面选择器需要的名称与说明。
+- 提供 `isDeepSeekModel`，保证环境变量中的默认模型也必须属于白名单。
+
+它不包含 API Key，因此可以安全地被 Client Component 引用。把白名单放在共享文件中，可以避免前端选项和后端校验各维护一份后发生不一致。
+
 ### `src/app/api/chat/route.ts`
 
 Chat 的应用编排层，也是最值得重点准备的面试文件：
@@ -87,6 +97,8 @@ Route Handler 使用 Node.js runtime，因为 Prisma 和当前 SDK 都属于服�
 - 消息必须经过 `trim` 后非空。
 - 单条消息最多 12,000 字符，避免异常大请求消耗内存和 token。
 - `conversationId` 可选，新对话不传，继续对话时传入。
+- `model` 只能是 `deepseek-v4-flash` 或 `deepseek-v4-pro`。
+- `thinkingMode` 只能是 `disabled` 或 `enabled`。
 
 TypeScript 类型只在编译期存在，不能阻止外部请求传入恶意 JSON；Zod 才是运行时校验。
 
@@ -106,6 +118,7 @@ Chat 的客户端控制器：
 
 - 初始化 Zustand 状态。
 - 管理输入框、错误信息和 `AbortController`。
+- 管理当前模型和思考模式，并在生成期间锁定选择器。
 - 使用 `fetch` POST 用户消息。
 - 从响应头取得服务端生成的会话和消息 ID。
 - 乐观地把 user 消息、assistant 空消息放入本地状态。
@@ -151,7 +164,7 @@ User 1 ---- n Conversation 1 ---- n Message
 
 1. 用户在 `ChatComposer` 输入内容，`ChatWorkspace.sendMessage()` 被调用。
 2. 前端检查空内容和 `isStreaming`，创建 `AbortController`。
-3. 浏览器发送 `POST /api/chat`，正文只有 `conversationId?` 和 `content`，不发送 userId。
+3. 浏览器发送 `POST /api/chat`，正文包含 `conversationId?`、`content`、`model` 和 `thinkingMode`，但不发送 userId。
 4. Route Handler 从服务端 Session 获取 userId，避免客户端冒充其他用户。
 5. Zod 校验 JSON。
 6. `getDeepSeekClient()` 在任何数据库写入前检查 API Key。
@@ -178,11 +191,13 @@ new Anthropic({
 });
 ```
 
-模型请求当前还有三个重要控制项：
+模型请求当前有三个重要控制项：
 
-- `model: deepseek-v4-flash`：默认选择成本和速度更合适的模型。
-- `thinking: { type: "disabled" }`：MVP 普通问答关闭思考模式，减少延迟和额外 token。
-- `max_tokens: 1024`：限制单次最大输出，防止成本和等待时间失控。
+- `model`：用户可选择低成本的 Flash 或能力更强的 Pro，服务端再用 Zod 白名单校验。
+- `thinking`：用户可选择普通或深度思考；这是一次请求的推理配置，不是 Agent 工具调用。
+- `max_tokens`：普通模式上限 1024，深度思考上限 4096，在回答完整度与费用之间取舍。
+
+DeepSeek 的 Anthropic 兼容接口会忽略 `budget_tokens`，但 Anthropic SDK 的启用思考类型要求提供该字段，因此代码保留一个兼容值。流处理只转发最终回答的 `text_delta`，不向用户展示内部思考过程。
 
 不要把 API Key 放到 `NEXT_PUBLIC_DEEPSEEK_API_KEY`。带 `NEXT_PUBLIC_` 的环境变量会进入浏览器构建产物，任何用户都可能看到并盗用余额。
 
@@ -222,7 +237,7 @@ TypeScript 在运行时会被擦除，HTTP 请求可能来自任何客户端。Z
 
 ### 如何控制上下文和费用？
 
-当前做了消息条数、字符数、单条输入长度和最大输出四层限制，并选用 Flash、关闭思考模式。字符数不是准确 token 数，生产环境应该使用 tokenizer 或供应商返回的 usage 做统计和配额。
+当前做了消息条数、字符数、单条输入长度和最大输出四层限制，并默认选择 Flash 普通模式。用户主动选择 Pro 或深度思考时会提高质量，也可能增加延迟与费用。字符数不是准确 token 数，生产环境应该使用 tokenizer 或供应商返回的 usage 做统计和配额。
 
 ### 为什么要把模型类型与 UI 类型分开？
 
@@ -306,7 +321,37 @@ UI 只认识 user/assistant 消息和 delta/done/error，不依赖 DeepSeek 或 
 
 这套回答能体现你不仅“调通了一个 API”，还理解安全边界、流式协议、数据一致性和从 Chat 走向 Agent 的工程路径。
 
-## 10. 本地运行检查
+## 10. 思考模式为什么不等于 Agent
+
+思考模式只是让同一个模型在生成答案前投入更多推理计算。请求仍然只有一次：
+
+```text
+问题 -> 模型思考 -> 最终回答
+```
+
+Agent 则包含模型与外部工具的多轮循环：
+
+```text
+问题 -> 模型决定调用 searchKnowledge
+     -> 服务端执行工具并返回结果
+     -> 模型判断是否继续调用工具
+     -> 生成最终回答
+```
+
+因此，多模型和思考模式属于 Chat 能力增强；只有接入受控工具、工具结果回填和循环终止条件后，项目才进入 Agent 阶段。
+
+## 11. 从 Chat 到个人知识库 Agent 的工作分配
+
+建议按风险和依赖关系分四个阶段：
+
+1. **聊天基础加固**：记录每条回答使用的模型、思考模式和 token usage，增加限流、配额、幂等键和消息状态。
+2. **固定知识检索**：实现只读的 `searchKnowledge`，先用关键词搜索并严格按 userId 过滤，把命中文档片段拼入上下文。
+3. **Tool Calling Agent**：向 DeepSeek 注册知识库工具，执行“模型选工具—服务端运行—结果回填”的有限循环，设置最大轮数和超时。
+4. **质量与扩展**：加入 embedding、向量检索、rerank、引用来源、文件上传，再考虑联网搜索、MCP 和 Multi-Agent。
+
+每个阶段都能单独测试和演示。不要一开始同时加入向量数据库、文件解析和多个 Agent，否则出现错误时很难判断是检索、权限、模型还是工具循环的问题。
+
+## 12. 本地运行检查
 
 在项目根目录创建 `.env`：
 

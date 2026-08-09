@@ -6,10 +6,11 @@ import { ChatMessages } from "./ChatMessages";
 import { ChatComposer } from "./ChatComposer";
 import { useActiveMessages, useChatStore } from "@/app/store/chat-store";
 import type { ChatBootstrap, ChatStreamEvent } from "../types";
+import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
 
 interface ChatWorkspaceProps {
   bootstrap: ChatBootstrap;
-  model: string;
+  initialModel: DeepSeekModel;
 }
 
 async function readError(response: Response): Promise<string> {
@@ -56,9 +57,11 @@ async function consumeSse(
   }
 }
 
-export function ChatWorkspace({ bootstrap, model }: ChatWorkspaceProps) {
+export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState<DeepSeekModel>(initialModel);
+  const [thinkingMode, setThinkingMode] = useState<DeepSeekThinkingMode>("disabled");
   const abortRef = useRef<AbortController | null>(null);
 
   const conversations = useChatStore((state) => state.conversations);
@@ -111,6 +114,8 @@ export function ChatWorkspace({ bootstrap, model }: ChatWorkspaceProps) {
         body: JSON.stringify({
           conversationId: previousConversationId ?? undefined,
           content,
+          model,
+          thinkingMode,
         }),
         signal: controller.signal,
       });
@@ -193,13 +198,17 @@ export function ChatWorkspace({ bootstrap, model }: ChatWorkspaceProps) {
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ChatMessages messages={messages} model={model} />
+          <ChatMessages messages={messages} model={model} thinkingMode={thinkingMode} />
         </div>
         <ChatComposer
           value={input}
           isStreaming={isStreaming}
           error={error}
+          model={model}
+          thinkingMode={thinkingMode}
           onChange={setInput}
+          onModelChange={setModel}
+          onThinkingModeChange={setThinkingMode}
           onSubmit={sendMessage}
           onStop={stopGenerating}
         />

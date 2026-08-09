@@ -6,14 +6,21 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import type { ChatMessage } from "../types";
+import {
+  DEEPSEEK_MODEL_OPTIONS,
+  type DeepSeekModel,
+  type DeepSeekThinkingMode,
+} from "@/lib/deepseek-models";
 
 interface ChatMessagesProps {
   messages: ChatMessage[];
-  model: string;
+  model: DeepSeekModel;
+  thinkingMode: DeepSeekThinkingMode;
 }
 
-export function ChatMessages({ messages, model }: ChatMessagesProps) {
+export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const modelLabel = DEEPSEEK_MODEL_OPTIONS.find((option) => option.value === model)?.label ?? model;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,7 +37,7 @@ export function ChatMessages({ messages, model }: ChatMessagesProps) {
           你可以让 DeepSeek 解释概念、整理笔记、生成代码，后续我们还会把知识库检索接入这里。
         </p>
         <span className="mt-5 rounded-full border bg-white px-3 py-1 text-xs text-muted-foreground">
-          当前模型：{model}
+          当前选择：{modelLabel} · {thinkingMode === "enabled" ? "深度思考" : "普通模式"}
         </span>
       </div>
     );

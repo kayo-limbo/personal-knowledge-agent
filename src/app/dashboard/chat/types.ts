@@ -27,6 +27,8 @@ export interface ChatBootstrap {
 export interface SendChatInput {
   conversationId?: string;
   content: string;
+  model: DeepSeekModel;
+  thinkingMode: DeepSeekThinkingMode;
 }
 
 /** SSE 每一帧都是这种可判别联合类型，客户端可以安全地分别处理文本和错误。 */
@@ -34,3 +36,4 @@ export type ChatStreamEvent =
   | { type: "delta"; text: string }
   | { type: "done" }
   | { type: "error"; message: string };
+import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";

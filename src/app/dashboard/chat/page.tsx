@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { DEEPSEEK_MODEL } from "@/lib/deepseek";
+import { DEEPSEEK_DEFAULT_MODEL } from "@/lib/deepseek";
 import { getChatBootstrap } from "@/lib/services/conversation.service";
 import { ChatWorkspace } from "./components/ChatWorkspace";
 
@@ -13,5 +13,5 @@ export default async function ChatPage() {
   if (!session?.user?.id) redirect("/login");
 
   const bootstrap = await getChatBootstrap(session.user.id);
-  return <ChatWorkspace bootstrap={bootstrap} model={DEEPSEEK_MODEL} />;
+  return <ChatWorkspace bootstrap={bootstrap} initialModel={DEEPSEEK_DEFAULT_MODEL} />;
 }
