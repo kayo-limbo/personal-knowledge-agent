@@ -11,9 +11,9 @@ export default function WorkspaceHeader({
 }:Props) {
     return (
         <div>
-      {/* <h1 className="text-3xl font-bold tracking-tight">
+      <h1 className="text-3xl font-bold tracking-tight">
         {title}
-      </h1> */}
+      </h1>
       {greeting && (
         <p className="mt-1 text-muted-foreground">
           {greeting}

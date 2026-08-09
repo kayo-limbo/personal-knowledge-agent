@@ -75,11 +75,11 @@ model KnowledgeDoc {
   title       String
   content     String
 
-  summary     String?      // AI总结
+  summary     String?      // AI 生成或用户填写的摘要
 
-  tags        String?      // V1先字符串
+  tags        String?      // V1 暂用逗号分隔字符串，后续可以拆成 Tag 表
 
-  source      String?      // conversation / upload / manual
+  source      String?      // 来源：conversation / upload / manual
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -87,4 +87,3 @@ model KnowledgeDoc {
   userId       String
   user         User @relation(fields:[userId],references:[id])
 }
-                                          

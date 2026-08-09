@@ -1,6 +1,5 @@
 "use server";
 
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import {
@@ -9,37 +8,32 @@ import {
   deleteKnowledge,
   getKnowledgeById,
 } from "@/lib/services/knowledge.service";
-import {
-  KNOWLEDGE_TITLE_MAX_LENGTH,
-  KNOWLEDGE_CONTENT_MAX_LENGTH,
-} from "@/app/dashboard/knowledge/constants";
 import type { KnowledgeActionResult } from "@/app/dashboard/knowledge/types";
-
-const knowledgeSchema = z.object({
-  title: z.string().min(1, "标题不能为空").max(KNOWLEDGE_TITLE_MAX_LENGTH),
-  content: z.string().min(1, "内容不能为空").max(KNOWLEDGE_CONTENT_MAX_LENGTH),
-  summary: z.string().optional(),
-  tags: z.string().optional(),
-  source: z.enum(["conversation", "upload", "manual"]).optional(),
-});
+import {
+  firstValidationError,
+  knowledgeInputSchema,
+  knowledgeUpdateSchema,
+} from "@/lib/validators/knowledge";
 
 async function requireUserId(): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("未登录");
+  // 隐藏菜单不是安全措施；Server Action 仍要单独检查角色。
+  if (session.user.role === "GUEST") throw new Error("访客没有管理知识库的权限");
   return session.user.id;
 }
 
 export async function createKnowledgeAction(formData: FormData): Promise<KnowledgeActionResult> {
   try {
     const userId = await requireUserId();
-    const parsed = knowledgeSchema.safeParse({
+    const parsed = knowledgeInputSchema.safeParse({
       title: formData.get("title"),
       content: formData.get("content"),
       summary: formData.get("summary") ?? undefined,
       tags: formData.get("tags") ?? undefined,
       source: formData.get("source") ?? undefined,
     });
-    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+    if (!parsed.success) return { success: false, error: firstValidationError(parsed.error) };
 
     const doc = await createKnowledge(userId, parsed.data);
     revalidatePath("/dashboard/knowledge");
@@ -52,14 +46,14 @@ export async function createKnowledgeAction(formData: FormData): Promise<Knowled
 export async function updateKnowledgeAction(id: string, formData: FormData): Promise<KnowledgeActionResult> {
   try {
     const userId = await requireUserId();
-    const parsed = knowledgeSchema.partial().safeParse({
+    const parsed = knowledgeUpdateSchema.safeParse({
       title: formData.get("title") ?? undefined,
       content: formData.get("content") ?? undefined,
       summary: formData.get("summary") ?? undefined,
       tags: formData.get("tags") ?? undefined,
       source: formData.get("source") ?? undefined,
     });
-    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+    if (!parsed.success) return { success: false, error: firstValidationError(parsed.error) };
 
     const doc = await updateKnowledge(id, userId, parsed.data);
     revalidatePath("/dashboard/knowledge");

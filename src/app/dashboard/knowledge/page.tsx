@@ -13,6 +13,8 @@ interface KnowledgePageProps {
 export default async function KnowledgePage({ searchParams }: KnowledgePageProps) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
+  // Sidebar 隐藏入口只是改善体验，页面本身仍要执行真正的权限检查。
+  if (session.user.role === "GUEST") redirect("/dashboard");
 
   const params = await searchParams;
   const page = params.page ? Number(params.page) : 1;
