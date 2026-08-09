@@ -42,7 +42,7 @@ API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏�
 
 `DEEPSEEK_MODEL` 决定页面首次打开时的默认模型，用户之后可以在聊天输入区切换。官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。
 
-> 完整的聊天代码职责、数据流、面试问题和易错点见 [`docs/chat-deepseek-interview-guide.md`](docs/chat-deepseek-interview-guide.md)。
+> 学习文档统一从 [`docs/README.md`](docs/README.md) 开始阅读；完整聊天面试指南见 [`docs/chat-deepseek-interview-guide.md`](docs/chat-deepseek-interview-guide.md)。
 
 ## 第一次阅读本项目
 
