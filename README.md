@@ -2,13 +2,84 @@ Personal Knowledge Agent
 
 一个基于 Next.js + TypeScript 构建的 AI 聊天工作空间，具备知识库管理功能，并支持通过函数调用实现检索。
 
-技术栈：Next.js + TypeScript + TailwindCSS + Zustand + Prisma + PostgreSQL + NextAuth
+技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + SQLite + NextAuth
 
-核心功能:登录/RBAC + Chat(SSE流式+Markdown) + Prompt管理 + Knowledge CRUD + History + Tool Calling(调用你自己的Knowledge Search)
+V1 目标:登录/RBAC + Chat(SSE流式+Markdown) + Prompt管理 + Knowledge CRUD + History + Tool Calling(调用自己的 Knowledge Search)
 V2:文件上传解析 + MCP + 更多工具
 V3:Multi-Agent + Workflow（后期）
 
+## 当前进度
+
+已经可以使用或已经打通：
+
+- Credentials 登录、JWT Session 和角色导航
+- 紧凑型登录页、注册页、注册输入校验和 bcrypt 密码哈希
+- Dashboard 数据概览
+- DeepSeek V4 Flash 对话、SSE 流式输出和会话历史持久化
+- Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
+- Prisma SQLite 数据模型、迁移和种子数据
+
+正在开发：
+
+- Prompt、History、Admin、Analytics 仍是规划路由
+- Knowledge Tool Calling、文件解析、MCP 和 Multi-Agent 尚未开始
+
+## 配置 DeepSeek API
+
+本项目默认使用低成本、低延迟的 `deepseek-v4-flash`。为了用最少改动复用现有流式聊天代码，服务端通过 Anthropic SDK 调用 DeepSeek 官方提供的 Anthropic 兼容接口；SDK 只是协议客户端，实际请求仍直接发送到 `https://api.deepseek.com/anthropic`。
+
+1. 复制 `.env.example` 为 `.env`。
+2. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。
+3. 将 Key 填入 `DEEPSEEK_API_KEY`，不要使用 `NEXT_PUBLIC_` 前缀。
+4. 重启 `npm run dev`，让 Next.js 重新读取环境变量。
+
+```env
+DEEPSEEK_API_KEY="sk-..."
+DEEPSEEK_MODEL="deepseek-v4-flash"
+```
+
+API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息，关闭思考模式并最多生成 1024 tokens，用于控制开发阶段的费用。
+
+官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。需要更强推理能力时，可以把 `DEEPSEEK_MODEL` 改成 `deepseek-v4-pro`；改完环境变量必须重启开发服务器。
+
+> 完整的聊天代码职责、数据流、面试问题和易错点见 [`docs/chat-deepseek-interview-guide.md`](docs/chat-deepseek-interview-guide.md)。
+
+## 第一次阅读本项目
+
+推荐按照一次请求经过的顺序阅读：
+
+1. `prisma/schema.prisma`：先看系统保存哪些数据。
+2. `src/auth.ts`：理解登录后如何把用户 id 和 role 放入 Session。
+3. `src/app/dashboard/knowledge/page.tsx`：页面如何取得当前用户并读取数据。
+4. `src/app/dashboard/knowledge/actions/knowledge.ts`：浏览器表单如何调用服务端代码。
+5. `src/lib/validators/knowledge.ts`：为什么服务端仍然需要校验输入。
+6. `src/lib/services/knowledge.service.ts`：业务逻辑如何通过 Prisma 读写数据库。
+7. `src/app/api/knowledge/route.ts`：同一套业务逻辑如何暴露为 REST API。
+8. `src/app/api/chat/route.ts`：理解 DeepSeek、SSE 与消息持久化如何串联。
+
+Knowledge 新建流程可以简化为：
+
+```text
+KnowledgeForm（浏览器）
+  -> createKnowledgeAction（认证 + 校验）
+  -> createKnowledge（业务逻辑）
+  -> Prisma
+  -> SQLite dev.db
+  -> revalidatePath 刷新页面
+```
+
+常用检查命令：
+
+```bash
+npm run dev
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
 ## 项目目录结构
+
+> 下方包含 V1 的目标结构；“当前进度”中标记为正在开发的目录可能尚未创建。
 
 ```
 personal-knowledge-agent/
