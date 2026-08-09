@@ -1,50 +1,26 @@
-"use client";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { LoginForm } from "./LoginForm";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+export const metadata: Metadata = { title: "登录 | Personal Knowledge Agent" };
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
+interface LoginPageProps {
+  searchParams: Promise<{ callbackUrl?: string; registered?: string; email?: string }>;
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const session = await auth();
+  if (session?.user) redirect("/dashboard");
 
-    if (res?.error) {
-      setError("邮箱或密码错误");
-      return;
-    }
-    router.push("/dashboard");
-  }
-
+  const { callbackUrl, registered, email } = await searchParams;
+  // 只接受站内路径，避免攻击者把登录后的用户跳转到钓鱼网站。
+  const safeCallbackUrl = callbackUrl?.startsWith("/") ? callbackUrl : "/dashboard";
   return (
-    <div style={{ padding: "2rem", maxWidth: "400px", margin: "0 auto" }}>
-      <h2>系统登录</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <input 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          placeholder="邮箱" 
-          style={{ padding: "0.5rem" }}
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="密码"
-          style={{ padding: "0.5rem" }}
-        />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit" style={{ padding: "0.5rem", cursor: "pointer" }}>登录</button>
-      </form>
-    </div>
+    <LoginForm
+      callbackUrl={safeCallbackUrl}
+      initialEmail={email ?? ""}
+      registered={registered === "1"}
+    />
   );
 }

@@ -19,7 +19,6 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function SidebarItem({ item }: Props) {
-  const IconComponent = iconMap[item.icon];
   const pathname = usePathname();
   const active = pathname.startsWith(item.href);
   const Icon = iconMap[item.icon];

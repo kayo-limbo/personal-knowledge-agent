@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import  Providers  from "./providers";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Personal Knowledge Agent",
@@ -17,7 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className={cn("font-sans", geist.variable)}>
+    // 使用 globals.css 中的系统字体栈，离线构建时不需要向 Google 下载字体。
+    <html lang="zh-CN" className="font-sans">
       <body>
         <Providers>{children}</Providers>
       </body>

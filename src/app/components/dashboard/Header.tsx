@@ -1,5 +1,4 @@
 "use client";
-import { usePathname } from "next/navigation";
 import UserDropdown from "./UserDropdown";
 import SearchBar from "./SearchBar"
 interface Props {
@@ -11,14 +10,6 @@ interface Props {
 }
 
 export default function Header({user}:Props){
-  const pathname = usePathname();
-  const breadcrumb =
-    pathname
-      .split("/")
-      .filter(Boolean)
-      .map((item) => 
-        item.replace("-", " ")
-      );
     return (
     <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b bg-background/80 px-8 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div>
