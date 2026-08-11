@@ -5,7 +5,7 @@ import { ConversationSidebar } from "./ConversationSidebar";
 import { ChatMessages } from "./ChatMessages";
 import { ChatComposer } from "./ChatComposer";
 import { useActiveMessages, useChatStore } from "@/app/store/chat-store";
-import type { ChatBootstrap, ChatStreamEvent } from "../types";
+import type { ChatBootstrap, ChatStreamEvent } from "@/app/dashboard/chat/types";
 import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
 
 interface ChatWorkspaceProps {
@@ -122,31 +122,34 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
 
       if (!response.ok) throw new Error(await readError(response));
 
-      conversationId = response.headers.get("X-Conversation-Id");
+      const responseConversationId = response.headers.get("X-Conversation-Id");
       const userMessageId = response.headers.get("X-User-Message-Id");
-      assistantMessageId = response.headers.get("X-Assistant-Message-Id");
+      const responseAssistantMessageId = response.headers.get("X-Assistant-Message-Id");
       const encodedTitle = response.headers.get("X-Conversation-Title");
-      if (!conversationId || !userMessageId || !assistantMessageId) {
+      if (!responseConversationId || !userMessageId || !responseAssistantMessageId) {
         throw new Error("服务端返回的会话信息不完整");
       }
 
+      conversationId = responseConversationId;
+      assistantMessageId = responseAssistantMessageId;
+
       const now = new Date().toISOString();
-      const existing = conversations.find((item) => item.id === conversationId);
+      const existing = conversations.find((item) => item.id === responseConversationId);
       upsertConversation({
-        id: conversationId,
+        id: responseConversationId,
         title: encodedTitle ? decodeURIComponent(encodedTitle) : existing?.title ?? "新对话",
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
       });
-      setActiveConversation(conversationId);
-      addMessage(conversationId, {
+      setActiveConversation(responseConversationId);
+      addMessage(responseConversationId, {
         id: userMessageId,
         role: "user",
         content,
         createdAt: now,
       });
-      addMessage(conversationId, {
-        id: assistantMessageId,
+      addMessage(responseConversationId, {
+        id: responseAssistantMessageId,
         role: "assistant",
         content: "",
         createdAt: now,
@@ -155,10 +158,14 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
 
       await consumeSse(response, (event) => {
         if (event.type === "delta") {
-          appendToMessage(conversationId!, assistantMessageId!, event.text);
+          appendToMessage(responseConversationId, responseAssistantMessageId, event.text);
         } else if (event.type === "error") {
           setError(event.message);
-          appendToMessage(conversationId!, assistantMessageId!, `> ⚠️ ${event.message}`);
+          appendToMessage(
+            responseConversationId,
+            responseAssistantMessageId,
+            `> ⚠️ ${event.message}`
+          );
         }
       });
     } catch (caught: unknown) {
