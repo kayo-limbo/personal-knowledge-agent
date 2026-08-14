@@ -1,6 +1,6 @@
 Personal Knowledge Agent
 
-一个基于 Next.js + TypeScript 构建的 AI 聊天工作空间，具备知识库管理功能，并支持通过函数调用实现检索。
+一个基于 Next.js + TypeScript 构建的个人知识库 AI 聊天工作空间，已经支持固定知识检索、上下文注入和引用来源，后续将继续升级为 Tool Calling Agent。
 
 技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + SQLite + NextAuth
 
@@ -17,12 +17,13 @@ V3:Multi-Agent + Workflow（后期）
 - Dashboard 数据概览
 - DeepSeek V4 Flash/Pro 多模型选择、普通/深度思考模式、SSE 流式输出和会话历史持久化
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
+- 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
 - Prisma SQLite 数据模型、迁移和种子数据
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- Knowledge Tool Calling、文件解析、MCP 和 Multi-Agent 尚未开始
+- Knowledge Tool Calling Agent 循环、联网搜索和 PostgreSQL 部署尚未开始
 
 ## 配置 DeepSeek API
 
@@ -38,11 +39,13 @@ DEEPSEEK_API_KEY="sk-..."
 DEEPSEEK_MODEL="deepseek-v4-flash"
 ```
 
-API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；普通模式最多生成 1024 tokens，深度思考模式最多生成 4096 tokens。
+API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；固定知识检索最多注入 5 条、合计约 6,000 字符的片段和元数据；普通模式最多生成 1024 tokens，深度思考模式最多生成 4096 tokens。
 
 `DEEPSEEK_MODEL` 决定页面首次打开时的默认模型，用户之后可以在聊天输入区切换。官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。
 
 > 学习文档统一从 [`docs/README.md`](docs/README.md) 开始阅读；完整聊天面试指南见 [`docs/chat-deepseek-interview-guide.md`](docs/chat-deepseek-interview-guide.md)。
+
+> 项目用于 2026-09-13 暑期考核，当前范围、排期、部署取舍和面试准备见 [`docs/plans/summer-assessment-roadmap.md`](docs/plans/summer-assessment-roadmap.md)。
 
 ## 第一次阅读本项目
 
@@ -55,7 +58,9 @@ API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏�
 5. `src/lib/validators/knowledge.ts`：为什么服务端仍然需要校验输入。
 6. `src/lib/services/knowledge.service.ts`：业务逻辑如何通过 Prisma 读写数据库。
 7. `src/app/api/knowledge/route.ts`：同一套业务逻辑如何暴露为 REST API。
-8. `src/app/api/chat/route.ts`：理解 DeepSeek、SSE 与消息持久化如何串联。
+8. `src/lib/knowledge-search.ts`：理解关键词、排序、片段预算与引用 Prompt。
+9. `src/lib/services/knowledge-search.service.ts`：理解检索如何按 Session 用户隔离。
+10. `src/app/api/chat/route.ts`：理解固定检索、DeepSeek、SSE 与消息持久化如何串联。
 
 Knowledge 新建流程可以简化为：
 
@@ -73,6 +78,7 @@ KnowledgeForm（浏览器）
 ```bash
 npm run dev
 npm run lint
+npm test
 npx tsc --noEmit
 npm run build
 ```

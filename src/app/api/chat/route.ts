@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getDeepSeekClient } from "@/lib/deepseek";
 import {
+  buildKnowledgeContextPrompt,
+  buildKnowledgeSourcesMarkdown,
+} from "@/lib/knowledge-search";
+import {
   completeAssistantMessage,
   createConversationMessage,
   getModelContext,
   getOrCreateConversation,
   removeMessage,
 } from "@/lib/services/conversation.service";
+import { searchKnowledge } from "@/lib/services/knowledge-search.service";
 import { sendChatSchema } from "@/lib/validators/chat";
 import type { ChatStreamEvent } from "@/app/dashboard/chat/types";
 
@@ -83,7 +88,18 @@ export async function POST(request: Request) {
     );
   }
 
+  let knowledgeResults;
   try {
+    // 固定检索只使用服务端 Session 的 userId，浏览器无法指定要搜索谁的知识库。
+    knowledgeResults = await searchKnowledge(session.user.id, parsed.data.content);
+  } catch (error: unknown) {
+    console.error("searchKnowledge failed", error);
+    return NextResponse.json({ error: "知识库检索失败，请稍后再试" }, { status: 500 });
+  }
+
+  try {
+    const knowledgePrompt = buildKnowledgeContextPrompt(knowledgeResults);
+    const sourcesMarkdown = buildKnowledgeSourcesMarkdown(knowledgeResults);
     const conversation = await getOrCreateConversation(
       session.user.id,
       parsed.data.conversationId,
@@ -114,7 +130,7 @@ export async function POST(request: Request) {
                 : { type: "disabled" },
               // 思考会占用更多输出空间；普通模式继续使用更低上限控制成本。
               max_tokens: thinkingEnabled ? 4096 : 1024,
-              system: SYSTEM_PROMPT,
+              system: `${SYSTEM_PROMPT}\n\n${knowledgePrompt}`,
               messages: context,
             },
             { signal: request.signal }
@@ -129,6 +145,10 @@ export async function POST(request: Request) {
           }
 
           if (!fullText.trim()) throw new Error("DeepSeek 返回了空内容");
+          if (sourcesMarkdown) {
+            fullText += sourcesMarkdown;
+            controller.enqueue(sseFrame({ type: "delta", text: sourcesMarkdown }));
+          }
           await completeAssistantMessage(assistantMessage.id, fullText);
           controller.enqueue(sseFrame({ type: "done" }));
         } catch (error: unknown) {
@@ -164,6 +184,7 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "创建会话失败";
     const status = message.includes("不存在") || message.includes("无权限") ? 404 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const publicMessage = status === 404 ? message : "创建会话失败，请稍后再试";
+    return NextResponse.json({ error: publicMessage }, { status });
   }
 }

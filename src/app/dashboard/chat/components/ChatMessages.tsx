@@ -34,7 +34,7 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
         </div>
         <h2 className="text-2xl font-semibold">今天想整理或探索什么？</h2>
         <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
-          你可以让 DeepSeek 解释概念、整理笔记、生成代码，后续我们还会把知识库检索接入这里。
+          你可以让 DeepSeek 解释概念、整理笔记或查询个人知识库；命中知识时，回答会显示引用来源。
         </p>
         <span className="mt-5 rounded-full border bg-white px-3 py-1 text-xs text-muted-foreground">
           当前选择：{modelLabel} · {thinkingMode === "enabled" ? "深度思考" : "普通模式"}
