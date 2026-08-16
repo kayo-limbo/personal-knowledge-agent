@@ -15,6 +15,7 @@ interface ChatState {
   setMessages: (conversationId: string, messages: ChatMessage[]) => void;
   addMessage: (conversationId: string, message: ChatMessage) => void;
   appendToMessage: (conversationId: string, messageId: string, delta: string) => void;
+  upsertToolCall: (conversationId: string, messageId: string, toolCall: NonNullable<ChatMessage["toolCalls"]>[number]) => void;
   finalizeMessage: (conversationId: string, messageId: string) => void;
   setStreaming: (streaming: boolean) => void;
   reset: () => void;
@@ -59,6 +60,24 @@ export const useChatStore = create<ChatState>((set) => ({
         ...state.messagesByConversation,
         [conversationId]: (state.messagesByConversation[conversationId] ?? []).map((m) =>
           m.id === messageId ? { ...m, content: m.content + delta } : m
+        ),
+      },
+    })),
+
+  upsertToolCall: (conversationId, messageId, toolCall) =>
+    set((state) => ({
+      messagesByConversation: {
+        ...state.messagesByConversation,
+        [conversationId]: (state.messagesByConversation[conversationId] ?? []).map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                toolCalls: [
+                  ...(message.toolCalls ?? []).filter((item) => item.id !== toolCall.id),
+                  toolCall,
+                ],
+              }
+            : message
         ),
       },
     })),

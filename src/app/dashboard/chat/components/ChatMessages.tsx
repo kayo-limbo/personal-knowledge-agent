@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Bot, Sparkles, User } from "lucide-react";
+import { Bot, CheckCircle2, LoaderCircle, Search, Sparkles, TriangleAlert, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import type { ChatMessage } from "../types";
+import type { ChatMessage, ToolCall } from "../types";
 import {
   DEEPSEEK_MODEL_OPTIONS,
   type DeepSeekModel,
@@ -16,6 +16,43 @@ interface ChatMessagesProps {
   messages: ChatMessage[];
   model: DeepSeekModel;
   thinkingMode: DeepSeekThinkingMode;
+}
+
+function toolResultValue(result: unknown, key: "resultCount" | "error"): unknown {
+  return typeof result === "object" && result !== null && key in result
+    ? (result as Record<string, unknown>)[key]
+    : undefined;
+}
+
+function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
+  const query =
+    typeof toolCall.arguments.query === "string" ? toolCall.arguments.query : "无有效查询词";
+  const resultCount = toolResultValue(toolCall.result, "resultCount");
+  const error = toolResultValue(toolCall.result, "error");
+  const status = toolCall.status ?? "running";
+
+  return (
+    <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+      {status === "running" ? (
+        <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-blue-500" />
+      ) : status === "success" ? (
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+      ) : (
+        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+      )}
+      <div className="min-w-0">
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <Search className="h-3.5 w-3.5" />
+          {status === "running"
+            ? "正在检索个人知识库"
+            : status === "success"
+              ? `知识库检索完成 · 命中 ${typeof resultCount === "number" ? resultCount : 0} 条`
+              : `知识库检索失败${typeof error === "string" ? ` · ${error}` : ""}`}
+        </div>
+        <p className="truncate text-slate-500">查询：{query}</p>
+      </div>
+    </div>
+  );
 }
 
 export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProps) {
@@ -62,6 +99,13 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
                   : "border bg-white text-gray-800 shadow-sm"
               }`}
             >
+              {!fromUser && message.toolCalls && message.toolCalls.length > 0 && (
+                <div className="mb-3 space-y-2">
+                  {message.toolCalls.map((toolCall) => (
+                    <ToolCallStatus key={toolCall.id} toolCall={toolCall} />
+                  ))}
+                </div>
+              )}
               {message.isStreaming && !message.content ? (
                 <div className="flex h-7 items-center gap-1" aria-label="DeepSeek 正在输入">
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" />

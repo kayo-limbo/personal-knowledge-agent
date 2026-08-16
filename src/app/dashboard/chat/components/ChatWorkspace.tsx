@@ -74,6 +74,7 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
   const setMessages = useChatStore((state) => state.setMessages);
   const addMessage = useChatStore((state) => state.addMessage);
   const appendToMessage = useChatStore((state) => state.appendToMessage);
+  const upsertToolCall = useChatStore((state) => state.upsertToolCall);
   const finalizeMessage = useChatStore((state) => state.finalizeMessage);
   const setStreaming = useChatStore((state) => state.setStreaming);
   const reset = useChatStore((state) => state.reset);
@@ -159,6 +160,8 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
       await consumeSse(response, (event) => {
         if (event.type === "delta") {
           appendToMessage(responseConversationId, responseAssistantMessageId, event.text);
+        } else if (event.type === "tool") {
+          upsertToolCall(responseConversationId, responseAssistantMessageId, event.toolCall);
         } else if (event.type === "error") {
           setError(event.message);
           appendToMessage(

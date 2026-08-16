@@ -1,12 +1,21 @@
-/** Chat 模块先定义领域类型，后续接入任意大模型时都不需要改 UI 状态结构。 */
-export type ChatRole = "user" | "assistant" | "system";
+import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
+
+export type MessageRole = "user" | "assistant" | "system";
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+  status?: "running" | "success" | "error";
+  result?: unknown;
+}
 
 export interface ChatMessage {
   id: string;
-  role: ChatRole;
+  role: MessageRole;
   content: string;
+  toolCalls?: ToolCall[];
   createdAt: string;
-  /** 仅用于前端显示打字状态，不需要存入数据库。 */
   isStreaming?: boolean;
 }
 
@@ -31,9 +40,9 @@ export interface SendChatInput {
   thinkingMode: DeepSeekThinkingMode;
 }
 
-/** SSE 每一帧都是这种可判别联合类型，客户端可以安全地分别处理文本和错误。 */
+/** SSE 每一帧都是可判别联合类型，客户端可以安全地区分文本、完成和错误事件。 */
 export type ChatStreamEvent =
   | { type: "delta"; text: string }
+  | { type: "tool"; toolCall: ToolCall }
   | { type: "done" }
   | { type: "error"; message: string };
-import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";

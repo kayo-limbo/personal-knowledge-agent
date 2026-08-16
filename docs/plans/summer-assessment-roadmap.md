@@ -1,6 +1,6 @@
 # 暑期考核、部署、面试与项目规划
 
-最后更新：2026-08-14
+最后更新：2026-08-16
 验收日期：2026-09-13
 规划周期：约 34 天
 
@@ -71,17 +71,16 @@
 - 普通/深度思考模式选择。
 - 聊天模块综合面试文档和多模型独立讲解文档。
 - 固定 `searchKnowledge` 关键词检索、上下文注入和可持久化引用来源。
+- DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、最多 4 轮/3 次调用的 Agent 循环、超时取消和工具状态展示。
 
 ### 部分完成
 
 - Chat Workspace 主链路已经完成，剩余会话删除、重命名、消息分页、消息状态和 token usage。
 - History 已有基础会话列表和消息恢复，但没有独立管理、搜索和分页。
-- Knowledge 已完成管理并通过固定检索接入聊天上下文；尚未升级为模型自主 Tool Calling。
+- Knowledge 已完成管理，并已通过模型自主 Tool Calling 接入有限 Agent 循环。
 
 ### 尚未开始的核心
 
-- DeepSeek Tool Calling。
-- Agent 工具循环和终止条件。
 - 联网搜索工具和网页引用。
 - PostgreSQL 迁移。
 - Docker 与线上部署。
@@ -100,8 +99,8 @@
 ### P0：验收必须完成
 
 1. 固定知识库检索和引用。（已完成）
-2. `searchKnowledge` Tool Calling Agent。
-3. Agent 最大轮数、超时、权限和错误处理。
+2. `searchKnowledge` Tool Calling Agent。（已完成）
+3. Agent 最大轮数、超时、权限和错误处理。（已完成）
 4. PostgreSQL。
 5. 最小 Docker Compose 线上部署。
 6. 关键流程测试、功能文档和演示准备。
@@ -147,6 +146,8 @@
 ### 8 月 17 日—8 月 23 日：Tool Calling Agent
 
 目标：让 DeepSeek 自主决定是否搜索知识库。
+
+状态：已于 2026-08-16 提前完成 Tool Schema、`tool_use/tool_result` 回填、有限循环、普通/思考模式、最多 4 轮/3 次调用、5 秒工具超时、50 秒总超时、取消、错误回填、工具状态展示、调用轨迹持久化和针对性测试。
 
 任务：
 
@@ -401,4 +402,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个开发任务是：**把现有 `searchKnowledge` 升级为有最大轮数、超时、取消和错误处理的 Tool Calling Agent 循环**。
+默认推荐的下一个开发任务是：**复用现有 Agent 工具框架增加受控 `webSearch` 与网页引用；若时间或 API 稳定性不足，则降级为用户手动开启、每次最多搜索一次**。

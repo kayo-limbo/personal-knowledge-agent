@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test tests/knowledge-search.test.ts"
+    "test": "node --experimental-strip-types --test tests/knowledge-search.test.ts tests/knowledge-agent.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

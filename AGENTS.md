@@ -23,15 +23,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 当前真实进度
 
-- 已完成：登录注册、JWT Session、角色权限、Knowledge CRUD、Chat Workspace、DeepSeek SSE、Markdown、停止生成、会话持久化、Flash/Pro 与普通/深度思考模式、固定 `searchKnowledge` 检索、上下文注入和引用来源。
-- 尚未完成的核心：Tool Calling 循环、联网搜索、PostgreSQL 和部署。
+- 已完成：登录注册、JWT Session、角色权限、Knowledge CRUD、Chat Workspace、DeepSeek SSE、Markdown、停止生成、会话持久化、Flash/Pro 与普通/深度思考模式、固定 `searchKnowledge` 检索、上下文注入、引用来源，以及有最大轮数、超时、取消和错误回填的 Tool Calling Agent 循环。
+- 尚未完成的核心：受控联网搜索、PostgreSQL 和部署。
 - 思考模式只是单次 LLM 请求配置，不等于 Agent；具备“模型选工具—服务端执行—结果回填—有限循环”后才算 Agent。
 
 ## 验收前优先级
 
 1. 固定知识检索已经完成：按 Session 的 `userId` 搜索 Knowledge，并生成带来源回答。
-2. 下一步完成 `searchKnowledge` Tool Calling 和有最大轮数、超时、错误处理的 Agent 循环。
-3. 复用工具框架增加受控联网搜索；若进度延期，可以降级为用户手动开启、每次只搜索一次。
+2. `searchKnowledge` Tool Calling 和有最大轮数、超时、错误处理的 Agent 循环已经完成。
+3. 下一步复用工具框架增加受控联网搜索；若进度延期，可以降级为用户手动开启、每次只搜索一次。
 4. 把 SQLite 迁移到 PostgreSQL，完成单环境、可复现的最小 Docker 部署。
 5. 最后集中处理测试、费用保护、交互细节、文档、PPT、演示数据和备用录屏。
 

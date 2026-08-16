@@ -1,6 +1,6 @@
 Personal Knowledge Agent
 
-一个基于 Next.js + TypeScript 构建的个人知识库 AI 聊天工作空间，已经支持固定知识检索、上下文注入和引用来源，后续将继续升级为 Tool Calling Agent。
+一个基于 Next.js + TypeScript 构建的个人知识库 Agent，已经支持模型自主调用 `searchKnowledge`、有限工具循环、流式回答和引用来源。
 
 技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + SQLite + NextAuth
 
@@ -18,12 +18,13 @@ V3:Multi-Agent + Workflow（后期）
 - DeepSeek V4 Flash/Pro 多模型选择、普通/深度思考模式、SSE 流式输出和会话历史持久化
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
 - 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
+- DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
 - Prisma SQLite 数据模型、迁移和种子数据
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- Knowledge Tool Calling Agent 循环、联网搜索和 PostgreSQL 部署尚未开始
+- 受控联网搜索、PostgreSQL 迁移和 Docker 部署尚未开始
 
 ## 配置 DeepSeek API
 
@@ -39,7 +40,7 @@ DEEPSEEK_API_KEY="sk-..."
 DEEPSEEK_MODEL="deepseek-v4-flash"
 ```
 
-API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；固定知识检索最多注入 5 条、合计约 6,000 字符的片段和元数据；普通模式最多生成 1024 tokens，深度思考模式最多生成 4096 tokens。
+API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；单次知识检索最多返回 5 条、约 6,000 字符的片段和元数据；Agent 最多运行 4 个模型轮次、执行 3 次工具调用，总时长 50 秒，单次知识检索等待 5 秒；普通模式每轮最多生成 1024 tokens，深度思考模式每轮最多生成 4096 tokens。
 
 `DEEPSEEK_MODEL` 决定页面首次打开时的默认模型，用户之后可以在聊天输入区切换。官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。
 
@@ -60,7 +61,8 @@ API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏�
 7. `src/app/api/knowledge/route.ts`：同一套业务逻辑如何暴露为 REST API。
 8. `src/lib/knowledge-search.ts`：理解关键词、排序、片段预算与引用 Prompt。
 9. `src/lib/services/knowledge-search.service.ts`：理解检索如何按 Session 用户隔离。
-10. `src/app/api/chat/route.ts`：理解固定检索、DeepSeek、SSE 与消息持久化如何串联。
+10. `src/lib/knowledge-agent.ts`：理解 Tool Schema、参数校验、工具结果回填与有限循环。
+11. `src/app/api/chat/route.ts`：理解 Agent 循环、DeepSeek、SSE 与消息持久化如何串联。
 
 Knowledge 新建流程可以简化为：
 
