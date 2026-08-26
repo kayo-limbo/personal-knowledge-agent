@@ -1,6 +1,6 @@
 Personal Knowledge Agent
 
-一个基于 Next.js + TypeScript 构建的个人知识库 Agent，已经支持模型自主调用 `searchKnowledge`、有限工具循环、流式回答和引用来源。
+一个基于 Next.js + TypeScript 构建的个人知识库 Agent，已经支持模型自主调用 `searchKnowledge`、受控联网搜索、有限工具循环、流式回答和引用来源。
 
 技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + SQLite + NextAuth
 
@@ -19,16 +19,19 @@ V3:Multi-Agent + Workflow（后期）
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
 - 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
 - DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
+- DeepSeek 官方 Web Search，支持自动/强制/禁止三档、每次请求最多联网一次和网页来源链接
 - Prisma SQLite 数据模型、迁移和种子数据
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- 受控联网搜索、PostgreSQL 迁移和 Docker 部署尚未开始
+- PostgreSQL 迁移和 Docker 部署尚未开始
 
 ## 配置 DeepSeek API
 
 本项目默认使用低成本、低延迟的 `deepseek-v4-flash`，聊天输入区也允许用户按每次请求切换 `deepseek-v4-pro`，并选择普通或深度思考模式。为了复用现有流式聊天代码，服务端通过 Anthropic SDK 调用 DeepSeek 官方提供的 Anthropic 兼容接口；SDK 只是协议客户端，实际请求仍直接发送到 `https://api.deepseek.com/anthropic`。
+
+聊天输入区还提供自动联网、强制联网和禁止联网三种模式。联网搜索使用 DeepSeek 官方服务端 Web Search，不需要额外的搜索 API Key；应用会把整次聊天请求的联网次数限制为 1，并只持久化经过 `http/https` 协议校验的网页来源链接。
 
 1. 复制 `.env.example` 为 `.env`。
 2. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。

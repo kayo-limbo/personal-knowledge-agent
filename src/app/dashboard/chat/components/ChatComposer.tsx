@@ -7,6 +7,10 @@ import {
   type DeepSeekModel,
   type DeepSeekThinkingMode,
 } from "@/lib/deepseek-models";
+import {
+  WEB_SEARCH_MODE_OPTIONS,
+  type WebSearchMode,
+} from "@/lib/web-search-config";
 
 interface ChatComposerProps {
   value: string;
@@ -14,9 +18,11 @@ interface ChatComposerProps {
   error: string | null;
   model: DeepSeekModel;
   thinkingMode: DeepSeekThinkingMode;
+  webSearchMode: WebSearchMode;
   onChange: (value: string) => void;
   onModelChange: (model: DeepSeekModel) => void;
   onThinkingModeChange: (mode: DeepSeekThinkingMode) => void;
+  onWebSearchModeChange: (mode: WebSearchMode) => void;
   onSubmit: () => void;
   onStop: () => void;
 }
@@ -27,9 +33,11 @@ export function ChatComposer({
   error,
   model,
   thinkingMode,
+  webSearchMode,
   onChange,
   onModelChange,
   onThinkingModeChange,
+  onWebSearchModeChange,
   onSubmit,
   onStop,
 }: ChatComposerProps) {
@@ -59,6 +67,22 @@ export function ChatComposer({
               aria-label="选择 DeepSeek 模型"
             >
               {DEEPSEEK_MODEL_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} · {option.description}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 rounded-lg border bg-white px-2.5 py-1.5">
+            <span>联网</span>
+            <select
+              value={webSearchMode}
+              disabled={isStreaming}
+              onChange={(event) => onWebSearchModeChange(event.target.value as WebSearchMode)}
+              className="bg-transparent font-medium text-gray-800 outline-none disabled:cursor-not-allowed"
+              aria-label="选择联网搜索模式"
+            >
+              {WEB_SEARCH_MODE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label} · {option.description}
                 </option>

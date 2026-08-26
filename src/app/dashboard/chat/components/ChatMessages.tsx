@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Bot, CheckCircle2, LoaderCircle, Search, Sparkles, TriangleAlert, User } from "lucide-react";
+import {
+  Bot,
+  CheckCircle2,
+  Globe2,
+  LoaderCircle,
+  Search,
+  Sparkles,
+  TriangleAlert,
+  User,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -30,6 +39,7 @@ function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
   const resultCount = toolResultValue(toolCall.result, "resultCount");
   const error = toolResultValue(toolCall.result, "error");
   const status = toolCall.status ?? "running";
+  const isWebSearch = toolCall.name === "webSearch";
 
   return (
     <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
@@ -42,12 +52,18 @@ function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
       )}
       <div className="min-w-0">
         <div className="flex items-center gap-1 font-medium text-slate-700">
-          <Search className="h-3.5 w-3.5" />
+          {isWebSearch ? (
+            <Globe2 className="h-3.5 w-3.5" />
+          ) : (
+            <Search className="h-3.5 w-3.5" />
+          )}
           {status === "running"
-            ? "正在检索个人知识库"
+            ? isWebSearch
+              ? "正在联网搜索"
+              : "正在检索个人知识库"
             : status === "success"
-              ? `知识库检索完成 · 命中 ${typeof resultCount === "number" ? resultCount : 0} 条`
-              : `知识库检索失败${typeof error === "string" ? ` · ${error}` : ""}`}
+              ? `${isWebSearch ? "联网搜索" : "知识库检索"}完成 · 命中 ${typeof resultCount === "number" ? resultCount : 0} 条`
+              : `${isWebSearch ? "联网搜索" : "知识库检索"}失败${typeof error === "string" ? ` · ${error}` : ""}`}
         </div>
         <p className="truncate text-slate-500">查询：{query}</p>
       </div>

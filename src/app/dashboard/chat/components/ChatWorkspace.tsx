@@ -7,6 +7,7 @@ import { ChatComposer } from "./ChatComposer";
 import { useActiveMessages, useChatStore } from "@/app/store/chat-store";
 import type { ChatBootstrap, ChatStreamEvent } from "@/app/dashboard/chat/types";
 import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
+import type { WebSearchMode } from "@/lib/web-search-config";
 
 interface ChatWorkspaceProps {
   bootstrap: ChatBootstrap;
@@ -62,6 +63,7 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<DeepSeekModel>(initialModel);
   const [thinkingMode, setThinkingMode] = useState<DeepSeekThinkingMode>("disabled");
+  const [webSearchMode, setWebSearchMode] = useState<WebSearchMode>("auto");
   const abortRef = useRef<AbortController | null>(null);
 
   const conversations = useChatStore((state) => state.conversations);
@@ -117,6 +119,7 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
           content,
           model,
           thinkingMode,
+          webSearchMode,
         }),
         signal: controller.signal,
       });
@@ -216,9 +219,11 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
           error={error}
           model={model}
           thinkingMode={thinkingMode}
+          webSearchMode={webSearchMode}
           onChange={setInput}
           onModelChange={setModel}
           onThinkingModeChange={setThinkingMode}
+          onWebSearchModeChange={setWebSearchMode}
           onSubmit={sendMessage}
           onStop={stopGenerating}
         />

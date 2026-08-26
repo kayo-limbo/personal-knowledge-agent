@@ -1,4 +1,5 @@
 import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
+import type { WebSearchMode } from "@/lib/web-search-config";
 
 export type MessageRole = "user" | "assistant" | "system";
 
@@ -38,6 +39,7 @@ export interface SendChatInput {
   content: string;
   model: DeepSeekModel;
   thinkingMode: DeepSeekThinkingMode;
+  webSearchMode: WebSearchMode;
 }
 
 /** SSE 每一帧都是可判别联合类型，客户端可以安全地区分文本、完成和错误事件。 */

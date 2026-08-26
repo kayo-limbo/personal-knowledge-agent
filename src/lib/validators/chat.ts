@@ -4,6 +4,7 @@ import {
   DEEPSEEK_THINKING_MODES,
   DEFAULT_DEEPSEEK_MODEL,
 } from "@/lib/deepseek-models";
+import { WEB_SEARCH_MODES } from "@/lib/web-search-config";
 
 export const sendChatSchema = z.object({
   conversationId: z.string().min(1).optional(),
@@ -11,4 +12,5 @@ export const sendChatSchema = z.object({
   // 浏览器传来的模型名不能直接交给上游 API，必须经过固定白名单校验。
   model: z.enum(DEEPSEEK_MODELS).default(DEFAULT_DEEPSEEK_MODEL),
   thinkingMode: z.enum(DEEPSEEK_THINKING_MODES).default("disabled"),
+  webSearchMode: z.enum(WEB_SEARCH_MODES).default("auto"),
 });
