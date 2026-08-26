@@ -73,6 +73,7 @@
 - 固定 `searchKnowledge` 关键词检索、上下文注入和可持久化引用来源。
 - DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、最多 4 轮/3 次调用的 Agent 循环、超时取消和工具状态展示。
 - DeepSeek 官方服务端 Web Search、自动/强制/禁止三档联网模式、单次请求最多搜索一次、实时搜索状态和可持久化网页来源链接。
+- Prisma PostgreSQL provider、`adapter-pg`、完整初始 migration、连接池单例、常用索引和幂等 seed 的代码迁移。
 
 ### 部分完成
 
@@ -82,8 +83,8 @@
 
 ### 尚未开始的核心
 
-- PostgreSQL 迁移。
 - Docker 与线上部署。
+- 真实 PostgreSQL 实例上的 `migrate deploy`、seed 和关键业务链路验证（随 Docker Compose 一起完成）。
 
 ### 暂不进入验收范围
 
@@ -101,7 +102,7 @@
 1. 固定知识库检索和引用。（已完成）
 2. `searchKnowledge` Tool Calling Agent。（已完成）
 3. Agent 最大轮数、超时、权限和错误处理。（已完成）
-4. PostgreSQL。
+4. PostgreSQL。（代码与 migration 已完成，待真实实例验收）
 5. 最小 Docker Compose 线上部署。
 6. 关键流程测试、功能文档和演示准备。
 
@@ -184,6 +185,8 @@
 ### 8 月 30 日—9 月 4 日：最小部署
 
 目标：获得一个稳定、可重复部署的线上验收环境。
+
+状态：PostgreSQL 代码迁移已于 2026-08-26 完成，包括 provider/driver 切换、PostgreSQL 初始 migration、连接池单例、索引和幂等 seed。当前机器没有 Docker、`psql` 或 PostgreSQL 服务，因此真实数据库上的 `migrate deploy` 和业务验证并入下一步 Docker Compose 功能，不能提前标记为端到端完成。
 
 任务：
 

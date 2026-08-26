@@ -2,7 +2,7 @@ Personal Knowledge Agent
 
 一个基于 Next.js + TypeScript 构建的个人知识库 Agent，已经支持模型自主调用 `searchKnowledge`、受控联网搜索、有限工具循环、流式回答和引用来源。
 
-技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + SQLite + NextAuth
+技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + PostgreSQL + NextAuth
 
 V1 目标:登录/RBAC + Chat(SSE流式+Markdown) + Prompt管理 + Knowledge CRUD + History + Tool Calling(调用自己的 Knowledge Search)
 V2:文件上传解析 + MCP + 更多工具
@@ -20,12 +20,30 @@ V3:Multi-Agent + Workflow（后期）
 - 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
 - DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
 - DeepSeek 官方 Web Search，支持自动/强制/禁止三档、每次请求最多联网一次和网页来源链接
-- Prisma SQLite 数据模型、迁移和种子数据
+- Prisma PostgreSQL 数据模型、`adapter-pg`、初始 migration、常用索引和幂等种子数据
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- PostgreSQL 迁移和 Docker 部署尚未开始
+- Docker Compose、真实 PostgreSQL 迁移验收和线上部署尚未开始
+
+## 配置 PostgreSQL
+
+项目已经切换为 PostgreSQL，不再使用 SQLite 作为运行数据库。先复制 `.env.example` 为 `.env`，再把 `DATABASE_URL` 改成可访问的 PostgreSQL 直连地址：
+
+```env
+DATABASE_URL="postgresql://postgres:你的密码@localhost:5432/personal_knowledge_agent"
+```
+
+首次连接一个空数据库时执行：
+
+```bash
+npm run db:generate
+npm run db:deploy
+npm run db:seed
+```
+
+开发模型变更使用 `npm run db:migrate -- --name <迁移名>`；生产和验收环境只运行已提交的 `npm run db:deploy`。旧的 `dev.db` 只作为本地 SQLite 备份保留，不会自动导入 PostgreSQL，也不再提交到 Git。
 
 ## 配置 DeepSeek API
 
@@ -74,7 +92,7 @@ KnowledgeForm（浏览器）
   -> createKnowledgeAction（认证 + 校验）
   -> createKnowledge（业务逻辑）
   -> Prisma
-  -> SQLite dev.db
+  -> PostgreSQL
   -> revalidatePath 刷新页面
 ```
 
@@ -86,6 +104,7 @@ npm run lint
 npm test
 npx tsc --noEmit
 npm run build
+npm run db:status
 ```
 
 ## 项目目录结构

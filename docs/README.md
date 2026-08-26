@@ -17,6 +17,7 @@
 - [`features/fixed-knowledge-search-citations.md`](features/fixed-knowledge-search-citations.md)：固定 `searchKnowledge` 关键词检索、`userId` 隔离、上下文注入、字符预算与引用来源持久化。
 - [`features/knowledge-tool-calling-agent.md`](features/knowledge-tool-calling-agent.md)：DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、有限 Agent 循环、超时取消与工具状态展示。
 - [`features/controlled-web-search-citations.md`](features/controlled-web-search-citations.md)：DeepSeek 官方服务端 Web Search、自动/强制/禁止三档、单次搜索费用边界、SSE 状态与安全网页引用。
+- [`features/postgresql-prisma-migration.md`](features/postgresql-prisma-migration.md)：Prisma 7 从 SQLite 切换 PostgreSQL、`adapter-pg`、迁移历史重建、连接池、幂等 seed 与验证边界。
 
 ## 后续文档约定
 

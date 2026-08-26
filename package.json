@@ -2,17 +2,24 @@
   "name": "personal-knowledge-agent",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test tests/knowledge-search.test.ts tests/knowledge-agent.test.ts tests/web-search.test.ts"
+    "test": "node --experimental-strip-types --test tests/knowledge-search.test.ts tests/knowledge-agent.test.ts tests/web-search.test.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
     "@base-ui/react": "^1.6.0",
-    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
@@ -21,6 +28,7 @@
     "motion": "^12.42.2",
     "next": "16.2.10",
     "next-auth": "^5.0.0-beta.31",
+    "pg": "^8.23.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
@@ -44,8 +52,5 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.11",
     "typescript": "^5"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }

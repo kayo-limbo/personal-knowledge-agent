@@ -19,7 +19,7 @@
        | POST /api/chat（JSON）
        v
 Next.js Route Handler
-  auth -> Zod -> Conversation Service -> Prisma -> SQLite
+  auth -> Zod -> Conversation Service -> Prisma -> PostgreSQL
                          |
                          v
                  DeepSeek Anthropic API
@@ -356,7 +356,7 @@ Agent 则包含模型与外部工具的多轮循环：
 在项目根目录创建 `.env`：
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://postgres:你的密码@localhost:5432/personal_knowledge_agent"
 AUTH_SECRET="请替换成长随机字符串"
 DEEPSEEK_API_KEY="你的 DeepSeek API Key"
 DEEPSEEK_MODEL="deepseek-v4-flash"

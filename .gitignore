@@ -42,3 +42,9 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# legacy local SQLite backup/runtime data (PostgreSQL is the active database)
+/dev.db
+/dev.db-journal
+/dev.db-shm
+/dev.db-wal
