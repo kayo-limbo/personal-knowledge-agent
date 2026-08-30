@@ -10,7 +10,7 @@
 - 使用多阶段 Dockerfile 分离依赖安装、构建、迁移和运行环境。
 - Compose 编排 PostgreSQL、一次性 migrate 和 Next.js App 三个服务。
 - PostgreSQL 使用命名 volume，且不向宿主机或公网映射 5432。
-- PostgreSQL 健康后才执行 `prisma migrate deploy` 和幂等 seed；二者成功后才启动 App。
+- PostgreSQL 健康后先执行 `prisma migrate deploy`；迁移成功后才启动 App，演示 seed 改为受控环境显式执行。
 - 新增 `/api/health`，同时检查 Next.js 进程和数据库查询。
 - 在真实 PostgreSQL 17 上成功应用初始 migration，并验证重复部署没有待执行迁移、重复 seed 不增加数据。
 - 删除并重建全部容器与网络后，volume 中的数据和 migration 记录仍存在。
@@ -38,7 +38,6 @@ docker compose up
   -> pg_isready 健康检查通过
   -> migrate 一次性容器启动
        -> prisma migrate deploy
-       -> prisma db seed
        -> 成功后以 0 退出
   -> app 容器启动 node server.js
   -> /api/health 执行 SELECT 1
@@ -68,7 +67,7 @@ Prisma 写入 PostgreSQL
 
 - `dependencies`：只复制 lockfile 并执行 `npm ci`。业务代码变化时可以复用最慢的依赖层。
 - `builder`：生成 Prisma Client 并执行 `next build`，使用的数据库连接串和认证密钥只是单条构建命令的格式占位值。
-- `migrator`：保留 Prisma CLI、migration 和 seed 所需文件，负责改变数据库结构后退出。
+- `migrator`：保留 Prisma CLI、migration 和 seed 所需文件，默认只负责改变数据库结构；同一镜像也可由运维人员显式运行一次性 seed。
 - `runner`：只运行 standalone server，并使用非 root 的 `nextjs` 用户。
 
 本机验证还发现 Prisma 7.8 的 `generate` 在当前含 Debian OpenSSL 3 的 builder 层会异常停滞，而 `migrate deploy` 和运行时需要完整 OpenSSL 环境。当前把 builder 留在官方 Node slim 基础层，把 migrator 和 runner 放在安装 OpenSSL 的层中；这是一项经过实际构建验证的阶段隔离，后续升级 Prisma 时应重新测试并尽量统一基础层。
@@ -93,9 +92,9 @@ Next.js 构建会加载服务端模块，Prisma 7 的配置也会在 `generate` 
 
 App 和 PostgreSQL 在 Compose 内网通信，本地验证也通过 `docker compose exec postgres psql` 进入数据库。这样线上部署时不会意外把 5432 暴露公网。需要本地 GUI 临时调试时可以单独增加仅绑定 `127.0.0.1` 的开发覆盖文件，但不写进验收默认配置。
 
-### seed 随 migrate 服务执行
+### migration 与 demo seed 分离
 
-这让首次部署可立即得到演示账号和固定数据，也利用 upsert 验证重试安全。代价是公开部署前必须更换或禁用 `admin@example.com / demo`，否则演示账号会成为安全风险。正式产品更适合把演示 seed 与生产初始化分开。
+最初实现让 seed 随 migrate 自动执行，方便本地立即得到固定数据，但也会让公网部署自动创建 `admin@example.com / demo` 弱密码账号。部署前安全审计后改为：migrator 默认只执行 migration，演示数据通过一次性命令显式导入；重复 seed 也不再重置已存在账号的密码。完整取舍见 [`production-safe-demo-seed.md`](production-safe-demo-seed.md)。
 
 ### 暂时不加入 Nginx
 
@@ -111,6 +110,7 @@ App 和 PostgreSQL 在 Compose 内网通信，本地验证也通过 `docker comp
 - PostgreSQL 没有宿主机端口映射，只能由 Compose 网络内服务访问。
 - App 使用非 root 用户运行。
 - 生产只执行已提交的 `migrate deploy`，不使用 `migrate dev` 或 `db push`。
+- 普通生产启动不执行 demo seed，不自动创建固定弱密码账号。
 - App 在 migration 失败时不会启动，避免代码在错误 schema 上运行。
 - 健康接口不回传数据库地址、用户名、密码或异常堆栈。
 - `restart: unless-stopped` 用于 App 和数据库；一次性 migrator 不自动无限重试。
@@ -149,7 +149,8 @@ App 和 PostgreSQL 在 Compose 内网通信，本地验证也通过 `docker comp
 - migration 目录残留空文件夹，Prisma 会报 P3015 缺少 `migration.sql`。
 - 只检查 HTTP 200，不确认数据库查询与 migration 状态。
 - 用 `docker compose down -v` 做普通重启，误删持久化数据。
-- seed 使用 create 导致每次部署重复插入；当前通过固定 id + upsert 避免。
+- 把 demo seed 绑定在每次部署上；当前已经拆成显式一次性命令，并通过固定 id + upsert 避免重复数据。
+- 在 upsert 的 `update` 分支覆盖密码哈希；当前重复 seed 不会重置已有账号密码。
 - 看到本地 Compose 成功就宣称线上部署完成；云服务器、防火墙、SSE 网络链路和 HTTPS 尚需单独验证。
 
 ## 9. 验证方法
@@ -169,12 +170,17 @@ docker compose --env-file .env.docker ps -a
 - `migrate`：Exited (0)。
 - `app`：healthy，只有 App 映射宿主机 3000。
 - `GET http://localhost:3000/api/health` 返回 `{"status":"ok","database":"reachable"}`。
+- 空数据库普通启动后不会自动出现 `admin@example.com`；需要演示数据时显式执行：
+
+```bash
+docker compose --env-file .env.docker run --rm migrate npm run db:seed
+```
 
 ### 本次真实验证结果
 
 - PostgreSQL：17.11。
 - migration：`20260826000000_init_postgresql` 成功，重复运行显示 `No pending migrations to apply`。
-- seed 重复运行后数据仍为：1 User、1 Conversation、2 Message、2 Prompt、2 KnowledgeDoc。
+- 显式 seed 重复运行后数据仍为：1 User、1 Conversation、2 Message、2 Prompt、2 KnowledgeDoc。
 - 容器与网络删除重建后，管理员 id 未变化，已应用 migration 仍为 1 条。
 - 自动检查：18/18 测试、ESLint、`tsc --noEmit`、Next.js 生产构建全部通过。
 
@@ -189,9 +195,9 @@ docker compose --env-file .env.docker down
 
 ## 10. 后续改进
 
-- 下一块增加基础 GitHub Actions CI，执行安装、测试、Lint、类型检查和生产构建。
+- 基础 GitHub Actions CI 已完成并 push，下一步确认首次托管运行结果。
 - 在香港 Linux 云服务器复用同一 Compose，配置真实高熵密钥并完成防火墙检查。
-- 公开部署前移除固定 demo 密码，或将演示数据初始化改成显式可选步骤。
+- 正式产品可进一步移除固定 demo 密码，改用一次性管理员邀请或初始化 token。
 - 服务器主链路稳定后再增加 Nginx + HTTPS，并验证 `/api/chat` SSE 不被缓冲。
 - 拆分 liveness 与 readiness，避免数据库短暂故障触发不必要的进程重启。
 - 评估 migrator 镜像只安装必要 CLI 依赖，继续缩小体积与依赖攻击面。

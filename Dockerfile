@@ -26,7 +26,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
 COPY src/generated ./src/generated
-CMD ["sh", "-c", "npm run db:deploy && npm run db:seed"]
+CMD ["npm", "run", "db:deploy"]
 
 FROM openssl-base AS runner
 ENV NODE_ENV=production

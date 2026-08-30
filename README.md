@@ -25,12 +25,13 @@ V3:Multi-Agent + Workflow（后期）
 - Prisma PostgreSQL 数据模型、`adapter-pg`、初始 migration、常用索引和幂等种子数据
 - Next.js standalone 多阶段镜像、Docker Compose、真实 PostgreSQL migration/seed、健康检查和命名 volume 持久化
 - GitHub Actions 基础 CI 配置：Prisma Client 生成、测试、Lint、TypeScript 和生产构建
+- 生产默认只执行 migration，demo seed 需要显式运行且不会重置已有账号密码
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
 - 香港 Linux 服务器线上部署尚未完成
-- GitHub Actions 工作流已完成本地等价验证，待提交并 push 后确认首次远程运行
+- GitHub Actions 工作流已 push，待确认首次远程运行结果
 
 ## 配置 PostgreSQL
 
@@ -60,7 +61,15 @@ docker compose --env-file .env.docker up --build -d
 docker compose --env-file .env.docker ps -a
 ```
 
-启动顺序是 PostgreSQL 健康检查通过，migrate 执行 `prisma migrate deploy` 与幂等 seed 并以 0 退出，最后启动 App。访问 `http://localhost:3000/api/health` 应看到数据库可达；PostgreSQL 端口只存在于 Compose 内网，不映射到宿主机。
+启动顺序是 PostgreSQL 健康检查通过，migrate 只执行 `prisma migrate deploy` 并以 0 退出，最后启动 App。访问 `http://localhost:3000/api/health` 应看到数据库可达；PostgreSQL 端口只存在于 Compose 内网，不映射到宿主机。
+
+生产启动默认不导入演示数据，避免公开创建 `admin@example.com / demo` 弱密码账号。只有本地学习或受控验收环境确实需要固定演示数据时，才显式执行一次：
+
+```bash
+docker compose --env-file .env.docker run --rm migrate npm run db:seed
+```
+
+重复 seed 不会重置已存在账号的密码，但公开部署仍不应保留默认演示密码。
 
 查看日志和停机：
 
@@ -69,7 +78,7 @@ docker compose --env-file .env.docker logs -f app migrate postgres
 docker compose --env-file .env.docker down
 ```
 
-普通 `down` 会保留命名 volume。不要在未备份时添加 `-v`，否则会删除 PostgreSQL 数据。公开部署前还必须更换或禁用 seed 中的 `admin@example.com / demo` 演示账号。
+普通 `down` 会保留命名 volume。不要在未备份时添加 `-v`，否则会删除 PostgreSQL 数据。若受控环境显式执行过 seed，公开访问前仍必须修改或删除 `admin@example.com / demo` 演示账号。
 
 ## 持续集成
 

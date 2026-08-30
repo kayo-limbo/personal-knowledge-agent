@@ -76,6 +76,7 @@
 - Prisma PostgreSQL provider、`adapter-pg`、完整初始 migration、连接池单例、常用索引和幂等 seed 的代码迁移。
 - Next.js standalone 多阶段 Dockerfile、Docker Compose、真实 PostgreSQL `migrate deploy`/幂等 seed、健康检查和命名 volume 持久化验证。
 - GitHub Actions 基础 CI 工作流代码与本地等价验证：Prisma Client 生成、测试、Lint、TypeScript 和生产构建。
+- 生产默认只迁移、demo seed 显式执行且不覆盖已有账号密码的部署安全门禁。
 
 ### 部分完成
 
@@ -115,7 +116,7 @@
 3. 消息模型、思考模式、状态和 token usage 持久化。
 4. 会话删除、重命名和消息分页。
 5. Nginx + HTTPS。
-6. GitHub Actions 基础 CI。（工作流与本地等价验证已完成，待 push 后确认远程运行）
+6. GitHub Actions 基础 CI。（工作流已 push，待确认首次远程运行结果）
 
 ### P2：有明显余量再做
 
@@ -188,7 +189,7 @@
 
 目标：获得一个稳定、可重复部署的线上验收环境。
 
-状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 代码与本地等价验证已于 2026-08-31 完成，待提交并 push 后确认首次远程运行。尚未完成香港服务器部署和线上登录/Knowledge/Chat/SSE 全链路验证。
+状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，显式重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 已于 2026-08-31 完成代码、本地等价验证和 push，待确认首次远程运行结果。部署前又完成生产默认不 seed、重复 seed 不重置密码的安全门禁。尚未完成香港服务器部署和线上登录/Knowledge/Chat/SSE 全链路验证。
 
 任务：
 
@@ -199,6 +200,7 @@
 - 生产迁移使用 `prisma migrate deploy`。（已完成）
 - 增加 `/api/health`。（已完成）
 - GitHub Actions 执行 Prisma Client 生成、测试、lint、TypeScript 和 build。（工作流已完成，待首次远程运行）
+- 生产启动与 demo seed 解耦，避免自动创建或重置弱密码演示账号。（已完成）
 - 部署到中国香港 Linux 服务器。
 - 验证登录、数据库持久化和 DeepSeek SSE。
 
@@ -269,7 +271,7 @@
 
 ### 基础 CI
 
-状态：工作流代码与本地等价验证已于 2026-08-31 完成；提交并 push 后还需在 GitHub Actions 页面确认第一次托管 runner 运行绿色。
+状态：工作流代码、本地等价验证和 push 已于 2026-08-31 完成；还需在 GitHub Actions 页面确认第一次托管 runner 运行绿色。
 
 Pull Request 或 push 至少执行：
 
@@ -413,4 +415,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个开发任务是：**提交并 push 当前 Docker/CI 改动，确认 GitHub Actions 首次绿色运行；随后在中国香港 Linux 云服务器手动部署单一 Compose 环境，并验证健康检查、登录、Knowledge、历史持久化和 DeepSeek SSE**。
+默认推荐的下一个开发任务是：**确认 GitHub Actions 首次绿色运行；随后在中国香港 Linux 云服务器手动部署单一 Compose 环境，并验证健康检查、登录、Knowledge、历史持久化和 DeepSeek SSE**。

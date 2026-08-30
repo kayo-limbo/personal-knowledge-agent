@@ -20,7 +20,8 @@ async function main() {
   const passwordHash = await bcrypt.hash("demo", 10);
   const user = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: { passwordHash },
+    // seed 只负责首次创建演示账号，重复运行不能重置已有账号的密码。
+    update: {},
     create: {
       email: "admin@example.com",
       name: "Demo User",
