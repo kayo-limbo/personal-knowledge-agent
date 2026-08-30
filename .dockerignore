@@ -1,0 +1,10 @@
+.docker-install
+.git
+.github
+.next
+coverage
+dev.db*
+docs
+node_modules
+npm-debug.log*
+.env*

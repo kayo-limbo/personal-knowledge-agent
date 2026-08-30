@@ -1,5 +1,7 @@
 Personal Knowledge Agent
 
+[![Continuous Integration](https://github.com/kayo-limbo/personal-knowledge-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/kayo-limbo/personal-knowledge-agent/actions/workflows/ci.yml)
+
 一个基于 Next.js + TypeScript 构建的个人知识库 Agent，已经支持模型自主调用 `searchKnowledge`、受控联网搜索、有限工具循环、流式回答和引用来源。
 
 技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + PostgreSQL + NextAuth
@@ -21,11 +23,14 @@ V3:Multi-Agent + Workflow（后期）
 - DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
 - DeepSeek 官方 Web Search，支持自动/强制/禁止三档、每次请求最多联网一次和网页来源链接
 - Prisma PostgreSQL 数据模型、`adapter-pg`、初始 migration、常用索引和幂等种子数据
+- Next.js standalone 多阶段镜像、Docker Compose、真实 PostgreSQL migration/seed、健康检查和命名 volume 持久化
+- GitHub Actions 基础 CI 配置：Prisma Client 生成、测试、Lint、TypeScript 和生产构建
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- Docker Compose、真实 PostgreSQL 迁移验收和线上部署尚未开始
+- 香港 Linux 服务器线上部署尚未完成
+- GitHub Actions 工作流已完成本地等价验证，待提交并 push 后确认首次远程运行
 
 ## 配置 PostgreSQL
 
@@ -44,6 +49,42 @@ npm run db:seed
 ```
 
 开发模型变更使用 `npm run db:migrate -- --name <迁移名>`；生产和验收环境只运行已提交的 `npm run db:deploy`。旧的 `dev.db` 只作为本地 SQLite 备份保留，不会自动导入 PostgreSQL，也不再提交到 Git。
+
+## 使用 Docker Compose
+
+本地可复现部署包含 Next.js App、PostgreSQL 和一次性迁移服务。先复制环境模板并替换密码与密钥：
+
+```bash
+cp .env.docker.example .env.docker
+docker compose --env-file .env.docker up --build -d
+docker compose --env-file .env.docker ps -a
+```
+
+启动顺序是 PostgreSQL 健康检查通过，migrate 执行 `prisma migrate deploy` 与幂等 seed 并以 0 退出，最后启动 App。访问 `http://localhost:3000/api/health` 应看到数据库可达；PostgreSQL 端口只存在于 Compose 内网，不映射到宿主机。
+
+查看日志和停机：
+
+```bash
+docker compose --env-file .env.docker logs -f app migrate postgres
+docker compose --env-file .env.docker down
+```
+
+普通 `down` 会保留命名 volume。不要在未备份时添加 `-v`，否则会删除 PostgreSQL 数据。公开部署前还必须更换或禁用 seed 中的 `admin@example.com / demo` 演示账号。
+
+## 持续集成
+
+`.github/workflows/ci.yml` 会在推送到 `main`、面向 `main` 的 Pull Request 和手动触发时使用 Node.js 22 执行：
+
+```text
+npm ci
+npm run db:generate
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+CI 使用非秘密构建占位变量，不连接 PostgreSQL 或 DeepSeek，不执行自动部署。第一次 GitHub 远程运行需要在提交并 push 工作流后确认。
 
 ## 配置 DeepSeek API
 
@@ -102,7 +143,7 @@ KnowledgeForm（浏览器）
 npm run dev
 npm run lint
 npm test
-npx tsc --noEmit
+npm run typecheck
 npm run build
 npm run db:status
 ```

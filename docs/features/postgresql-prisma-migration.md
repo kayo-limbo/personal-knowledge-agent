@@ -16,7 +16,7 @@ SQLite 很适合单机开发：零安装、一个文件即可运行。但验收�
 - 增加 `db:generate`、`db:migrate`、`db:deploy`、`db:status`、`db:seed`、`db:studio` 脚本。
 - 旧 `dev.db` 作为本地备份保留，但不再作为运行数据库，也不再进入 Git。
 
-当前机器没有 Docker、`psql` 或 PostgreSQL 服务，所以本次不能把“真实数据库已经成功部署”写成完成。真实实例上的 `migrate deploy`、seed、登录和 CRUD 验证会在下一块 Docker Compose 功能中完成。
+后续已于 2026-08-27 在 Docker Compose 的真实 PostgreSQL 17 实例上完成 `migrate deploy`、幂等 seed、健康检查和 volume 重建验证。容器编排细节见 [`docker-compose-postgresql-deployment.md`](docker-compose-postgresql-deployment.md)。
 
 ## 2. 相关文件职责
 
@@ -129,9 +129,9 @@ SQLite 文件中可能包含本地账号、密码哈希、聊天记录和测试�
 
 当前选择是：保留 `dev.db` 本地备份，新 PostgreSQL 用 migration 建结构、用 seed 建演示数据。若将来确实需要迁移个人数据，再编写只在本地执行、输出不入 Git、带条数校验和事务的数据搬迁脚本。
 
-### 不在本轮加入 Docker
+### 为什么当时没有把 Docker 混入同一轮
 
-PostgreSQL provider 与 Docker Compose 是两个可定位的问题域。本轮先验证 schema、驱动、migration 和构建；下一轮再加入容器、volume、健康检查和启动顺序。这样遇到错误时可以判断是 ORM 配置还是容器网络问题。
+PostgreSQL provider 与 Docker Compose 是两个可定位的问题域。当时先验证 schema、驱动、migration 和构建，下一轮再加入容器、volume、健康检查和启动顺序。后续实际排错也证明拆分有效：空 migration 目录导致的 P3015、镜像 OpenSSL 环境和 Compose 启动门禁可以分别定位。
 
 ### 使用标准 pg，而不是 Serverless 驱动
 
@@ -203,23 +203,22 @@ npx prisma validate
 - Conversation、Message、Prompt、KnowledgeDoc 查询索引。
 - 五条外键约束。
 
-### 真实 PostgreSQL 验收清单
+### 真实 PostgreSQL 验收结果
 
-当前机器缺少数据库进程，以下清单必须在下一步 Docker Compose 完成后执行：
+已在 Docker Compose PostgreSQL 17 上完成：
 
-1. 对空 PostgreSQL 运行 `npm run db:deploy`。
-2. 运行 `npm run db:status`，确认 database schema is up to date。
-3. 连续运行两次 `npm run db:seed`，确认数据条数不重复。
-4. 使用 `admin@example.com / demo` 登录。
-5. 创建、修改、搜索并删除 Knowledge，确认 `userId` 隔离仍生效。
-6. 创建聊天并刷新页面，确认 Conversation 和 Message 持久化。
-7. 重启应用进程，确认数据仍在。
-8. 将错误数据库地址临时用于测试，确认约 5 秒内失败而不是无限等待。
+1. 对空 PostgreSQL 运行 `migrate deploy`，唯一初始 migration 成功应用。
+2. 重复运行 deploy，确认 `No pending migrations to apply`。
+3. 重复运行 seed，数据仍为 1 User、1 Conversation、2 Message、2 Prompt、2 KnowledgeDoc。
+4. `/api/health` 返回数据库 reachable，App 和 PostgreSQL 均为 healthy。
+5. 删除并重建容器与网络但保留 volume，管理员 id 与 migration 记录保持不变。
+
+登录、Knowledge CRUD、Chat 与 DeepSeek SSE 还要在香港服务器线上环境再做一轮端到端验收。
 
 ## 10. 后续改进
 
-- 下一步增加 Docker Compose PostgreSQL、命名 volume、健康检查和 `migrate deploy` 启动流程。
-- 增加 `/api/health`，同时区分应用存活与数据库就绪。
+- Docker Compose、命名 volume、健康检查和 `migrate deploy` 启动流程已经完成，下一步部署到香港 Linux 服务器。
+- 后续可把 `/api/health` 拆成应用存活与数据库就绪两个端点。
 - 在 GitHub Actions 中生成 Prisma Client并执行 lint、TypeScript、测试和 build。
 - 部署前把演示密码改为环境变量，或提供专用演示数据初始化命令。
 - 数据量增长后评估 PostgreSQL 全文检索，再决定是否需要 embedding 和向量数据库。

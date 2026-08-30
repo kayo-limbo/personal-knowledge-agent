@@ -1,6 +1,6 @@
 # 暑期考核、部署、面试与项目规划
 
-最后更新：2026-08-26
+最后更新：2026-08-31
 验收日期：2026-09-13
 规划周期：约 34 天
 
@@ -66,7 +66,7 @@
 - Chat Workspace、输入区和历史会话侧边栏。
 - DeepSeek 官方 API 与 Anthropic 兼容 SDK。
 - SSE 流式输出、停止生成和 Markdown 代码高亮。
-- Conversation/Message SQLite 持久化。
+- Conversation/Message PostgreSQL 持久化。
 - Flash/Pro 多模型选择。
 - 普通/深度思考模式选择。
 - 聊天模块综合面试文档和多模型独立讲解文档。
@@ -74,6 +74,8 @@
 - DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、最多 4 轮/3 次调用的 Agent 循环、超时取消和工具状态展示。
 - DeepSeek 官方服务端 Web Search、自动/强制/禁止三档联网模式、单次请求最多搜索一次、实时搜索状态和可持久化网页来源链接。
 - Prisma PostgreSQL provider、`adapter-pg`、完整初始 migration、连接池单例、常用索引和幂等 seed 的代码迁移。
+- Next.js standalone 多阶段 Dockerfile、Docker Compose、真实 PostgreSQL `migrate deploy`/幂等 seed、健康检查和命名 volume 持久化验证。
+- GitHub Actions 基础 CI 工作流代码与本地等价验证：Prisma Client 生成、测试、Lint、TypeScript 和生产构建。
 
 ### 部分完成
 
@@ -81,10 +83,10 @@
 - History 已有基础会话列表和消息恢复，但没有独立管理、搜索和分页。
 - Knowledge 已完成管理，并已通过模型自主 Tool Calling 接入有限 Agent 循环。
 
-### 尚未开始的核心
+### 尚未完成的核心
 
-- Docker 与线上部署。
-- 真实 PostgreSQL 实例上的 `migrate deploy`、seed 和关键业务链路验证（随 Docker Compose 一起完成）。
+- 中国香港 Linux 云服务器线上部署。
+- GitHub Actions 首次远程绿色运行，以及线上环境的登录、Knowledge CRUD、历史持久化和 DeepSeek SSE 端到端验证。
 
 ### 暂不进入验收范围
 
@@ -102,8 +104,8 @@
 1. 固定知识库检索和引用。（已完成）
 2. `searchKnowledge` Tool Calling Agent。（已完成）
 3. Agent 最大轮数、超时、权限和错误处理。（已完成）
-4. PostgreSQL。（代码与 migration 已完成，待真实实例验收）
-5. 最小 Docker Compose 线上部署。
+4. PostgreSQL。（代码迁移与真实 PostgreSQL 验收已完成）
+5. 最小 Docker Compose 线上部署。（本地 Compose 已完成，线上服务器待完成）
 6. 关键流程测试、功能文档和演示准备。
 
 ### P1：尽量完成
@@ -113,7 +115,7 @@
 3. 消息模型、思考模式、状态和 token usage 持久化。
 4. 会话删除、重命名和消息分页。
 5. Nginx + HTTPS。
-6. GitHub Actions 基础 CI。
+6. GitHub Actions 基础 CI。（工作流与本地等价验证已完成，待 push 后确认远程运行）
 
 ### P2：有明显余量再做
 
@@ -186,17 +188,17 @@
 
 目标：获得一个稳定、可重复部署的线上验收环境。
 
-状态：PostgreSQL 代码迁移已于 2026-08-26 完成，包括 provider/driver 切换、PostgreSQL 初始 migration、连接池单例、索引和幂等 seed。当前机器没有 Docker、`psql` 或 PostgreSQL 服务，因此真实数据库上的 `migrate deploy` 和业务验证并入下一步 Docker Compose 功能，不能提前标记为端到端完成。
+状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 代码与本地等价验证已于 2026-08-31 完成，待提交并 push 后确认首次远程运行。尚未完成香港服务器部署和线上登录/Knowledge/Chat/SSE 全链路验证。
 
 任务：
 
-- SQLite 迁移 PostgreSQL。
-- 创建 Next.js standalone 多阶段 Dockerfile。
-- 创建包含 App 和 PostgreSQL 的 Docker Compose。
-- PostgreSQL 使用持久化 volume。
-- 生产迁移使用 `prisma migrate deploy`。
-- 增加 `/api/health`。
-- GitHub Actions 执行 lint、TypeScript 和 build。
+- SQLite 迁移 PostgreSQL。（已完成）
+- 创建 Next.js standalone 多阶段 Dockerfile。（已完成）
+- 创建包含 App 和 PostgreSQL 的 Docker Compose。（本地已完成）
+- PostgreSQL 使用持久化 volume。（已完成并完成容器重建验证）
+- 生产迁移使用 `prisma migrate deploy`。（已完成）
+- 增加 `/api/health`。（已完成）
+- GitHub Actions 执行 Prisma Client 生成、测试、lint、TypeScript 和 build。（工作流已完成，待首次远程运行）
 - 部署到中国香港 Linux 服务器。
 - 验证登录、数据库持久化和 DeepSeek SSE。
 
@@ -267,12 +269,16 @@
 
 ### 基础 CI
 
+状态：工作流代码与本地等价验证已于 2026-08-31 完成；提交并 push 后还需在 GitHub Actions 页面确认第一次托管 runner 运行绿色。
+
 Pull Request 或 push 至少执行：
 
 ```text
 npm ci
+npm run db:generate
+npm test
 npm run lint
-npx tsc --noEmit
+npm run typecheck
 npm run build
 ```
 
@@ -407,4 +413,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个开发任务是：**复用现有 Agent 工具框架增加受控 `webSearch` 与网页引用；若时间或 API 稳定性不足，则降级为用户手动开启、每次最多搜索一次**。
+默认推荐的下一个开发任务是：**提交并 push 当前 Docker/CI 改动，确认 GitHub Actions 首次绿色运行；随后在中国香港 Linux 云服务器手动部署单一 Compose 环境，并验证健康检查、登录、Knowledge、历史持久化和 DeepSeek SSE**。

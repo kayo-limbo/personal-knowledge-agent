@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/knowledge-search.test.ts tests/knowledge-agent.test.ts tests/web-search.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
