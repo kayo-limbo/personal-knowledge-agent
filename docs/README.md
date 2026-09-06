@@ -21,6 +21,7 @@
 - [`features/docker-compose-postgresql-deployment.md`](features/docker-compose-postgresql-deployment.md)：Next.js standalone 多阶段镜像、Compose 启动门禁、真实 PostgreSQL migration/seed、健康检查与 volume 持久化验证。
 - [`features/github-actions-basic-ci.md`](features/github-actions-basic-ci.md)：GitHub Actions 的最小权限、Node/npm 缓存、Prisma 生成、测试/Lint/类型/构建门禁与 CI/CD 边界。
 - [`features/production-safe-demo-seed.md`](features/production-safe-demo-seed.md)：生产部署默认只迁移、演示 seed 显式执行，以及重复 seed 不重置已有账号密码的安全边界。
+- [`features/vercel-neon-free-deployment.md`](features/vercel-neon-free-deployment.md)：Vercel Hobby + Neon Free 的零成本线上架构、pooled/direct 连接分层、Serverless 小连接池、迁移步骤、SSE 与公网验收清单。
 
 ## 后续文档约定
 

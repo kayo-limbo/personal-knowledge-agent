@@ -26,22 +26,46 @@ V3:Multi-Agent + Workflow（后期）
 - Next.js standalone 多阶段镜像、Docker Compose、真实 PostgreSQL migration/seed、健康检查和命名 volume 持久化
 - GitHub Actions 基础 CI 配置：Prisma Client 生成、测试、Lint、TypeScript 和生产构建
 - 生产默认只执行 migration，demo seed 需要显式运行且不会重置已有账号密码
+- Vercel Hobby + Neon Free 部署所需的区域配置、数据库连接分层和 Serverless 连接池适配
 
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- 香港 Linux 服务器线上部署尚未完成
-- GitHub Actions 工作流已 push，待确认首次远程运行结果
+- Vercel + Neon 控制台创建、线上 migration 和公网全链路验收尚未完成
+- GitHub Actions 最新运行已在提交 `0bd56c2` 上验证为绿色
+
+## 使用 Vercel Hobby + Neon Free
+
+验收实际线上方案是 Vercel Serverless + Neon PostgreSQL，目标费用为 0 元；Docker Compose 保留为本地生产模拟和自托管备用，不把它描述成尚未发生的线上部署。
+
+数据库连接分为两条：
+
+```text
+DATABASE_URL  Neon pooled 地址（主机名包含 -pooler），供 Vercel 应用运行时使用
+DIRECT_URL    Neon direct 地址（主机名不包含 -pooler），只供本地 Prisma migration 使用
+```
+
+在 Neon 创建 AWS Singapore Free 项目后，把 direct 地址只写入本机被 Git 忽略的 `.env`，执行已提交 migration：
+
+```bash
+npm run db:deploy
+```
+
+不要用 `prisma db push` 代替生产 migration，也不要自动执行 demo seed。然后在 Vercel 导入 GitHub 仓库，并只在控制台配置 `DATABASE_URL`、`AUTH_SECRET`、`DEEPSEEK_API_KEY` 和 `DEEPSEEK_MODEL`；不要把密码或密钥发送到聊天或提交到 Git。
+
+仓库通过 `vercel.json` 把 Node.js Functions 固定在香港 `hkg1`，聊天路由保留 `maxDuration = 60`，Agent 自身 50 秒超时。部署 Ready 不等于验收完成，还必须实测 `/api/health`、登录注册、用户隔离、Knowledge CRUD、会话持久化、Tool Calling、SSE 首字/持续输出、停止生成、联网搜索、重新部署后的数据持久性，以及中国大陆网络访问 `vercel.app` 和 Vercel 香港访问 DeepSeek 的稳定性。
+
+完整步骤、设计解释和验收清单见 [`docs/features/vercel-neon-free-deployment.md`](docs/features/vercel-neon-free-deployment.md)。
 
 ## 配置 PostgreSQL
 
-项目已经切换为 PostgreSQL，不再使用 SQLite 作为运行数据库。先复制 `.env.example` 为 `.env`，再把 `DATABASE_URL` 改成可访问的 PostgreSQL 直连地址：
+项目已经切换为 PostgreSQL，不再使用 SQLite 作为运行数据库。先复制 `.env.example` 为 `.env`，再把 `DATABASE_URL` 改成可访问的 PostgreSQL 地址。本地和 Docker 使用直连地址；Neon/Vercel runtime 使用 pooled 地址：
 
 ```env
 DATABASE_URL="postgresql://postgres:你的密码@localhost:5432/personal_knowledge_agent"
 ```
 
-首次连接一个空数据库时执行：
+首次连接本地空数据库时执行：
 
 ```bash
 npm run db:generate

@@ -13,11 +13,15 @@ function getDatabaseUrl(): string {
 }
 
 function createPrismaClient(): PrismaClient {
+  const isVercel = process.env.VERCEL === "1";
   const adapter = new PrismaPg({
     connectionString: getDatabaseUrl(),
-    connectionTimeoutMillis: 5_000,
-    idleTimeoutMillis: 30_000,
-    max: 10,
+    // Neon Free 可能从休眠中冷启动，连接等待时间要覆盖这段唤醒延迟。
+    connectionTimeoutMillis: 10_000,
+    // 每个 Vercel 实例只保留一个客户端连接，再由 Neon PgBouncer 汇聚；
+    // Docker/本地是长生命周期进程，继续使用原来的 10 连接池。
+    idleTimeoutMillis: isVercel ? 10_000 : 30_000,
+    max: isVercel ? 1 : 10,
   });
   return new PrismaClient({ adapter });
 }

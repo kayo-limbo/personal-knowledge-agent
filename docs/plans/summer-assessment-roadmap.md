@@ -1,6 +1,6 @@
 # 暑期考核、部署、面试与项目规划
 
-最后更新：2026-08-31
+最后更新：2026-09-04
 验收日期：2026-09-13
 规划周期：约 34 天
 
@@ -75,8 +75,9 @@
 - DeepSeek 官方服务端 Web Search、自动/强制/禁止三档联网模式、单次请求最多搜索一次、实时搜索状态和可持久化网页来源链接。
 - Prisma PostgreSQL provider、`adapter-pg`、完整初始 migration、连接池单例、常用索引和幂等 seed 的代码迁移。
 - Next.js standalone 多阶段 Dockerfile、Docker Compose、真实 PostgreSQL `migrate deploy`/幂等 seed、健康检查和命名 volume 持久化验证。
-- GitHub Actions 基础 CI 工作流代码与本地等价验证：Prisma Client 生成、测试、Lint、TypeScript 和生产构建。
+- GitHub Actions 基础 CI：Prisma Client 生成、测试、Lint、TypeScript 和生产构建，并已确认远程运行绿色。
 - 生产默认只迁移、demo seed 显式执行且不覆盖已有账号密码的部署安全门禁。
+- Vercel Hobby + Neon Free 的仓库侧适配：hkg1 单区域、pooled/direct 连接分层、Serverless 小连接池和构建时 Prisma Client 生成。
 
 ### 部分完成
 
@@ -86,8 +87,8 @@
 
 ### 尚未完成的核心
 
-- 中国香港 Linux 云服务器线上部署。
-- GitHub Actions 首次远程绿色运行，以及线上环境的登录、Knowledge CRUD、历史持久化和 DeepSeek SSE 端到端验证。
+- Vercel Hobby + Neon Free 控制台创建、Neon migration 和首次公网部署。
+- 线上环境的登录、Knowledge CRUD、用户隔离、历史持久化、DeepSeek SSE、联网搜索和中国大陆可达性端到端验证。
 
 ### 暂不进入验收范围
 
@@ -106,7 +107,7 @@
 2. `searchKnowledge` Tool Calling Agent。（已完成）
 3. Agent 最大轮数、超时、权限和错误处理。（已完成）
 4. PostgreSQL。（代码迁移与真实 PostgreSQL 验收已完成）
-5. 最小 Docker Compose 线上部署。（本地 Compose 已完成，线上服务器待完成）
+5. 零成本 Vercel Hobby + Neon Free 线上部署。（仓库适配已完成，控制台部署与公网验收待完成）
 6. 关键流程测试、功能文档和演示准备。
 
 ### P1：尽量完成
@@ -116,7 +117,7 @@
 3. 消息模型、思考模式、状态和 token usage 持久化。
 4. 会话删除、重命名和消息分页。
 5. Nginx + HTTPS。
-6. GitHub Actions 基础 CI。（工作流已 push，待确认首次远程运行结果）
+6. GitHub Actions 基础 CI。（已在 `0bd56c2` 上确认首次远程绿色运行）
 
 ### P2：有明显余量再做
 
@@ -189,7 +190,7 @@
 
 目标：获得一个稳定、可重复部署的线上验收环境。
 
-状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，显式重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 已于 2026-08-31 完成代码、本地等价验证和 push，待确认首次远程运行结果。部署前又完成生产默认不 seed、重复 seed 不重置密码的安全门禁。尚未完成香港服务器部署和线上登录/Knowledge/Chat/SSE 全链路验证。
+状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，显式重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 已完成，并于 2026-09-04 确认提交 `0bd56c2` 的远程运行绿色。由于不购买香港 VPS，线上目标改为 Vercel Hobby + Neon Free；仓库侧的 hkg1 区域、pooled/direct 连接分层、Serverless 小连接池和远程 Prisma Client 生成已完成，控制台创建、Neon migration 与公网全链路验收尚未完成。
 
 任务：
 
@@ -199,10 +200,12 @@
 - PostgreSQL 使用持久化 volume。（已完成并完成容器重建验证）
 - 生产迁移使用 `prisma migrate deploy`。（已完成）
 - 增加 `/api/health`。（已完成）
-- GitHub Actions 执行 Prisma Client 生成、测试、lint、TypeScript 和 build。（工作流已完成，待首次远程运行）
+- GitHub Actions 执行 Prisma Client 生成、测试、lint、TypeScript 和 build。（已完成并确认远程绿色）
 - 生产启动与 demo seed 解耦，避免自动创建或重置弱密码演示账号。（已完成）
-- 部署到中国香港 Linux 服务器。
-- 验证登录、数据库持久化和 DeepSeek SSE。
+- 完成 Vercel Hobby + Neon Free 仓库适配。（已完成）
+- 在 Neon Singapore 创建项目并用 direct URL 执行 `prisma migrate deploy`。
+- 从 Vercel hkg1 部署 Node.js Functions，不自动执行 demo seed。
+- 验证登录、用户隔离、数据库持久化、DeepSeek SSE、联网搜索和中国大陆可达性。
 
 ### 9 月 5 日—9 月 9 日：质量打磨
 
@@ -231,19 +234,18 @@
 ### 选择
 
 ```text
-中国香港 Linux 云服务器
-  + Next.js standalone Docker
-  + Docker Compose
-  + PostgreSQL
-  + 持久化 volume
+Vercel Hobby（香港 hkg1 Node.js Functions）
+  + Neon Free PostgreSQL（AWS Singapore）
+  + pooled runtime URL / direct migration URL
   + 基础 GitHub Actions CI
   + 单一线上环境
 ```
 
-选择香港节点是为了避免验收进度依赖中国大陆服务器的 ICP 备案流程。腾讯云官方说明，中国香港及境外服务器无需备案，中国大陆境内服务器对外提供网站或 App 服务前需要完成备案：
+预算决策是不购买每月 38～90 元的香港 VPS，接受少量 Serverless 架构调整，把公网演示目标改为费用 0 元的 Vercel Hobby + Neon Free。线上架构必须在文档和简历中如实写成 Vercel Serverless + Neon PostgreSQL。
 
-- https://cloud.tencent.com/document/product/243/18908
-- https://cloud.tencent.com/document/api/243/19630
+Docker Compose 已完成且继续保留，职责是本地生产模拟、可移植自托管方案和验收现场备用；不再把“香港 Linux Compose 已上线”作为当前目标。
+
+Vercel Functions 固定在香港 `hkg1`，优先照顾中国大陆访问与 DeepSeek 链路；Neon 选择 AWS Singapore。两者不是同一区域，因此必须实测数据库延迟。如果数据库往返成为明显瓶颈，可把 Vercel 单一区域改为 `sin1` 对比，但验收前不启用多区域。
 
 ### 第一阶段不做
 
@@ -255,23 +257,25 @@
 - Kubernetes。
 - Redis 分布式缓存。
 
-### Nginx 和域名
+### Vercel Functions 与 SSE
 
-先让 Docker Compose 通过服务器网络稳定运行。Nginx + HTTPS 在核心部署完成且有余量时增加。
+聊天 Route Handler 保持 Node.js runtime 和 `maxDuration = 60`，Agent 业务总超时为 50 秒，给主动取消、错误回填和流关闭留出余量。Vercel 支持 Route Handler 流式响应，但上线后必须测量首字到达和持续增量输出，不能只检查 HTTP 200。
 
-如果增加 Nginx，必须关闭 `/api/chat` 的代理缓冲，否则 SSE 可能变成生成完后一次性返回。需要验证整个链路的首字时间，而不是只检查 HTTP 200。
+必须从 Vercel 香港函数实际调用 DeepSeek，确认 API 可用、不会被网络策略阻断；同时使用中国大陆验收网络多次访问 `vercel.app`。任一链路不稳定时先准备录屏和本地 Docker 备用，再评估 Render Free + Neon。Render 空闲服务可能休眠，只作为备选；Cloudflare Quick Tunnel 不作为 SSE 主方案。
 
 ### 数据库
 
-- 本地 `dev.db` 不进入生产，也不提交新的运行数据。
-- PostgreSQL 不暴露公网端口，只允许 Compose 内部网络访问。
-- 数据保存到命名 volume。
-- 生产只运行已有 migration，不使用 `db push` 代替迁移历史。
-- 验收版不追求零停机迁移，但迁移前要备份并准备失败处理。
+- Vercel runtime 的 `DATABASE_URL` 使用 Neon 主机名带 `-pooler` 的 pooled connection string。
+- migration 在本地通过 `DIRECT_URL` 连接 Neon 非 pooler endpoint，执行 `prisma migrate deploy`。
+- Vercel 实例内 `pg` pool 最大连接数为 1，Docker/本地长生命周期进程仍为 10。
+- 生产不自动 seed；demo seed 只能显式执行，重复 seed 不重置已有密码。
+- 不使用 `prisma db push` 替代生产 migration。
+- `DATABASE_URL`、`DIRECT_URL` 和数据库密码不提交 Git、不发送到聊天、不出现在截图或日志中。
+- Neon 重新唤醒可能带来冷启动延迟，健康检查和首次登录必须覆盖冷启动场景。
 
 ### 基础 CI
 
-状态：工作流代码、本地等价验证和 push 已于 2026-08-31 完成；还需在 GitHub Actions 页面确认第一次托管 runner 运行绿色。
+状态：工作流代码、本地等价验证和 push 已于 2026-08-31 完成；2026-09-04 已确认 `0bd56c2` 对应的托管 runner 运行成功。
 
 Pull Request 或 push 至少执行：
 
@@ -284,7 +288,7 @@ npm run typecheck
 npm run build
 ```
 
-验收前不要求自动部署。先使用手动、可记录、可重复的部署命令，理解每一步以后再自动化。
+验收前不要求自动 CD。Vercel 从 GitHub 构建应用，但 Neon migration 仍由本地使用 direct URL 手动执行，避免并发迁移和生产自动 seed。
 
 ## 7. 面试重点知识地图
 
@@ -331,6 +335,9 @@ npm run build
 
 ### 部署
 
+- Vercel Serverless Functions、函数区域和执行时长边界。
+- Neon pooled runtime URL 与 direct migration URL 的职责分离。
+- 为什么 Serverless 实例内使用小连接池，并由 PgBouncer 汇聚连接。
 - Docker 多阶段构建和 standalone 输出。
 - Docker image、container、volume 和 network。
 - Docker Compose 如何组织 App 与 PostgreSQL。
@@ -370,7 +377,7 @@ npm run build
 - 基于 Next.js 16、TypeScript、NextAuth、Prisma 和 PostgreSQL 构建全栈个人知识助手。
 - 接入 DeepSeek V4 Flash/Pro，支持思考模式、SSE 流式输出和多轮会话持久化。
 - 设计用户级知识检索与 Tool Calling Agent 循环，实现权限隔离、引用来源和联网搜索。
-- 使用 Docker Compose 部署 Next.js 与 PostgreSQL，并通过 GitHub Actions 执行持续质量检查。
+- 使用 Vercel Serverless + Neon PostgreSQL 提供零成本线上演示，并保留 Docker Compose 自托管备用，通过 GitHub Actions 执行持续质量检查。（完成公网验收后再写入简历）
 
 简历只写实际完成并能深入解释的内容。未完成的向量数据库、MCP、Multi-Agent 和自动部署不能提前写入。
 
@@ -386,7 +393,7 @@ npm run build
 
 ### 部署延期
 
-保留本地 Docker Compose 和现场本地演示，同时准备录像；服务器优先选择无需等待大陆 ICP 备案的香港节点。
+保留本地 Docker Compose 和现场本地演示，同时准备录像。主方案是 Vercel Hobby + Neon Free；若 `vercel.app` 或 Vercel 香港到 DeepSeek 的链路不稳定，再评估 Render Free + Neon，不同时扩展两套线上环境。
 
 ### PostgreSQL 迁移失败
 
@@ -415,4 +422,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个开发任务是：**确认 GitHub Actions 首次绿色运行；随后在中国香港 Linux 云服务器手动部署单一 Compose 环境，并验证健康检查、登录、Knowledge、历史持久化和 DeepSeek SSE**。
+默认推荐的下一个开发任务是：**用户在 Neon 创建 Singapore Free PostgreSQL，在本地通过 direct URL 执行 `prisma migrate deploy`；随后在 Vercel 配置 pooled URL 和服务端密钥并部署 hkg1，验证健康检查、登录、Knowledge、历史持久化、DeepSeek SSE、联网搜索和中国大陆可达性**。
