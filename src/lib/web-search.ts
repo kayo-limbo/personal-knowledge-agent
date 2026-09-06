@@ -42,14 +42,17 @@ export interface WebSearchPolicy {
 /** 一次聊天请求全局最多联网一次；后续 Agent 轮次不再把 Web Search 暴露给模型。 */
 export function getWebSearchPolicy(
   mode: WebSearchMode,
-  alreadyUsed: boolean
+  alreadyUsed: boolean,
+  continuingPausedTurn = false
 ): WebSearchPolicy {
-  const enabled = mode !== "never" && !alreadyUsed;
+  // A pause_turn continuation must keep the same server tool definition so
+  // DeepSeek can resume it. It is exposed with auto choice, never forced again.
+  const enabled = continuingPausedTurn || (mode !== "never" && !alreadyUsed);
   return {
     enabled,
-    force: enabled && mode === "always",
+    force: enabled && mode === "always" && !continuingPausedTurn,
     toolChoice:
-      enabled && mode === "always"
+      enabled && mode === "always" && !continuingPausedTurn
         ? { type: "tool", name: "web_search" }
         : { type: "auto" },
   };

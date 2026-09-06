@@ -220,6 +220,16 @@ export async function runKnowledgeAgent({
       onTextDelta(turn.text);
     }
 
+    // Server-side tools such as Web Search can pause a long-running turn.
+    // The provider requires the assistant blocks to be sent back unchanged so
+    // it can finish the same turn; this is not a client tool call and needs no
+    // tool_result message from our application.
+    if (turn.stopReason === "pause_turn") {
+      if (round >= MAX_AGENT_ROUNDS) throw new AgentRoundLimitError();
+      messages.push({ role: "assistant", content: turn.content });
+      continue;
+    }
+
     const toolUses = turn.content.filter(isToolUseBlock);
     if (toolUses.length === 0) {
       if (!visibleText.trim()) throw new Error("模型没有生成最终回答");

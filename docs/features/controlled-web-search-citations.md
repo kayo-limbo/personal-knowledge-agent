@@ -170,3 +170,48 @@ npm run build
 - 当需要可审计摘要、固定排序或供应商故障切换时，抽象 Search Provider 并接入独立搜索 API。
 - 增加 Route Handler 集成测试，模拟完整 SSE 搜索事件序列。
 - 在 PostgreSQL 和 Docker 部署后验证代理链路不会缓冲搜索状态与文本增量。
+
+## 11. 线上 `pause_turn` 续跑修复（2026-09-07）
+
+### 目标与结果
+
+Render 公网验收时，DeepSeek 已成功执行 `web_search` 并返回搜索结果，但响应以 `stop_reason: "pause_turn"` 暂停。旧循环只检查本地 `tool_use`；当这一轮暂时没有文本时，它会误判成“模型没有生成最终回答”，因此浏览器只能收到通用错误。
+
+修复后，Agent 会把暂停轮的完整 assistant 内容块原样追加到上下文，再在现有最大轮数和 50 秒总超时内请求下一轮。续跑不是一次新的本地工具调用，也不需要应用伪造 `tool_result`。
+
+### 相关文件职责与数据流
+
+- `src/lib/knowledge-agent.ts`：识别 `pause_turn`，保存原始 assistant blocks 并继续有限循环。
+- `src/app/api/chat/route.ts`：判断当前请求是否是在续跑已暂停的 Web Search。
+- `src/lib/web-search.ts`：续跑时保留同一个服务端工具定义，但把 `tool_choice` 改回 `auto`，避免再次强制搜索。
+- `tests/knowledge-agent.test.ts`：验证暂停内容原样进入下一轮，并最终得到文本回答。
+- `tests/web-search.test.ts`：验证续跑策略不会再次强制 `web_search`。
+
+```text
+DeepSeek 执行服务端 Web Search
+  -> 返回 server_tool_use + web_search_tool_result
+  -> stop_reason = pause_turn
+  -> Agent 原样回传本轮 assistant content
+  -> 下一轮保留 Web Search 定义，tool_choice = auto
+  -> DeepSeek 继续同一回合并生成最终文本
+  -> 追加工具轨迹与网页来源
+  -> SSE done + PostgreSQL 持久化
+```
+
+### 关键解释与设计取舍
+
+`pause_turn` 是服务端工具的正常停止原因，不是 HTTP 错误。必须保留搜索结果中的加密内容，因此不能只提取标题和 URL 后自己拼一个新 Prompt；原始内容块用于上游续跑，经过白名单处理的标题和 URL 只用于最终页面展示。
+
+续跑仍占用 Agent 轮数，也继续受 50 秒总超时和浏览器取消信号控制。这样可以防止上游反复暂停导致无限循环。续跑必须保留工具定义，但不能沿用“强制联网”的 `tool_choice`，否则可能把恢复动作变成又一次搜索。
+
+### 面试重点与易错点
+
+- 服务端工具由模型提供方执行，本地工具由应用执行，两者的续跑协议不同。
+- `pause_turn` 要回传 assistant blocks；本地 `tool_use` 才由应用返回 user 角色的 `tool_result`。
+- 不能看到 HTTP 200 和搜索 success 就认为整条回答完成，还要等待最终文本与 SSE `done`。
+- 不能为了续跑移除工具定义，也不能再次强制选择工具。
+- 原始搜索块只回传给上游，不写入日志；最终只持久化回答、工具轨迹和经过协议校验的来源 URL。
+
+### 验证方法
+
+本地回归新增 1 个 Agent 测试和 1 个策略断言。修复后共 19 个测试通过，ESLint、TypeScript 和 Next.js 16.2.10 生产构建通过。公网还需在包含本修复的提交部署后，再验证强制联网得到网页来源、SSE `done`，并刷新页面确认回答持久化。

@@ -85,6 +85,32 @@ test("模型调用工具后会收到 tool_result 并继续到最终回答", asyn
   assert.equal(toolResults[0]?.type, "tool_result");
 });
 
+test("pause_turn 会原样回传 assistant 内容并继续下一轮", async () => {
+  const seenMessages: Array<Array<{ role: string; content: unknown }>> = [];
+  const pausedContent: ContentBlockParam[] = [{ type: "text", text: "" }];
+  let turnIndex = 0;
+
+  const output = await runKnowledgeAgent({
+    initialMessages: [{ role: "user", content: "搜索最新信息" }],
+    signal: new AbortController().signal,
+    requestModel: async (messages) => {
+      seenMessages.push(structuredClone(messages));
+      if (turnIndex++ === 0) {
+        return { text: "", stopReason: "pause_turn", content: pausedContent };
+      }
+      return finalTurn("搜索完成");
+    },
+    executeSearch: async () => [],
+    formatToolResult: () => "[]",
+    onTextDelta: () => undefined,
+  });
+
+  assert.equal(output.rounds, 2);
+  assert.equal(output.text, "搜索完成");
+  assert.equal(seenMessages[1]?.[1]?.role, "assistant");
+  assert.deepEqual(seenMessages[1]?.[1]?.content, pausedContent);
+});
+
 test("非法工具参数会作为错误结果回填，而不是执行数据库查询", async () => {
   let searchCalls = 0;
   let turnIndex = 0;

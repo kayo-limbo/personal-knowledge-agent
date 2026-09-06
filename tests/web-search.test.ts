@@ -22,6 +22,11 @@ test("联网模式会映射为自动、强制和禁用策略", () => {
   });
   assert.equal(getWebSearchPolicy("never", false).enabled, false);
   assert.equal(getWebSearchPolicy("always", true).enabled, false);
+  assert.deepEqual(getWebSearchPolicy("always", true, true), {
+    enabled: true,
+    force: false,
+    toolChoice: { type: "auto" },
+  });
 });
 
 test("网页结果只保留安全 URL、去重并限制来源数量", () => {
@@ -100,4 +105,3 @@ test("网页引用跨轮次复用编号并安全生成 Markdown", () => {
   assert.ok(markdown.includes("官方 \\[文档\\]\\(伪造\\)"));
   assert.ok(markdown.includes("docs_%28new%29"));
 });
-

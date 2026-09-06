@@ -154,7 +154,19 @@ export async function POST(request: Request) {
             initialMessages: context,
             signal: agentController.signal,
             requestModel: async (messages, signal, onTextDelta) => {
-              const webPolicy = getWebSearchPolicy(parsed.data.webSearchMode, webSearchUsed);
+              const lastMessage = messages.at(-1);
+              const continuingPausedWebSearch =
+                lastMessage?.role === "assistant" &&
+                Array.isArray(lastMessage.content) &&
+                lastMessage.content.some(
+                  (block) =>
+                    isWebSearchServerToolUse(block) || block.type === "web_search_tool_result"
+                );
+              const webPolicy = getWebSearchPolicy(
+                parsed.data.webSearchMode,
+                webSearchUsed,
+                continuingPausedWebSearch
+              );
               upstream = deepSeek.messages.stream(
                 {
                   model: parsed.data.model,
