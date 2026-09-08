@@ -81,6 +81,7 @@
 - Neon Singapore 项目与初始 migration 已完成，无自动 seed；Vercel 已部署但当前网络不可达，已启用 Render Free Docker + Neon 实际公网方案。
 - `11e29e5` 已在 Render live：登录注册、Knowledge CRUD/隔离、知识与联网 Agent、Flash/Pro、普通/深度思考、SSE、消息与每日配额持久化均已实测；同一 SHA 重新部署后 Session、Knowledge、Conversation 和配额仍可读取。
 - Prompt 用户隔离 CRUD、会话历史搜索/重命名/删除/继续对话、管理员用户角色管理和系统统计页面已通过本地 Docker HTTP/Server Action 验证，等待真实浏览器视觉回归与公网发布验证。
+- Dashboard 已改为固定左侧导航和右侧主内容独立滚动，避免长列表把导航带出视口；等待真实浏览器视觉回归与公网发布验证。
 
 ### 部分完成
 
@@ -216,7 +217,7 @@
 
 - 修复主要 Bug。
 - 补充限流与费用保护。
-- 完善 Loading、错误、空状态和基础响应式布局。
+- 完善 Loading、错误、空状态和基础响应式布局。（桌面端固定侧栏与独立内容滚动已完成，移动端抽屉延期）
 - 增加关键集成测试。
 - 补齐每个功能的学习文档。
 - 更新 README、架构图和数据流图。

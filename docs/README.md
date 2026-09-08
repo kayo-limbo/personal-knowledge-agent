@@ -9,6 +9,7 @@
 ## 规划与新对话交接
 
 - [`plans/summer-assessment-roadmap.md`](plans/summer-assessment-roadmap.md)：2026-09-13 暑期验收范围、34 天排期、最小部署方案、面试准备和功能裁剪标准。新对话应先阅读这份文件。
+- [`plans/next-session-handoff.md`](plans/next-session-handoff.md)：2026-09-09 最新 Git、验证边界、待发布内容和下一会话执行顺序。
 
 ## 功能讲解
 
@@ -27,6 +28,7 @@
 - [`features/prompt-management.md`](features/prompt-management.md)：Prompt 的用户隔离 CRUD、收藏/公开标记、Server Action 鉴权与表单校验。
 - [`features/conversation-history-management.md`](features/conversation-history-management.md)：独立历史页的搜索、重命名、删除及跳回指定会话的数据流与权限边界。
 - [`features/admin-users-system-stats.md`](features/admin-users-system-stats.md)：管理员用户角色管理、禁止自我降权和 PostgreSQL 系统统计聚合。
+- [`features/dashboard-fixed-sidebar-layout.md`](features/dashboard-fixed-sidebar-layout.md)：Dashboard 固定侧栏、右侧独立滚动以及 Flex 嵌套滚动中的高度和宽度约束。
 
 ## 后续文档约定
 
