@@ -32,9 +32,10 @@ V3:Multi-Agent + Workflow（后期）
 
 - Prompt、History、Admin、Analytics 仍是规划路由
 - Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
-- 强制联网修复已通过本地完整 HTTP + 真实 DeepSeek + Neon 验证，待发布后公网复验；Pro/思考模式、浏览器交互、重新部署后的数据保留仍待验收
-- PostgreSQL 用户/全站两级每日聊天配额已完成并迁移到 Neon；本地真实 HTTP 429 已验证，待随下一次 Render 发布生效
-- GitHub Actions 已在提交 `f3abb8a` 上验证为绿色
+- 强制联网修复已在 Render 公网通过：持续 SSE、网页引用、`done` 和最终回答落库均正常；Pro + 深度思考也已实测
+- PostgreSQL 用户/全站两级每日聊天配额已上线；默认用户上限的 200→429、`Retry-After` 及重新部署后计数保留均已实测
+- 保存账号、Knowledge 和 Conversation 后重新部署同一 SHA，Session 与全部记录仍可读取，证明数据不依赖容器文件系统
+- GitHub Actions 的 `11e29e5` 远程运行已由用户在 Actions 页面确认绿色
 
 ## 当前公网演示：Render Free + Neon Free
 
@@ -85,6 +86,8 @@ npm run db:seed
 
 开发模型变更使用 `npm run db:migrate -- --name <迁移名>`；生产和验收环境只运行已提交的 `npm run db:deploy`。旧的 `dev.db` 只作为本地 SQLite 备份保留，不会自动导入 PostgreSQL，也不再提交到 Git。
 
+如果直接运行 `npm run dev` 后看到“`DATABASE_URL` 必须使用 `postgresql://` 或 `postgres://` 协议”，说明被 Git 忽略的本机 `.env` 仍保存着迁移前的 `file:./dev.db`。Next.js 开发环境按 `.env.local`、`.env` 的顺序取值：可以在 `.env.local` 配置一条仅本机可访问的 PostgreSQL 地址；也可以停止 `npm run dev`，启动 Docker Desktop 后按下一节运行完整 Compose。不要把 Neon 密码或连接串发到聊天、截图或提交到 Git；Compose 内的 PostgreSQL 不映射宿主机端口，因此不能直接供宿主机上的 `npm run dev` 使用。
+
 ## 使用 Docker Compose
 
 本地可复现部署包含 Next.js App、PostgreSQL 和一次性迁移服务。先复制环境模板并替换密码与密钥：
@@ -95,7 +98,7 @@ docker compose --env-file .env.docker up --build -d
 docker compose --env-file .env.docker ps -a
 ```
 
-启动顺序是 PostgreSQL 健康检查通过，migrate 只执行 `prisma migrate deploy` 并以 0 退出，最后启动 App。访问 `http://localhost:3000/api/health` 应看到数据库可达；PostgreSQL 端口只存在于 Compose 内网，不映射到宿主机。
+启动顺序是 PostgreSQL 健康检查通过，migrate 只执行 `prisma migrate deploy` 并以 0 退出，最后启动 App。Compose 会为自托管的 Auth.js 显式设置 `AUTH_URL=http://localhost:<APP_PORT>` 和 `AUTH_TRUST_HOST=true`；访问 `http://localhost:3000/api/health` 应看到数据库可达，并从 `http://localhost:3000` 登录。PostgreSQL 端口只存在于 Compose 内网，不映射到宿主机。
 
 生产启动默认不导入演示数据，避免公开创建 `admin@example.com / demo` 弱密码账号。只有本地学习或受控验收环境确实需要固定演示数据时，才显式执行一次：
 

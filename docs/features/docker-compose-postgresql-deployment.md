@@ -86,6 +86,10 @@ Prisma 写入 PostgreSQL
 
 Next.js 构建会加载服务端模块，Prisma 7 的配置也会在 `generate` 阶段解析 `DATABASE_URL`，所以构建命令需要合法格式的占位值。这些值只对对应 `RUN` 生效；最终容器由 Compose 注入真实 `DATABASE_URL`、`AUTH_SECRET` 和 `DEEPSEEK_API_KEY`。
 
+### 4.6 为什么 Compose 要设置 `AUTH_TRUST_HOST`
+
+Auth.js 在生产模式下依赖请求的 `Host` 头构造认证 URL，自托管平台不会像 Vercel 一样被自动识别为可信平台。Compose 直接把 App 的 3000 端口映射到本机，因此显式注入 `AUTH_URL=http://localhost:<APP_PORT>` 和 `AUTH_TRUST_HOST=true`；前者避免登录回跳使用容器监听地址 `0.0.0.0`，后者避免健康检查正常但登录、Session 等 `/api/auth/*` 请求报 `UntrustedHost`。这些变量不会暴露 `AUTH_SECRET`，也不会改变数据库网络边界。
+
 ## 5. 设计取舍
 
 ### 数据库不映射宿主机端口

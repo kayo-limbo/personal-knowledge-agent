@@ -58,7 +58,7 @@ Render 容器只承担计算。账号、Knowledge、Conversation、Message 存�
 | DEEPSEEK_API_KEY | 服务端 DeepSeek Key |
 | DEEPSEEK_MODEL | `deepseek-v4-flash` |
 
-首次创建空数据库时：在 Neon 选择 Free、AWS Singapore，取得 direct 连接串并仅在本机进程或被忽略的环境文件中设置 `DIRECT_URL`，运行 `npm run db:deploy`。当前 Neon 初始 migration 已成功应用，无需重新初始化，也没有执行 demo seed。
+首次创建空数据库时：在 Neon 选择 Free、AWS Singapore，取得 direct 连接串并仅在本机进程或被忽略的环境文件中设置 `DIRECT_URL`，运行 `npm run db:deploy`。当前 Neon 两条 migration 均已成功应用，无需重新初始化，也没有执行 demo seed。
 
 后续发布：
 
@@ -99,18 +99,23 @@ Render 默认推荐 10000，也允许配置端口。这里显式使用 3000，�
 - `searchKnowledge` 与知识引用，Flash 普通模式 SSE；此前一次请求首 chunk 1.435 秒、总 5.184 秒、262 个 delta，属于单次样本而非性能保证。
 - 完整回答已写入 Neon 的 Message；不能直接在原始 SSE 中搜索完整句子，需先解析和拼接 delta。
 - 客户端主动断开后，测试会话只保留 user 消息，assistant 占位被删除。
-- `f3abb8a` 已 live，GitHub Actions [对应运行绿色](https://github.com/kayo-limbo/personal-knowledge-agent/actions/runs/34053048732)。但该线上版本的强制联网仍失败。
-- 新增的服务端 `tool_use` 总结修复已通过真实 Agent 直连：两轮完成、生成文本和 5 条网页来源；发布后仍需公网复验。
-- 修复版本本地完整 HTTP 链路已通过：登录 → 强制联网 → 486 个 delta → 网页链接 → `done` → Neon Message 与拼接文本一致；首字 4.637 秒，总 8.358 秒。该结果不是 Render 公网复验结果。
-- 最终本地检查：21/21 测试、ESLint、TypeScript、Next.js 16.2.10 生产构建通过。构建使用非秘密 PostgreSQL 占位地址，不执行线上迁移。
+- `11e29e5` 对应部署 `dep-dafsk4740ujc73cpnfcg` 已 live；`/api/health` 返回数据库 reachable，GitHub Actions 远程运行也已由用户确认绿色。
+- 服务端 `tool_use` 总结修复在公网强制联网样本中产生 335 个 delta，首字约 2.8 秒，返回网页链接、`done` 并与 Neon Message 一致。
+- Pro + 深度思考公网样本产生 115 个 delta，首字约 3.0 秒、总约 7.0 秒，回答落库一致。
+- 默认 20 次用户配额已验证第 20 次成功、第 21 次 429；响应带 `Retry-After`，被拒绝请求不新增会话。全站 60 次门禁不在公网预填，以免占用实际演示额度。
+- 保存 Session、Knowledge、两条 Conversation、回答和配额后重新部署同一 SHA，全部仍可读取；随后精确清理随机账号，数据库复核临时用户和知识均为 0。
+- 最终本地检查：24/24 测试、ESLint、TypeScript、Next.js 16.2.10 生产构建和 Compose 配置通过。构建使用非秘密 PostgreSQL 占位地址，不执行线上迁移。
 
 待验收，不能标记已完成：
 
-- [ ] 发布最终搜索修复后，Render 强制联网产生文本、网页来源和 `done`。
-- [ ] 发布每日聊天配额代码；对应 Neon migration 已应用，本地 200→429 门禁已通过。
-- [ ] 完整 Pro/思考模式、浏览器 Markdown 和“停止”按钮视觉交互。
-- [ ] 保存账号、知识、回答后重新部署，再核对记录仍可访问。
+- [x] Render 强制联网产生文本、网页来源、`done` 并持久化。
+- [x] 每日聊天配额上线，公网 200→429 和跨部署计数保留通过。
+- [x] Pro + 深度思考的公网 SSE 与持久化通过。
+- [x] 保存账号、知识、回答后重新部署，Session 和记录仍可访问。
+- [ ] 用真实浏览器检查 Markdown 渲染与“停止”按钮视觉反馈（接口取消与占位清理已通过）。
 - [ ] 现场同类网络多次访问，覆盖免费实例休眠与唤醒。
+
+本机若仍保留迁移前的 SQLite `DATABASE_URL=file:...`，直接运行 `npm run dev` 会在 Prisma 初始化阶段明确失败。Next.js 开发环境优先读取 `.env.local`，缺少该变量时再回退到 `.env`；本地应改用可访问的 PostgreSQL 地址，或启动 Docker Desktop 后运行完整 Compose。Compose 的 PostgreSQL 只在容器内网可见，宿主机上的开发服务器不能用 `localhost:5432` 连接它。
 
 测试用户使用随机邮箱与强随机密码，验证后按本轮精确 userId/邮箱清理关联数据；不运行固定弱密码 seed。清理测试数据不可恢复，不影响用户原有记录。
 
@@ -126,6 +131,6 @@ Render 默认推荐 10000，也允许配置端口。这里显式使用 3000，�
 
 Render Free 空闲约 15 分钟会休眠，再次访问唤醒约一分钟，且有免费实例小时、构建和流量额度。演示前主动打开网页完成一次暖机，并保留本地 Compose 与备用录屏；不扩展付费机器、多环境或自动 CD。详见 [Render 免费计划限制](https://render.com/docs/free)。
 
-下一步统一发布搜索修复与 PostgreSQL 每日请求配额并完成公网验收，再处理演示数据、5—10 分钟脚本和 PPT。精确 usage 与预算告警仍延期。免费托管不提供稳定性承诺，当前网络的一次成功也不代表所有大陆网络可达。
+下一步集中处理固定演示数据、5—10 分钟脚本、PPT、备用录屏和浏览器人工检查。精确 usage 与预算告警仍延期。免费托管不提供稳定性承诺，当前网络的一次成功也不代表所有大陆网络可达。
 
 官方参考：[Render Web Service 与端口](https://render.com/docs/web-services)、[Render Docker](https://render.com/docs/docker)、[Auth.js 部署](https://authjs.dev/getting-started/deployment)、[DeepSeek Anthropic 兼容协议](https://api-docs.deepseek.com/guides/anthropic_api/)。

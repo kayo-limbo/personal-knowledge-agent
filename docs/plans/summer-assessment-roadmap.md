@@ -79,7 +79,7 @@
 - 生产默认只迁移、demo seed 显式执行且不覆盖已有账号密码的部署安全门禁。
 - Vercel Hobby + Neon Free 的仓库侧适配：hkg1 单区域、pooled/direct 连接分层、Serverless 小连接池和构建时 Prisma Client 生成。
 - Neon Singapore 项目与初始 migration 已完成，无自动 seed；Vercel 已部署但当前网络不可达，已启用 Render Free Docker + Neon 实际公网方案。
-- Render 登录注册、Knowledge CRUD 与用户隔离、知识检索、Flash 普通 SSE、消息持久化及客户端取消已实测；`f3abb8a` 已 live 且 CI 绿色。
+- `11e29e5` 已在 Render live：登录注册、Knowledge CRUD/隔离、知识与联网 Agent、Flash/Pro、普通/深度思考、SSE、消息与每日配额持久化均已实测；同一 SHA 重新部署后 Session、Knowledge、Conversation 和配额仍可读取。
 
 ### 部分完成
 
@@ -87,11 +87,11 @@
 - History 已有基础会话列表和消息恢复，但没有独立管理、搜索和分页。
 - Knowledge 已完成管理，并已通过模型自主 Tool Calling 接入有限 Agent 循环。
 
-### 尚未完成的核心
+### 尚未完成的验收准备
 
-- Render 强制联网修复发布与公网复验：真实根因是服务端搜索结果以 `tool_use` 停止，不是此前猜测的 `pause_turn`。修复已通过本地完整 HTTP + 真实 DeepSeek + Neon 验证，不能提前标记线上通过。
-- Pro/思考模式完整回答、浏览器视觉交互、重新部署后保留已有数据，以及现场网络多次访问与休眠唤醒验收。
-- PostgreSQL 用户/全站每日请求配额代码与 Neon migration 已完成，本地真实 429 通过；待随下一次 Render 发布验收。
+- 真实浏览器中的 Markdown 和“停止”按钮视觉反馈；底层 SSE 取消、上游 Abort 和空占位清理已实测。
+- 现场同类网络多次访问，以及 Render Free 休眠后的唤醒体验。
+- `11e29e5` 的 GitHub Actions 已由用户在 Actions 页面确认绿色。
 - 固定演示数据、PPT、演示脚本和备用录屏。
 
 ### 暂不进入验收范围
@@ -111,13 +111,13 @@
 2. `searchKnowledge` Tool Calling Agent。（已完成）
 3. Agent 最大轮数、超时、权限和错误处理。（已完成）
 4. PostgreSQL。（代码迁移与真实 PostgreSQL 验收已完成）
-5. 免费 Render Docker + Neon 线上部署。（已上线，联网修复发布与剩余公网验收待完成）
+5. 免费 Render Docker + Neon 线上部署。（公网功能与跨部署持久化已完成，剩余现场/浏览器人工检查）
 6. 关键流程测试、功能文档和演示准备。
 
 ### P1：尽量完成
 
 1. 联网搜索及网页引用。（已完成）
-2. 用户级与全站每日请求配额。（代码、migration 与本地真实 HTTP 已完成，公网发布待完成；精确 Token 统计延期）
+2. 用户级与全站每日请求配额。（代码、migration、本地并发和公网跨部署验证已完成；精确 Token 统计延期）
 3. 消息模型、思考模式、状态和 token usage 持久化。
 4. 会话删除、重命名和消息分页。
 5. Nginx + HTTPS。
@@ -194,7 +194,7 @@
 
 目标：获得一个稳定、可重复部署的线上验收环境。
 
-状态：PostgreSQL 代码迁移与本地 Compose 闭环已完成，真实 migration、显式幂等 seed、健康检查、volume 容器重建持久性均已实测。基础 CI 已确认 `f3abb8a` 绿色。免费部署先尝试 Vercel + Neon，随后因当前网络不可达转用 Render Docker + Neon；Neon migration 和公网健康/登录/知识检索/SSE 主链路已验证，联网兼容修复与剩余验收见 [Render 记录](../features/render-neon-free-deployment.md)。
+状态：PostgreSQL 与本地 Compose 闭环已完成。免费部署先尝试 Vercel + Neon，随后因当前网络不可达转用 Render Docker + Neon；Neon 两条 migration、公网健康/登录/隔离/知识与联网 Agent/SSE/配额及跨容器持久化已验证，详见 [Render 记录](../features/render-neon-free-deployment.md)。`11e29e5` 的基础 CI 已由用户在 Actions 页面确认绿色。
 
 任务：
 
@@ -265,7 +265,7 @@ Docker Compose 已完成且继续保留，职责是本地生产模拟、可移�
 
 聊天 Route Handler 保持 Node.js runtime 和 `maxDuration = 60`，Agent 业务总超时为 50 秒，给主动取消、错误回填和流关闭留出余量。Vercel 支持 Route Handler 流式响应，但上线后必须测量首字到达和持续增量输出，不能只检查 HTTP 200。
 
-`maxDuration` 不构成 Render Docker 的函数时限，实际业务仍受 50 秒超时保护。Render 到 DeepSeek 的普通知识问答 SSE 已实测；联网修复待发布。Render Free 空闲约 15 分钟休眠、唤醒约一分钟，演示前暖机并备录屏；还需现场同类网络多次验证。Cloudflare Quick Tunnel 不作为 SSE 主方案。
+`maxDuration` 不构成 Render Docker 的函数时限，实际业务仍受 50 秒超时保护。Render 到 DeepSeek 的知识与联网 SSE 均已实测。Render Free 空闲约 15 分钟休眠、唤醒约一分钟，演示前暖机并备录屏；还需现场同类网络多次验证。Cloudflare Quick Tunnel 不作为 SSE 主方案。
 
 ### 数据库
 
@@ -426,4 +426,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个任务是：**用户 push 搜索兼容修复后，按新 SHA 部署现有 Render 服务，复验强制联网文本/引用/持久化，再补 Pro/思考、浏览器交互、重新部署保留记录和现场网络验收**。数据库和服务已创建，不要重复创建；不自动 seed。随后只做费用保护和验收材料，守住 9 月 13 日截止。
+默认推荐的下一个任务是：**准备固定演示数据、5—10 分钟演示脚本、PPT 和备用录屏，并用验收当天同类浏览器/网络检查 Markdown、停止按钮和 Render 休眠唤醒**。数据库、服务、联网修复和每日配额已完成，不重复创建基础设施；不自动 seed，不扩展新技术范围。
