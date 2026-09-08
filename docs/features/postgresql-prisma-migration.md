@@ -1,5 +1,7 @@
 # Prisma 7 从 SQLite 迁移到 PostgreSQL
 
+> 2026-09-08 更新：最初香港自托管计划已调整。当前实际线上环境为 Render Singapore Docker + Neon PostgreSQL，Neon 已应用两条 migration；下文涉及香港服务器的内容仅保留为历史设计记录。
+
 ## 1. 目标与结果
 
 SQLite 很适合单机开发：零安装、一个文件即可运行。但验收版需要 Docker Compose、持久化 volume，并为后续线上服务提供更稳定的并发连接和迁移流程，因此运行数据库必须切换到 PostgreSQL。
@@ -217,7 +219,7 @@ npx prisma validate
 
 ## 10. 后续改进
 
-- Docker Compose、命名 volume、健康检查和 `migrate deploy` 启动流程已经完成，下一步部署到香港 Linux 服务器。
+- Docker Compose、命名 volume、健康检查和 `migrate deploy` 启动流程已经完成；实际免费公网部署已改为 Render + Neon，Compose 保留为本地与自托管备用。
 - 后续可把 `/api/health` 拆成应用存活与数据库就绪两个端点。
 - 在 GitHub Actions 中生成 Prisma Client并执行 lint、TypeScript、测试和 build。
 - 部署前把演示密码改为环境变量，或提供专用演示数据初始化命令。

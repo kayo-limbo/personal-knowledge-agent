@@ -107,6 +107,7 @@ Render 默认推荐 10000，也允许配置端口。这里显式使用 3000，�
 待验收，不能标记已完成：
 
 - [ ] 发布最终搜索修复后，Render 强制联网产生文本、网页来源和 `done`。
+- [ ] 发布每日聊天配额代码；对应 Neon migration 已应用，本地 200→429 门禁已通过。
 - [ ] 完整 Pro/思考模式、浏览器 Markdown 和“停止”按钮视觉交互。
 - [ ] 保存账号、知识、回答后重新部署，再核对记录仍可访问。
 - [ ] 现场同类网络多次访问，覆盖免费实例休眠与唤醒。
@@ -125,6 +126,6 @@ Render 默认推荐 10000，也允许配置端口。这里显式使用 3000，�
 
 Render Free 空闲约 15 分钟会休眠，再次访问唤醒约一分钟，且有免费实例小时、构建和流量额度。演示前主动打开网页完成一次暖机，并保留本地 Compose 与备用录屏；不扩展付费机器、多环境或自动 CD。详见 [Render 免费计划限制](https://render.com/docs/free)。
 
-下一步先完成上述公网验收，再集中处理用户级费用保护、演示数据、5—10 分钟脚本和 PPT。免费托管不提供稳定性承诺，当前网络的一次成功也不代表所有大陆网络可达。
+下一步统一发布搜索修复与 PostgreSQL 每日请求配额并完成公网验收，再处理演示数据、5—10 分钟脚本和 PPT。精确 usage 与预算告警仍延期。免费托管不提供稳定性承诺，当前网络的一次成功也不代表所有大陆网络可达。
 
 官方参考：[Render Web Service 与端口](https://render.com/docs/web-services)、[Render Docker](https://render.com/docs/docker)、[Auth.js 部署](https://authjs.dev/getting-started/deployment)、[DeepSeek Anthropic 兼容协议](https://api-docs.deepseek.com/guides/anthropic_api/)。

@@ -23,6 +23,8 @@ import {
   removeMessage,
 } from "@/lib/services/conversation.service";
 import { searchKnowledge } from "@/lib/services/knowledge-search.service";
+import { reserveDailyChatQuota } from "@/lib/services/chat-quota.service";
+import { ChatQuotaExceededError } from "@/lib/chat-quota";
 import { sendChatSchema } from "@/lib/validators/chat";
 import type { ChatStreamEvent } from "@/app/dashboard/chat/types";
 import {
@@ -113,6 +115,23 @@ export async function POST(request: Request) {
       { error: error instanceof Error ? error.message : "DeepSeek 配置不完整" },
       { status: 503 }
     );
+  }
+
+  // 通过校验且具备上游配置后再占用配额；即使用户稍后取消或上游失败也计数，
+  // 因为请求可能已经产生模型费用。配额失败时还没有创建会话或消息。
+  try {
+    await reserveDailyChatQuota(session.user.id);
+  } catch (error: unknown) {
+    if (error instanceof ChatQuotaExceededError) {
+      return NextResponse.json(
+        { error: `${error.message}，请在下一个 UTC 自然日再试` },
+        {
+          status: 429,
+          headers: { "Retry-After": String(error.retryAfterSeconds) },
+        }
+      );
+    }
+    return NextResponse.json({ error: "聊天配额服务暂时不可用，请稍后再试" }, { status: 503 });
   }
 
   try {

@@ -39,6 +39,8 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:?请在 .env.docker 中设置 AUTH_SECRET}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-flash}
+      CHAT_DAILY_USER_LIMIT: ${CHAT_DAILY_USER_LIMIT:-20}
+      CHAT_DAILY_GLOBAL_LIMIT: ${CHAT_DAILY_GLOBAL_LIMIT:-60}
     ports:
       - "${APP_PORT:-3000}:3000"
     depends_on:

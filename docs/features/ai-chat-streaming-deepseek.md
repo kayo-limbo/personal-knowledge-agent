@@ -698,7 +698,7 @@ ChatWorkspace、消息列表和侧边栏共享状态，使用 Zustand 比层层�
 15. 真实 Key 放进 `.env.example` 或 `NEXT_PUBLIC_` 会泄露。
 16. 只检查 conversationId、不检查 userId 会产生越权漏洞。
 17. 未来启用原始 HTML Markdown 可能引入 XSS。
-18. 没有用户限流时，登录用户可以消耗大量 API 余额。
+18. 已有 PostgreSQL 用户/全站每日请求配额，但它不是精确 Token 预算；仍需防多账号耗尽全站额度并记录真实 usage。
 
 ## 22. 调试排查表
 
@@ -752,7 +752,7 @@ SDK 只是 Anthropic Messages 协议客户端，`baseURL` 指向 DeepSeek，Key 
 
 ### 如何控制费用？
 
-限制单条输入、上下文消息数、上下文字符数和最大输出；默认 Flash 普通模式。生产版还要记录 usage、增加用户配额、限流和总预算熔断。
+限制单条输入、上下文消息数、上下文字符数和最大输出，默认 Flash 普通模式；PostgreSQL 还原子限制用户/全站每日请求。后续要记录真实 usage，并增加告警和总预算熔断。
 
 ### 为什么思考模式不是 Agent？
 

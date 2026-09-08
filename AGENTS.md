@@ -24,7 +24,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## 当前真实进度
 
 - 已完成：登录注册、JWT Session、角色权限、Knowledge CRUD、Chat Workspace、DeepSeek SSE、Markdown、停止生成、会话持久化、Flash/Pro 与普通/深度思考模式、固定 `searchKnowledge` 检索、上下文注入、引用来源、有最大轮数、超时、取消和错误回填的 Tool Calling Agent 循环、受控联网搜索，以及 Prisma PostgreSQL provider、`adapter-pg`、初始 migration、连接池单例和幂等 seed 的代码迁移。
-- 部署进度（2026-09-08）：本地真实 PostgreSQL migration/显式 seed、Docker Compose 与基础 CI 已完成；Neon migration 和 Render Free Docker 公网主链路已完成，生产无自动 seed。强制联网兼容修复待发布复验，其余待验收项以 roadmap 和 Render 功能文档为准。
+- 部署进度（2026-09-08）：本地真实 PostgreSQL migration/显式 seed、Docker Compose 与基础 CI 已完成；Neon migration 和 Render Free Docker 公网主链路已完成，生产无自动 seed。强制联网兼容修复及 PostgreSQL 每日聊天配额待发布复验，其余待验收项以 roadmap 和 Render 功能文档为准。
 - 思考模式只是单次 LLM 请求配置，不等于 Agent；具备“模型选工具—服务端执行—结果回填—有限循环”后才算 Agent。
 
 ## 验收前优先级

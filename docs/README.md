@@ -23,6 +23,7 @@
 - [`features/production-safe-demo-seed.md`](features/production-safe-demo-seed.md)：生产部署默认只迁移、演示 seed 显式执行，以及重复 seed 不重置已有账号密码的安全边界。
 - [`features/vercel-neon-free-deployment.md`](features/vercel-neon-free-deployment.md)：最初 Vercel 方案与部署尝试、pooled/direct 分层、Serverless 连接池；当前网络未通过可达性验收。
 - [`features/render-neon-free-deployment.md`](features/render-neon-free-deployment.md)：当前实际 Render Free Docker + Neon 公网方案、控制台网址、代理与端口配置、联网兼容修复及已验证/待验收记录。
+- [`features/postgresql-chat-daily-quota.md`](features/postgresql-chat-daily-quota.md)：PostgreSQL 用户/全站两级每日聊天配额、Serializable 原子计数、429/Retry-After、真实 Neon migration 与费用保护边界。
 
 ## 后续文档约定
 

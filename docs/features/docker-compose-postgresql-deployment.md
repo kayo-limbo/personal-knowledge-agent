@@ -196,7 +196,7 @@ docker compose --env-file .env.docker down
 ## 10. 后续改进
 
 - 基础 GitHub Actions CI 已完成并 push，下一步确认首次托管运行结果。
-- 在香港 Linux 云服务器复用同一 Compose，配置真实高熵密钥并完成防火墙检查。
+- 如未来选择自托管，可在 Linux 服务器复用同一 Compose，配置真实高熵密钥并完成防火墙检查；当前实际公网方案是 Render + Neon。
 - 正式产品可进一步移除固定 demo 密码，改用一次性管理员邀请或初始化 token。
 - 服务器主链路稳定后再增加 Nginx + HTTPS，并验证 `/api/chat` SSE 不被缓冲。
 - 拆分 liveness 与 readiness，避免数据库短暂故障触发不必要的进程重启。

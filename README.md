@@ -33,6 +33,7 @@ V3:Multi-Agent + Workflow（后期）
 - Prompt、History、Admin、Analytics 仍是规划路由
 - Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
 - 强制联网修复已通过本地完整 HTTP + 真实 DeepSeek + Neon 验证，待发布后公网复验；Pro/思考模式、浏览器交互、重新部署后的数据保留仍待验收
+- PostgreSQL 用户/全站两级每日聊天配额已完成并迁移到 Neon；本地真实 HTTP 429 已验证，待随下一次 Render 发布生效
 - GitHub Actions 已在提交 `f3abb8a` 上验证为绿色
 
 ## 当前公网演示：Render Free + Neon Free
@@ -145,6 +146,8 @@ DEEPSEEK_MODEL="deepseek-v4-flash"
 ```
 
 API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏览器。当前每次请求最多携带最近 30 条、合计约 24,000 字符的历史消息；单次知识检索最多返回 5 条、约 6,000 字符的片段和元数据；Agent 最多运行 4 个模型轮次、执行 3 次工具调用，总时长 50 秒，单次知识检索等待 5 秒；普通模式每轮最多生成 1024 tokens，深度思考模式每轮最多生成 4096 tokens。
+
+公开演示默认还按 UTC 自然日限制每账号 20 次、全站 60 次聊天请求，达到上限会在调用 DeepSeek 前返回 429。可通过服务端 `CHAT_DAILY_USER_LIMIT`、`CHAT_DAILY_GLOBAL_LIMIT` 调整；无效值回退到默认值，不能用 0 关闭。它是请求数保护，不是精确 Token 计费，完整设计见 [`docs/features/postgresql-chat-daily-quota.md`](docs/features/postgresql-chat-daily-quota.md)。
 
 `DEEPSEEK_MODEL` 决定页面首次打开时的默认模型，用户之后可以在聊天输入区切换。官方接口和当前支持的模型可能更新，请以 [DeepSeek API 文档](https://api-docs.deepseek.com/) 为准。
 

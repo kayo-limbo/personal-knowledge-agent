@@ -96,3 +96,17 @@ model KnowledgeDoc {
 
   @@index([userId, updatedAt])
 }
+
+/// 每日聊天配额桶。既保存用户桶，也保存全站桶；subjectId 不设置外键，
+/// 因为全站桶没有对应 User，并且这里只保留不含聊天正文的短期计数。
+model ChatQuota {
+  id           String   @id @default(cuid())
+  scope        String
+  subjectId    String
+  usageDate    DateTime @db.Date
+  requestCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([scope, subjectId, usageDate])
+  @@index([usageDate])
+}
