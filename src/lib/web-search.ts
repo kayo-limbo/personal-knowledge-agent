@@ -10,7 +10,7 @@ export const WEB_SEARCH_TOOL_NAME = "webSearch";
 export const MAX_WEB_SEARCH_USES = 1;
 export const MAX_WEB_SOURCES = 5;
 
-/** DeepSeek 在服务端执行搜索；max_uses 是第一层费用保护。 */
+/** 向供应商请求最多一次搜索；兼容接口的内部实际次数仍需核对 usage。 */
 export const WEB_SEARCH_TOOL = {
   type: "web_search_20250305",
   name: "web_search",
@@ -39,7 +39,7 @@ export interface WebSearchPolicy {
   toolChoice: ToolChoice;
 }
 
-/** 一次聊天请求全局最多联网一次；后续 Agent 轮次不再把 Web Search 暴露给模型。 */
+/** 搜索完成后的普通 Agent 轮次移除联网工具；仅 pause_turn 可恢复工具定义。 */
 export function getWebSearchPolicy(
   mode: WebSearchMode,
   alreadyUsed: boolean,
@@ -47,7 +47,7 @@ export function getWebSearchPolicy(
 ): WebSearchPolicy {
   // A pause_turn continuation must keep the same server tool definition so
   // DeepSeek can resume it. It is exposed with auto choice, never forced again.
-  const enabled = continuingPausedTurn || (mode !== "never" && !alreadyUsed);
+  const enabled = mode !== "never" && (continuingPausedTurn || !alreadyUsed);
   return {
     enabled,
     force: enabled && mode === "always" && !continuingPausedTurn,

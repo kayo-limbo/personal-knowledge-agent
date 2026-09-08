@@ -1,5 +1,7 @@
 # Vercel Hobby + Neon Free 零成本部署
 
+> 2026-09-08 状态更新：Neon 项目、初始 migration、Vercel 配置与部署已完成，生产没有运行 demo seed。但当前测试网络无法访问 `vercel.app`，Vercel 端到端验收未通过；已启用 **Render Free Docker + Neon** 作为实际公网方案，见 [Render 部署与验收记录](render-neon-free-deployment.md)。下文 2026-09-04 的准备状态和 Vercel 清单保留为历史与复现说明，不是当前待创建清单。
+
 ## 目标与当前结果
 
 这个功能块的目标，是在不购买香港 VPS 的前提下，为 2026-09-13 验收准备一个可公开访问、可以持久化数据并支持 SSE 流式回答的环境。
@@ -23,13 +25,13 @@
 - Vercel 每次构建都会先生成 Prisma Client。
 - 聊天路由继续使用 Node.js runtime、60 秒函数上限和 SSE 防缓冲响应头。
 
-尚未完成、因此不能写成已上线的部分：用户还需要创建 Neon/Vercel 项目、在控制台配置密钥、执行线上 migration，并完成公网端到端验证。
+2026-09-04 当时尚未完成：创建 Neon/Vercel 项目、配置密钥、执行线上 migration 和公网端到端验证。当前进度以顶部更新及 Render 文档为准。
 
 ## 为什么选择这个方案
 
 Vercel 对 Next.js 16 有原生构建适配，Route Handler 可以返回流式响应；Neon 提供 PostgreSQL、PgBouncer pooled endpoint 和免费额度。两者都能按需缩容，适合访问量很小的考核项目。
 
-Docker Compose 不会删除。它仍然负责本地生产模拟、自托管备用方案和现场断网时的演示兜底。简历和文档必须如实区分：线上是 Vercel Serverless + Neon PostgreSQL，本地备用才是 Docker Compose。
+Docker Compose 不会删除。它仍然负责本地生产模拟、自托管备用方案和现场断网时的演示兜底。简历和文档必须如实区分最初 Vercel 方案、实际 Render Docker + Neon 线上环境与本地 Compose。
 
 免费方案也有边界：额度和产品规则可能变化；Neon 休眠后首次查询会有冷启动；`vercel.app` 在中国大陆的可达性以及 Vercel 香港到 DeepSeek 的链路必须实际测试。若主链路不稳定，再评估 Render Free + Neon，而不是同时建设两套环境。
 

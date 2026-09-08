@@ -21,6 +21,7 @@ test("联网模式会映射为自动、强制和禁用策略", () => {
     toolChoice: { type: "tool", name: "web_search" },
   });
   assert.equal(getWebSearchPolicy("never", false).enabled, false);
+  assert.equal(getWebSearchPolicy("never", true, true).enabled, false);
   assert.equal(getWebSearchPolicy("always", true).enabled, false);
   assert.deepEqual(getWebSearchPolicy("always", true, true), {
     enabled: true,

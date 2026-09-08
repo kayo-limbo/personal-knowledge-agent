@@ -1,6 +1,6 @@
 # 暑期考核、部署、面试与项目规划
 
-最后更新：2026-09-04
+最后更新：2026-09-08
 验收日期：2026-09-13
 规划周期：约 34 天
 
@@ -72,12 +72,14 @@
 - 聊天模块综合面试文档和多模型独立讲解文档。
 - 固定 `searchKnowledge` 关键词检索、上下文注入和可持久化引用来源。
 - DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、最多 4 轮/3 次调用的 Agent 循环、超时取消和工具状态展示。
-- DeepSeek 官方服务端 Web Search、自动/强制/禁止三档联网模式、单次请求最多搜索一次、实时搜索状态和可持久化网页来源链接。
+- DeepSeek 官方服务端 Web Search、自动/强制/禁止三档、跨轮工具控制、实时状态和持久化网页来源；上游内部搜索次数不是硬保证。
 - Prisma PostgreSQL provider、`adapter-pg`、完整初始 migration、连接池单例、常用索引和幂等 seed 的代码迁移。
 - Next.js standalone 多阶段 Dockerfile、Docker Compose、真实 PostgreSQL `migrate deploy`/幂等 seed、健康检查和命名 volume 持久化验证。
 - GitHub Actions 基础 CI：Prisma Client 生成、测试、Lint、TypeScript 和生产构建，并已确认远程运行绿色。
 - 生产默认只迁移、demo seed 显式执行且不覆盖已有账号密码的部署安全门禁。
 - Vercel Hobby + Neon Free 的仓库侧适配：hkg1 单区域、pooled/direct 连接分层、Serverless 小连接池和构建时 Prisma Client 生成。
+- Neon Singapore 项目与初始 migration 已完成，无自动 seed；Vercel 已部署但当前网络不可达，已启用 Render Free Docker + Neon 实际公网方案。
+- Render 登录注册、Knowledge CRUD 与用户隔离、知识检索、Flash 普通 SSE、消息持久化及客户端取消已实测；`f3abb8a` 已 live 且 CI 绿色。
 
 ### 部分完成
 
@@ -87,8 +89,9 @@
 
 ### 尚未完成的核心
 
-- Vercel Hobby + Neon Free 控制台创建、Neon migration 和首次公网部署。
-- 线上环境的登录、Knowledge CRUD、用户隔离、历史持久化、DeepSeek SSE、联网搜索和中国大陆可达性端到端验证。
+- Render 强制联网修复发布与公网复验：真实根因是服务端搜索结果以 `tool_use` 停止，不是此前猜测的 `pause_turn`。修复已通过本地完整 HTTP + 真实 DeepSeek + Neon 验证，不能提前标记线上通过。
+- Pro/思考模式完整回答、浏览器视觉交互、重新部署后保留已有数据，以及现场网络多次访问与休眠唤醒验收。
+- 用户级费用保护、固定演示数据、PPT、演示脚本和备用录屏。
 
 ### 暂不进入验收范围
 
@@ -107,7 +110,7 @@
 2. `searchKnowledge` Tool Calling Agent。（已完成）
 3. Agent 最大轮数、超时、权限和错误处理。（已完成）
 4. PostgreSQL。（代码迁移与真实 PostgreSQL 验收已完成）
-5. 零成本 Vercel Hobby + Neon Free 线上部署。（仓库适配已完成，控制台部署与公网验收待完成）
+5. 免费 Render Docker + Neon 线上部署。（已上线，联网修复发布与剩余公网验收待完成）
 6. 关键流程测试、功能文档和演示准备。
 
 ### P1：尽量完成
@@ -172,7 +175,7 @@
 
 目标：解决模型训练知识过期问题。
 
-状态：已于 2026-08-26 完成。采用 DeepSeek Anthropic 兼容接口的官方服务端 Web Search，支持自动、强制、禁止三档；整次聊天请求最多联网一次，搜索状态通过 SSE 展示，网页标题、URL 和页面时间随回答持久化。搜索结果视为不可信输入，网页链接只允许 `http/https`。
+状态：基础实现已于 2026-08-26 完成，支持自动、强制、禁止三档，SSE 状态与持久化网页引用。2026-09-08 发现真实兼容接口的服务端 `tool_use` 总结问题，已修复并通过本地真实集成，待公网发布；同时纠正次数边界：`max_uses: 1` 下上游仍可能内部搜索多次。搜索结果仍视为不可信输入，链接只允许 `http/https`。
 
 任务：
 
@@ -184,13 +187,13 @@
 - 限制搜索次数、结果数和费用。
 - 防御搜索结果中的 Prompt Injection。
 
-如果前两阶段延期，降级为“用户手动开启、每次最多搜索一次”，不做复杂自动规划。
+如果前两阶段延期，降级为用户手动开启，不做复杂自动规划；不承诺供应商内部严格搜索一次。
 
 ### 8 月 30 日—9 月 4 日：最小部署
 
 目标：获得一个稳定、可重复部署的线上验收环境。
 
-状态：PostgreSQL 代码迁移已于 2026-08-26 完成。本地 Docker Compose 闭环已于 2026-08-27 完成：Next.js standalone 镜像、PostgreSQL 17、一次性 migrator、`/api/health`、命名 volume 均已实测；初始 migration 成功应用，重复 deploy 无待迁移，显式重复 seed 数据不增加，删除并重建容器与网络后数据仍存在。基础 GitHub Actions CI 已完成，并于 2026-09-04 确认提交 `0bd56c2` 的远程运行绿色。由于不购买香港 VPS，线上目标改为 Vercel Hobby + Neon Free；仓库侧的 hkg1 区域、pooled/direct 连接分层、Serverless 小连接池和远程 Prisma Client 生成已完成，控制台创建、Neon migration 与公网全链路验收尚未完成。
+状态：PostgreSQL 代码迁移与本地 Compose 闭环已完成，真实 migration、显式幂等 seed、健康检查、volume 容器重建持久性均已实测。基础 CI 已确认 `f3abb8a` 绿色。免费部署先尝试 Vercel + Neon，随后因当前网络不可达转用 Render Docker + Neon；Neon migration 和公网健康/登录/知识检索/SSE 主链路已验证，联网兼容修复与剩余验收见 [Render 记录](../features/render-neon-free-deployment.md)。
 
 任务：
 
@@ -203,8 +206,8 @@
 - GitHub Actions 执行 Prisma Client 生成、测试、lint、TypeScript 和 build。（已完成并确认远程绿色）
 - 生产启动与 demo seed 解耦，避免自动创建或重置弱密码演示账号。（已完成）
 - 完成 Vercel Hobby + Neon Free 仓库适配。（已完成）
-- 在 Neon Singapore 创建项目并用 direct URL 执行 `prisma migrate deploy`。
-- 从 Vercel hkg1 部署 Node.js Functions，不自动执行 demo seed。
+- 在 Neon Singapore 创建项目并用 direct URL 执行 `prisma migrate deploy`。（已完成，无 seed）
+- Vercel hkg1 已部署但当前网络不可达；Render Singapore Docker 已 live，不自动 seed。
 - 验证登录、用户隔离、数据库持久化、DeepSeek SSE、联网搜索和中国大陆可达性。
 
 ### 9 月 5 日—9 月 9 日：质量打磨
@@ -234,18 +237,18 @@
 ### 选择
 
 ```text
-Vercel Hobby（香港 hkg1 Node.js Functions）
+Render Free（Singapore Docker Web Service）
   + Neon Free PostgreSQL（AWS Singapore）
   + pooled runtime URL / direct migration URL
   + 基础 GitHub Actions CI
   + 单一线上环境
 ```
 
-预算决策是不购买每月 38～90 元的香港 VPS，接受少量 Serverless 架构调整，把公网演示目标改为费用 0 元的 Vercel Hobby + Neon Free。线上架构必须在文档和简历中如实写成 Vercel Serverless + Neon PostgreSQL。
+预算决策是不购买香港 VPS。最初 Vercel 部署已 Ready，但当前网络无法访问其域名，因此启用原定备用 Render Free + Neon Free。实际网址是 https://personal-knowledge-agent.onrender.com，简历必须如实写 Render Docker + Neon PostgreSQL。免费额度内托管费用为 0，DeepSeek 调用仍收费。
 
 Docker Compose 已完成且继续保留，职责是本地生产模拟、可移植自托管方案和验收现场备用；不再把“香港 Linux Compose 已上线”作为当前目标。
 
-Vercel Functions 固定在香港 `hkg1`，优先照顾中国大陆访问与 DeepSeek 链路；Neon 选择 AWS Singapore。两者不是同一区域，因此必须实测数据库延迟。如果数据库往返成为明显瓶颈，可把 Vercel 单一区域改为 `sin1` 对比，但验收前不启用多区域。
+当前 Render 与 Neon 均选择新加坡。Vercel `hkg1` 配置保留作历史尝试，不再同时建设另一套主环境；不能把 Ready 写成该链路已验收。
 
 ### 第一阶段不做
 
@@ -257,15 +260,15 @@ Vercel Functions 固定在香港 `hkg1`，优先照顾中国大陆访问与 Deep
 - Kubernetes。
 - Redis 分布式缓存。
 
-### Vercel Functions 与 SSE
+### 容器、Vercel 兼容配置与 SSE
 
 聊天 Route Handler 保持 Node.js runtime 和 `maxDuration = 60`，Agent 业务总超时为 50 秒，给主动取消、错误回填和流关闭留出余量。Vercel 支持 Route Handler 流式响应，但上线后必须测量首字到达和持续增量输出，不能只检查 HTTP 200。
 
-必须从 Vercel 香港函数实际调用 DeepSeek，确认 API 可用、不会被网络策略阻断；同时使用中国大陆验收网络多次访问 `vercel.app`。任一链路不稳定时先准备录屏和本地 Docker 备用，再评估 Render Free + Neon。Render 空闲服务可能休眠，只作为备选；Cloudflare Quick Tunnel 不作为 SSE 主方案。
+`maxDuration` 不构成 Render Docker 的函数时限，实际业务仍受 50 秒超时保护。Render 到 DeepSeek 的普通知识问答 SSE 已实测；联网修复待发布。Render Free 空闲约 15 分钟休眠、唤醒约一分钟，演示前暖机并备录屏；还需现场同类网络多次验证。Cloudflare Quick Tunnel 不作为 SSE 主方案。
 
 ### 数据库
 
-- Vercel runtime 的 `DATABASE_URL` 使用 Neon 主机名带 `-pooler` 的 pooled connection string。
+- Render/Vercel runtime 的 `DATABASE_URL` 使用 Neon 主机名带 `-pooler` 的 pooled connection string。
 - migration 在本地通过 `DIRECT_URL` 连接 Neon 非 pooler endpoint，执行 `prisma migrate deploy`。
 - Vercel 实例内 `pg` pool 最大连接数为 1，Docker/本地长生命周期进程仍为 10。
 - 生产不自动 seed；demo seed 只能显式执行，重复 seed 不重置已有密码。
@@ -275,7 +278,7 @@ Vercel Functions 固定在香港 `hkg1`，优先照顾中国大陆访问与 Deep
 
 ### 基础 CI
 
-状态：工作流代码、本地等价验证和 push 已于 2026-08-31 完成；2026-09-04 已确认 `0bd56c2` 对应的托管 runner 运行成功。
+状态：工作流代码、本地等价验证和 push 已完成；`0bd56c2`、`73bc63c`、`f3abb8a` 的托管 runner 均已确认成功。新修复提交仍需单独检查。
 
 Pull Request 或 push 至少执行：
 
@@ -288,7 +291,7 @@ npm run typecheck
 npm run build
 ```
 
-验收前不要求自动 CD。Vercel 从 GitHub 构建应用，但 Neon migration 仍由本地使用 direct URL 手动执行，避免并发迁移和生产自动 seed。
+验收前不要求自动 CD。Render 自动部署已关闭，用户 push 后按 commit SHA 手动部署；Neon migration 由本地使用 direct URL 执行，避免并发迁移和生产自动 seed。
 
 ## 7. 面试重点知识地图
 
@@ -377,7 +380,7 @@ npm run build
 - 基于 Next.js 16、TypeScript、NextAuth、Prisma 和 PostgreSQL 构建全栈个人知识助手。
 - 接入 DeepSeek V4 Flash/Pro，支持思考模式、SSE 流式输出和多轮会话持久化。
 - 设计用户级知识检索与 Tool Calling Agent 循环，实现权限隔离、引用来源和联网搜索。
-- 使用 Vercel Serverless + Neon PostgreSQL 提供零成本线上演示，并保留 Docker Compose 自托管备用，通过 GitHub Actions 执行持续质量检查。（完成公网验收后再写入简历）
+- 使用 Render Docker + Neon PostgreSQL 提供免费额度内的线上演示，并保留 Docker Compose 本地备用，通过 GitHub Actions 执行持续质量检查。（完成剩余公网验收后再写入简历，不声称 Vercel 已验收）
 
 简历只写实际完成并能深入解释的内容。未完成的向量数据库、MCP、Multi-Agent 和自动部署不能提前写入。
 
@@ -389,11 +392,11 @@ npm run build
 
 ### 联网搜索不稳定
 
-改成用户手动开启、每次只搜索一次，并保留搜索失败时的普通模型回答。
+降级为用户手动开启或现场禁止联网并使用固定知识；保留明确错误提示。不承诺供应商内部严格一次，也不把未实现的失败后自动降级写成已有功能。
 
 ### 部署延期
 
-保留本地 Docker Compose 和现场本地演示，同时准备录像。主方案是 Vercel Hobby + Neon Free；若 `vercel.app` 或 Vercel 香港到 DeepSeek 的链路不稳定，再评估 Render Free + Neon，不同时扩展两套线上环境。
+保留本地 Docker Compose 和现场本地演示，同时准备录像。当前已启用 Render Free + Neon；演示前暖机，避免将免费实例冷启动误认为故障，不同时扩展两套线上环境。
 
 ### PostgreSQL 迁移失败
 
@@ -422,4 +425,4 @@ npm run build
 9. 新增独立中文功能讲解并更新文档索引。
 10. 提醒用户需要提交的文件和具体中文 commit message，不自动提交。
 
-默认推荐的下一个开发任务是：**用户在 Neon 创建 Singapore Free PostgreSQL，在本地通过 direct URL 执行 `prisma migrate deploy`；随后在 Vercel 配置 pooled URL 和服务端密钥并部署 hkg1，验证健康检查、登录、Knowledge、历史持久化、DeepSeek SSE、联网搜索和中国大陆可达性**。
+默认推荐的下一个任务是：**用户 push 搜索兼容修复后，按新 SHA 部署现有 Render 服务，复验强制联网文本/引用/持久化，再补 Pro/思考、浏览器交互、重新部署保留记录和现场网络验收**。数据库和服务已创建，不要重复创建；不自动 seed。随后只做费用保护和验收材料，守住 9 月 13 日截止。

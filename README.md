@@ -21,7 +21,7 @@ V3:Multi-Agent + Workflow（后期）
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
 - 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
 - DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
-- DeepSeek 官方 Web Search，支持自动/强制/禁止三档、每次请求最多联网一次和网页来源链接
+- DeepSeek 官方 Web Search，支持自动/强制/禁止三档、跨轮工具控制和网页来源链接（上游内部搜索次数不是硬保证）
 - Prisma PostgreSQL 数据模型、`adapter-pg`、初始 migration、常用索引和幂等种子数据
 - Next.js standalone 多阶段镜像、Docker Compose、真实 PostgreSQL migration/seed、健康检查和命名 volume 持久化
 - GitHub Actions 基础 CI 配置：Prisma Client 生成、测试、Lint、TypeScript 和生产构建
@@ -31,12 +31,21 @@ V3:Multi-Agent + Workflow（后期）
 正在开发：
 
 - Prompt、History、Admin、Analytics 仍是规划路由
-- Vercel + Neon 控制台创建、线上 migration 和公网全链路验收尚未完成
-- GitHub Actions 最新运行已在提交 `0bd56c2` 上验证为绿色
+- Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
+- 强制联网修复已通过本地完整 HTTP + 真实 DeepSeek + Neon 验证，待发布后公网复验；Pro/思考模式、浏览器交互、重新部署后的数据保留仍待验收
+- GitHub Actions 已在提交 `f3abb8a` 上验证为绿色
+
+## 当前公网演示：Render Free + Neon Free
+
+访问 [Personal Knowledge Agent](https://personal-knowledge-agent.onrender.com)。实际架构为 **Render Singapore Docker Web Service + Neon AWS Singapore PostgreSQL**；免费额度内托管费用为 0，DeepSeek 调用仍收费。
+
+Vercel 部署虽已 Ready，但当前测试网络访问失败，因此启用了原定 Render 备用方案。不能把当前线上架构写成 Vercel Serverless 或香港 VPS Compose。Render 免费实例空闲会休眠，演示前需要暖机，并保留本地 Compose 与备用录屏。
+
+部署配置、控制台网址、真实验证记录和剩余清单见 [`docs/features/render-neon-free-deployment.md`](docs/features/render-neon-free-deployment.md)。
 
 ## 使用 Vercel Hobby + Neon Free
 
-验收实际线上方案是 Vercel Serverless + Neon PostgreSQL，目标费用为 0 元；Docker Compose 保留为本地生产模拟和自托管备用，不把它描述成尚未发生的线上部署。
+以下保留最初的 Vercel 方案与复现说明，不代表它已通过公网验收；实际运行方案见上面的 Render 章节。Docker Compose 保留为本地生产模拟和自托管备用。
 
 数据库连接分为两条：
 
@@ -117,13 +126,13 @@ npm run typecheck
 npm run build
 ```
 
-CI 使用非秘密构建占位变量，不连接 PostgreSQL 或 DeepSeek，不执行自动部署。第一次 GitHub 远程运行需要在提交并 push 工作流后确认。
+CI 使用非秘密构建占位变量，不连接 PostgreSQL 或 DeepSeek，不执行自动部署。`f3abb8a` 的远程运行已确认绿色；每次新提交仍需独立检查。
 
 ## 配置 DeepSeek API
 
 本项目默认使用低成本、低延迟的 `deepseek-v4-flash`，聊天输入区也允许用户按每次请求切换 `deepseek-v4-pro`，并选择普通或深度思考模式。为了复用现有流式聊天代码，服务端通过 Anthropic SDK 调用 DeepSeek 官方提供的 Anthropic 兼容接口；SDK 只是协议客户端，实际请求仍直接发送到 `https://api.deepseek.com/anthropic`。
 
-聊天输入区还提供自动联网、强制联网和禁止联网三种模式。联网搜索使用 DeepSeek 官方服务端 Web Search，不需要额外的搜索 API Key；应用会把整次聊天请求的联网次数限制为 1，并只持久化经过 `http/https` 协议校验的网页来源链接。
+聊天输入区还提供自动联网、强制联网和禁止联网三种模式。联网搜索使用 DeepSeek 官方服务端 Web Search，不需要额外的搜索 API Key；应用请求 `max_uses: 1` 并在搜索完成后的普通轮次移除工具，但实测供应商内部仍可能执行多次搜索，不能把该字段当作硬费用上限。网页来源链接只接受 `http/https`。
 
 1. 复制 `.env.example` 为 `.env`。
 2. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。

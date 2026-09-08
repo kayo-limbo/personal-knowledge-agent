@@ -16,12 +16,13 @@
 - [`features/chat-multi-model-thinking.md`](features/chat-multi-model-thinking.md)：Flash/Pro 多模型切换与普通/深度思考模式。
 - [`features/fixed-knowledge-search-citations.md`](features/fixed-knowledge-search-citations.md)：固定 `searchKnowledge` 关键词检索、`userId` 隔离、上下文注入、字符预算与引用来源持久化。
 - [`features/knowledge-tool-calling-agent.md`](features/knowledge-tool-calling-agent.md)：DeepSeek 自主选择 `searchKnowledge`、`tool_use/tool_result` 回填、有限 Agent 循环、超时取消与工具状态展示。
-- [`features/controlled-web-search-citations.md`](features/controlled-web-search-citations.md)：DeepSeek 官方服务端 Web Search、自动/强制/禁止三档、单次搜索费用边界、`pause_turn` 续跑、SSE 状态与安全网页引用。
+- [`features/controlled-web-search-citations.md`](features/controlled-web-search-citations.md)：DeepSeek 官方服务端 Web Search、三档控制与实际费用边界、`pause_turn` 和服务端 `tool_use` 续跑、SSE 与安全网页引用。
 - [`features/postgresql-prisma-migration.md`](features/postgresql-prisma-migration.md)：Prisma 7 从 SQLite 切换 PostgreSQL、`adapter-pg`、迁移历史重建、连接池、幂等 seed 与验证边界。
 - [`features/docker-compose-postgresql-deployment.md`](features/docker-compose-postgresql-deployment.md)：Next.js standalone 多阶段镜像、Compose 启动门禁、真实 PostgreSQL migration/seed、健康检查与 volume 持久化验证。
 - [`features/github-actions-basic-ci.md`](features/github-actions-basic-ci.md)：GitHub Actions 的最小权限、Node/npm 缓存、Prisma 生成、测试/Lint/类型/构建门禁与 CI/CD 边界。
 - [`features/production-safe-demo-seed.md`](features/production-safe-demo-seed.md)：生产部署默认只迁移、演示 seed 显式执行，以及重复 seed 不重置已有账号密码的安全边界。
-- [`features/vercel-neon-free-deployment.md`](features/vercel-neon-free-deployment.md)：Vercel Hobby + Neon Free 的零成本线上架构、pooled/direct 连接分层、Serverless 小连接池、迁移步骤、SSE 与公网验收清单。
+- [`features/vercel-neon-free-deployment.md`](features/vercel-neon-free-deployment.md)：最初 Vercel 方案与部署尝试、pooled/direct 分层、Serverless 连接池；当前网络未通过可达性验收。
+- [`features/render-neon-free-deployment.md`](features/render-neon-free-deployment.md)：当前实际 Render Free Docker + Neon 公网方案、控制台网址、代理与端口配置、联网兼容修复及已验证/待验收记录。
 
 ## 后续文档约定
 

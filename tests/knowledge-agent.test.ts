@@ -36,6 +36,56 @@ function finalTurn(text: string): AgentModelTurn {
   };
 }
 
+// Shape observed from DeepSeek's forced server search: tool_use stop reason,
+// completed server result blocks, but no client tool_use and no final text.
+const completedWebSearch: ContentBlockParam[] = [
+  { type: "server_tool_use", id: "web-1", name: "web_search", input: { query: "Next.js Docker" } },
+  { type: "web_search_tool_result", tool_use_id: "web-1", content: [
+    { type: "web_search_result", title: "Deploying", url: "https://nextjs.org/docs/app/getting-started/deploying", encrypted_content: "opaque-result", page_age: null },
+  ] },
+];
+
+test("已完成的服务端搜索以 tool_use 停止时会保留结果并请求总结", async () => {
+  for (const intro of ["", "我会查询部署文档。"] ) {
+    let calls = 0;
+    let searches = 0;
+    const chunks: string[] = [];
+    const output = await runKnowledgeAgent({
+      initialMessages: [{ role: "user", content: "Next.js 支持 Docker 吗？" }],
+      signal: new AbortController().signal,
+      requestModel: async (messages) => {
+        calls++;
+        if (calls === 1) return { text: intro, content: completedWebSearch, stopReason: "tool_use" };
+        assert.deepEqual(messages[1], { role: "assistant", content: completedWebSearch });
+        assert.equal(messages.at(-1)?.role, "user");
+        assert.equal(messages.length, 3);
+        return finalTurn("支持 Docker，见官方部署文档。");
+      },
+      executeSearch: async () => { searches++; return []; },
+      formatToolResult: () => "[]",
+      onTextDelta: delta => chunks.push(delta),
+    });
+    assert.equal(output.rounds, 2);
+    assert.equal(searches, 0);
+    assert.ok(chunks.join("").endsWith("支持 Docker，见官方部署文档。"));
+  }
+});
+
+test("服务端工具持续暂停或只返回搜索结果时仍受最大轮数限制", async () => {
+  for (const stopReason of ["pause_turn", "tool_use"] as const) {
+    let calls = 0;
+    await assert.rejects(runKnowledgeAgent({
+      initialMessages: [{ role: "user", content: "查询部署文档" }],
+      signal: new AbortController().signal,
+      requestModel: async () => { calls++; return { text: "", content: completedWebSearch, stopReason }; },
+      executeSearch: async () => [],
+      formatToolResult: () => "[]",
+      onTextDelta: () => undefined,
+    }), AgentRoundLimitError);
+    assert.equal(calls, MAX_AGENT_ROUNDS);
+  }
+});
+
 const result: KnowledgeSearchResult = {
   id: "knowledge-1",
   citation: "[知识库 1]",
