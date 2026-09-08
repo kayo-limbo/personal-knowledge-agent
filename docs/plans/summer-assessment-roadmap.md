@@ -80,11 +80,12 @@
 - Vercel Hobby + Neon Free 的仓库侧适配：hkg1 单区域、pooled/direct 连接分层、Serverless 小连接池和构建时 Prisma Client 生成。
 - Neon Singapore 项目与初始 migration 已完成，无自动 seed；Vercel 已部署但当前网络不可达，已启用 Render Free Docker + Neon 实际公网方案。
 - `11e29e5` 已在 Render live：登录注册、Knowledge CRUD/隔离、知识与联网 Agent、Flash/Pro、普通/深度思考、SSE、消息与每日配额持久化均已实测；同一 SHA 重新部署后 Session、Knowledge、Conversation 和配额仍可读取。
+- Prompt 用户隔离 CRUD、会话历史搜索/重命名/删除/继续对话、管理员用户角色管理和系统统计页面已通过本地 Docker HTTP/Server Action 验证，等待真实浏览器视觉回归与公网发布验证。
 
 ### 部分完成
 
-- Chat Workspace 主链路已经完成，剩余会话删除、重命名、消息分页、消息状态和 token usage。
-- History 已有基础会话列表和消息恢复，但没有独立管理、搜索和分页。
+- Chat Workspace 主链路、会话删除与重命名已经完成，剩余消息分页、消息状态和 token usage。
+- History 已有独立搜索、重命名、删除和继续对话页面；当前最多读取最近 50 条，尚未做数据库分页。
 - Knowledge 已完成管理，并已通过模型自主 Tool Calling 接入有限 Agent 循环。
 
 ### 尚未完成的验收准备
@@ -119,7 +120,7 @@
 1. 联网搜索及网页引用。（已完成）
 2. 用户级与全站每日请求配额。（代码、migration、本地并发和公网跨部署验证已完成；精确 Token 统计延期）
 3. 消息模型、思考模式、状态和 token usage 持久化。
-4. 会话删除、重命名和消息分页。
+4. 会话删除、重命名和消息分页。（删除、重命名已完成，分页延期）
 5. Nginx + HTTPS。
 6. GitHub Actions 基础 CI。（已在 `0bd56c2` 上确认首次远程绿色运行）
 
@@ -127,7 +128,7 @@
 
 1. 文件上传和解析。
 2. Embedding、向量数据库和 rerank。
-3. Prompt 管理完整 CRUD。
+3. Prompt 管理完整 CRUD。（已完成）
 4. 自动 CD、镜像回滚和数据库自动备份。
 5. 独立 staging 环境。
 

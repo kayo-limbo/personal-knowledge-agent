@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/chat-quota.test.ts tests/knowledge-search.test.ts tests/knowledge-agent.test.ts tests/web-search.test.ts",
+    "test": "node --experimental-strip-types --test tests/chat-quota.test.ts tests/dashboard-management.test.ts tests/knowledge-search.test.ts tests/knowledge-agent.test.ts tests/web-search.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

@@ -8,10 +8,24 @@ import { ChatWorkspace } from "./components/ChatWorkspace";
  * Page 保持为 Server Component：认证和数据库读取留在服务器，
  * 只有真正需要交互的 ChatWorkspace 才进入浏览器 bundle。
  */
-export default async function ChatPage() {
+interface ChatPageProps {
+  searchParams: Promise<{ conversation?: string }>;
+}
+
+export default async function ChatPage({ searchParams }: ChatPageProps) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const bootstrap = await getChatBootstrap(session.user.id);
-  return <ChatWorkspace bootstrap={bootstrap} initialModel={DEEPSEEK_DEFAULT_MODEL} />;
+  const { conversation } = await searchParams;
+  const bootstrap = await getChatBootstrap(session.user.id, conversation);
+  const initialConversationId = bootstrap.conversations.some((item) => item.id === conversation)
+    ? conversation
+    : undefined;
+  return (
+    <ChatWorkspace
+      bootstrap={bootstrap}
+      initialModel={DEEPSEEK_DEFAULT_MODEL}
+      initialConversationId={initialConversationId}
+    />
+  );
 }

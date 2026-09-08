@@ -12,6 +12,7 @@ import type { WebSearchMode } from "@/lib/web-search-config";
 interface ChatWorkspaceProps {
   bootstrap: ChatBootstrap;
   initialModel: DeepSeekModel;
+  initialConversationId?: string;
 }
 
 async function readError(response: Response): Promise<string> {
@@ -58,7 +59,7 @@ async function consumeSse(
   }
 }
 
-export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
+export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }: ChatWorkspaceProps) {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<DeepSeekModel>(initialModel);
@@ -88,8 +89,8 @@ export function ChatWorkspace({ bootstrap, initialModel }: ChatWorkspaceProps) {
     Object.entries(bootstrap.messagesByConversation).forEach(([id, list]) => {
       setMessages(id, list);
     });
-    setActiveConversation(bootstrap.conversations[0]?.id ?? null);
-  }, [bootstrap, reset, setActiveConversation, setConversations, setMessages]);
+    setActiveConversation(initialConversationId ?? bootstrap.conversations[0]?.id ?? null);
+  }, [bootstrap, initialConversationId, reset, setActiveConversation, setConversations, setMessages]);
 
   function startNewConversation() {
     setError(null);

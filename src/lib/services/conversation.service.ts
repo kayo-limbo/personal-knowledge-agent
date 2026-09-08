@@ -39,13 +39,26 @@ function toMessage(item: {
 /**
  * 首屏只取最近 20 个会话。限制数量既能减少数据库读取，也能控制传给浏览器的数据体积。
  */
-export async function getChatBootstrap(userId: string): Promise<ChatBootstrap> {
-  const rows = await prisma.conversation.findMany({
+export async function getChatBootstrap(
+  userId: string,
+  preferredConversationId?: string
+): Promise<ChatBootstrap> {
+  const recentRows = await prisma.conversation.findMany({
     where: { userId },
     orderBy: { updatedAt: "desc" },
     take: MAX_BOOTSTRAP_CONVERSATIONS,
     include: { messages: { orderBy: { createdAt: "asc" } } },
   });
+
+  const preferredAlreadyLoaded = recentRows.some((row) => row.id === preferredConversationId);
+  const preferredRow =
+    preferredConversationId && !preferredAlreadyLoaded
+      ? await prisma.conversation.findFirst({
+          where: { id: preferredConversationId, userId },
+          include: { messages: { orderBy: { createdAt: "asc" } } },
+        })
+      : null;
+  const rows = preferredRow ? [preferredRow, ...recentRows] : recentRows;
 
   const conversations = rows.map(toConversation);
   const messagesByConversation = Object.fromEntries(
@@ -57,6 +70,54 @@ export async function getChatBootstrap(userId: string): Promise<ChatBootstrap> {
   );
 
   return { conversations, messagesByConversation };
+}
+
+export async function listConversationHistory(userId: string, query?: string) {
+  const normalizedQuery = query?.trim();
+  return prisma.conversation.findMany({
+    where: {
+      userId,
+      ...(normalizedQuery
+        ? { title: { contains: normalizedQuery, mode: "insensitive" as const } }
+        : {}),
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 50,
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: { select: { messages: true } },
+      messages: {
+        where: { content: { not: "" } },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { role: true, content: true },
+      },
+    },
+  });
+}
+
+export async function renameConversation(id: string, userId: string, title: string) {
+  const result = await prisma.conversation.updateMany({
+    where: { id, userId },
+    data: { title },
+  });
+  if (result.count === 0) throw new Error("会话不存在或无权限");
+}
+
+export async function deleteConversation(id: string, userId: string) {
+  const conversation = await prisma.conversation.findFirst({
+    where: { id, userId },
+    select: { id: true },
+  });
+  if (!conversation) throw new Error("会话不存在或无权限");
+
+  await prisma.$transaction([
+    prisma.message.deleteMany({ where: { conversationId: id } }),
+    prisma.conversation.delete({ where: { id } }),
+  ]);
 }
 
 /** 根据第一条问题生成一个简短标题，后面可以再换成模型自动总结标题。 */

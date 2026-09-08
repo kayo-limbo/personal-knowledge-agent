@@ -24,6 +24,9 @@
 - [`features/vercel-neon-free-deployment.md`](features/vercel-neon-free-deployment.md)：最初 Vercel 方案与部署尝试、pooled/direct 分层、Serverless 连接池；当前网络未通过可达性验收。
 - [`features/render-neon-free-deployment.md`](features/render-neon-free-deployment.md)：当前实际 Render Free Docker + Neon 公网方案、控制台网址、代理与端口配置、联网兼容修复及已验证/待验收记录。
 - [`features/postgresql-chat-daily-quota.md`](features/postgresql-chat-daily-quota.md)：PostgreSQL 用户/全站两级每日聊天配额、Serializable 原子计数、429/Retry-After、真实 Neon migration 与费用保护边界。
+- [`features/prompt-management.md`](features/prompt-management.md)：Prompt 的用户隔离 CRUD、收藏/公开标记、Server Action 鉴权与表单校验。
+- [`features/conversation-history-management.md`](features/conversation-history-management.md)：独立历史页的搜索、重命名、删除及跳回指定会话的数据流与权限边界。
+- [`features/admin-users-system-stats.md`](features/admin-users-system-stats.md)：管理员用户角色管理、禁止自我降权和 PostgreSQL 系统统计聚合。
 
 ## 后续文档约定
 

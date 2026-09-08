@@ -27,10 +27,13 @@ V3:Multi-Agent + Workflow（后期）
 - GitHub Actions 基础 CI 配置：Prisma Client 生成、测试、Lint、TypeScript 和生产构建
 - 生产默认只执行 migration，demo seed 需要显式运行且不会重置已有账号密码
 - Vercel Hobby + Neon Free 部署所需的区域配置、数据库连接分层和 Serverless 连接池适配
+- Prompt 用户隔离 CRUD、收藏与公开标记
+- 历史记录搜索、重命名、删除和继续指定会话
+- 管理员用户角色管理与 PostgreSQL 系统统计
 
-正在开发：
+验收收尾：
 
-- Prompt、History、Admin、Analytics 仍是规划路由
+- Prompt、History、用户管理和系统统计已通过本地 Docker HTTP/Server Action 全链路验证；仍待真实浏览器视觉检查和公网发布验证
 - Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
 - 强制联网修复已在 Render 公网通过：持续 SSE、网页引用、`done` 和最终回答落库均正常；Pro + 深度思考也已实测
 - PostgreSQL 用户/全站两级每日聊天配额已上线；默认用户上限的 200→429、`Retry-After` 及重新部署后计数保留均已实测
