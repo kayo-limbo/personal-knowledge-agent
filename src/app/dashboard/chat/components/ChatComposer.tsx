@@ -42,6 +42,8 @@ export function ChatComposer({
   onStop,
 }: ChatComposerProps) {
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // 输入法确认候选字的 Enter 不应发送；229 兼容组合输入结束附近的浏览器事件。
+    if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (!isStreaming && value.trim()) onSubmit();

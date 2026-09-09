@@ -80,6 +80,22 @@ Flex 子项默认最小宽度可能等于其内容宽度。代码块、表格或
 
 ## 验证方法
 
+### 2026-09-09 实际回归与旧镜像问题
+
+用户反馈侧栏仍随长内容滚动后，检查发现本地 `localhost:3000` 的 Compose 应用容器未包含 `bcbf877` 中的 `flex h-screen overflow-hidden bg-gray-50` 布局。代码已经提交不等于运行中的 Docker 镜像已经更新；容器不会像开发服务器一样自动读取工作区文件。
+
+执行 `docker compose --env-file .env.docker up --build -d app` 后，生产构建通过，应用容器重建，已有 PostgreSQL volume 保留，没有执行 seed。此次修复运行环境，没有再次修改布局代码。两处用户 Knowledge 未提交修改保持原样；本地镜像按当前工作区构建，不能声称它与 Git 提交逐字节一致。
+
+使用隔离的真实 Chrome 无头浏览器，以本地 ADMIN 演示账号登录，在 1280×720 视口逐一检查 AI 对话、知识库、Prompt 管理、历史记录、用户管理、系统统计。每个页面仅在浏览器 DOM 临时追加 2400px 内容，不写入数据库，然后将 `<main>` 滚动 1200px 并尝试滚动 window。六页均得到：
+
+- 侧栏滚动前后 top 均为 0，Header top 为 0。
+- main.scrollTop 为 1200，window.scrollY 为 0。
+- 文档高度与视口高度均为 720，没有产生整页纵向滚动。
+
+这是本地生产容器的布局回归，不等于公网全功能验收。GitHub Actions 的 `bcbf877` 已 success，Render 部署 `dep-dag3qch594qs73foe0fg` 已 live 且提交相同；公网登录后的长内容滚动、Markdown、停止按钮等仍需独立验证。
+
+遇到“源码已改但界面没变”，先确认访问地址和运行方式：`npm run dev` 会更新源码，而 Compose 必须重新 build 并重建应用；Render 则需要确认 live 的 commit。不要仅凭编辑器里的代码判断浏览器实际收到的版本。
+
 自动检查：
 
 ```bash

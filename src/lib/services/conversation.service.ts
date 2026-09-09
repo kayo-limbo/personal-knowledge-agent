@@ -15,6 +15,7 @@ const MAX_CONTEXT_CHARACTERS = 24_000;
 function toConversation(item: {
   id: string;
   title: string;
+  promptId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): ChatConversation {
@@ -132,20 +133,21 @@ function createTitle(content: string): string {
 export async function getOrCreateConversation(
   userId: string,
   conversationId: string | undefined,
-  firstMessage: string
+  firstMessage: string,
+  promptId: string | null = null
 ): Promise<ChatConversation> {
   if (conversationId) {
     const existing = await prisma.conversation.findFirst({
       where: { id: conversationId, userId },
-      select: { id: true, title: true, createdAt: true, updatedAt: true },
+      select: { id: true, title: true, promptId: true, createdAt: true, updatedAt: true },
     });
     if (!existing) throw new Error("会话不存在或无权限");
     return toConversation(existing);
   }
 
   const created = await prisma.conversation.create({
-    data: { userId, title: createTitle(firstMessage) || "新对话" },
-    select: { id: true, title: true, createdAt: true, updatedAt: true },
+    data: { userId, title: createTitle(firstMessage) || "新对话", promptId },
+    select: { id: true, title: true, promptId: true, createdAt: true, updatedAt: true },
   });
   return toConversation(created);
 }

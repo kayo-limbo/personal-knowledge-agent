@@ -56,7 +56,7 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
           </label>
           <div className="flex flex-wrap gap-5 text-sm text-gray-700">
             <label className="flex items-center gap-2"><input type="checkbox" name="favorite" /> 收藏</label>
-            <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" /> 标记为公开</label>
+            <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" /> 公开意向（暂不对外分享）</label>
           </div>
           <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700" type="submit">
             保存 Prompt
@@ -79,14 +79,14 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
               <form action={updatePromptAction} className="space-y-4">
                 <input type="hidden" name="id" value={prompt.id} />
                 <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                  <span>{prompt.favorite ? "★ 已收藏" : "普通"} · {prompt.isPublic ? "公开" : "私有"}</span>
+                  <span>{prompt.favorite ? "★ 已收藏" : "普通"} · {prompt.isPublic ? "有公开意向，当前仅自己可见" : "私有"}</span>
                   <time>{new Intl.DateTimeFormat("zh-CN").format(prompt.createdAt)}</time>
                 </div>
                 <input className={fieldClass} name="title" defaultValue={prompt.title} maxLength={100} required aria-label="Prompt 标题" />
                 <textarea className={`${fieldClass} min-h-32 resize-y font-mono`} name="content" defaultValue={prompt.content} maxLength={8000} required aria-label="Prompt 内容" />
                 <div className="flex flex-wrap items-center gap-5 text-sm text-gray-700">
                   <label className="flex items-center gap-2"><input type="checkbox" name="favorite" defaultChecked={prompt.favorite} /> 收藏</label>
-                  <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" defaultChecked={prompt.isPublic} /> 标记为公开</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" defaultChecked={prompt.isPublic} /> 公开意向（暂不对外分享）</label>
                   <button className="ml-auto rounded-lg border px-3 py-2 font-medium hover:bg-gray-50" type="submit">保存修改</button>
                 </div>
               </form>

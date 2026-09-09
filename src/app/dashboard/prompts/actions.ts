@@ -43,6 +43,7 @@ export async function createPromptAction(formData: FormData) {
       destination = promptUrl("error", firstPromptValidationError(parsed.error));
     } else {
       await createPrompt(userId, parsed.data);
+      revalidatePath("/dashboard/chat");
       revalidatePath("/dashboard/prompts");
       revalidatePath("/dashboard");
     }
@@ -62,6 +63,7 @@ export async function updatePromptAction(formData: FormData) {
       destination = promptUrl("error", firstPromptValidationError(parsed.error));
     } else {
       await updatePrompt(id, userId, parsed.data);
+      revalidatePath("/dashboard/chat");
       revalidatePath("/dashboard/prompts");
     }
   } catch (error) {
@@ -76,6 +78,7 @@ export async function deletePromptAction(formData: FormData) {
     const userId = await requirePromptUser();
     const id = resourceIdSchema.parse(formData.get("id"));
     await deletePrompt(id, userId);
+    revalidatePath("/dashboard/chat");
     revalidatePath("/dashboard/prompts");
     revalidatePath("/dashboard");
   } catch (error) {

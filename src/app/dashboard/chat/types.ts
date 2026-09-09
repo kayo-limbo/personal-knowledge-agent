@@ -22,6 +22,7 @@ export interface ChatMessage {
 
 export interface ChatConversation {
   id: string;
+  promptId?: string | null;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export interface ChatBootstrap {
 /** 浏览器提交给 /api/chat 的最小数据；用户身份永远从服务端 Session 获取。 */
 export interface SendChatInput {
   conversationId?: string;
+  promptId?: string | null;
   content: string;
   model: DeepSeekModel;
   thinkingMode: DeepSeekThinkingMode;

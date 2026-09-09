@@ -23,7 +23,7 @@ export default function Header({user}:Props){
       </div>
 
       <div className="flex items-center gap-6">
-        <SearchBar />
+        {user.role !== "GUEST" && <SearchBar />}
         <UserDropdown user={user} />
       </div>
     </header>

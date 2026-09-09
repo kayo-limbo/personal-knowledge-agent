@@ -4,6 +4,9 @@
 
 ## 总览
 
+- [`acceptance/manual-demo.md`](acceptance/manual-demo.md)：固定演示账号和数据、八分钟人工展示步骤、预期答案与 Git 提交范围；不制作 PPT 或录屏。
+- [`acceptance/verification-2026-09-09.md`](acceptance/verification-2026-09-09.md)：本轮本地测试和浏览器集成结果，以及待公网验证边界。
+
 - [`chat-deepseek-interview-guide.md`](chat-deepseek-interview-guide.md)：聊天模块、DeepSeek 接入、SSE、持久化和 Agent 演进路线的综合面试指南。
 
 ## 规划与新对话交接
@@ -12,6 +15,15 @@
 - [`plans/next-session-handoff.md`](plans/next-session-handoff.md)：2026-09-09 最新 Git、验证边界、待发布内容和下一会话执行顺序。
 
 ## 功能讲解
+
+- [`features/manual-demo-data.md`](features/manual-demo-data.md)：独立本地演示账号、固定知识和模板的幂等准备与隔离验证。
+
+- [`features/chat-prompt-selection.md`](features/chat-prompt-selection.md)：个人模板选用、会话关联、服务端归属校验和删除后的默认行为。
+
+- [`features/chat-stream-reliability.md`](features/chat-stream-reliability.md)：中文输入保护、SSE 完成确认、异常断流与离页取消。
+- [`features/dashboard-search-entry.md`](features/dashboard-search-entry.md)：顶部搜索范围选择与现有知识、历史检索页面的连接。
+
+- [`features/current-session-permissions.md`](features/current-session-permissions.md)：角色修改后旧 JWT 的实时权限同步、登录输入校验与失效用户处理。
 
 - [`features/ai-chat-streaming-deepseek.md`](features/ai-chat-streaming-deepseek.md)：AI 流式对话、SSE、会话持久化、客户端状态和常见类型错误排查。
 - [`features/chat-multi-model-thinking.md`](features/chat-multi-model-thinking.md)：Flash/Pro 多模型切换与普通/深度思考模式。
@@ -28,7 +40,7 @@
 - [`features/prompt-management.md`](features/prompt-management.md)：Prompt 的用户隔离 CRUD、收藏/公开标记、Server Action 鉴权与表单校验。
 - [`features/conversation-history-management.md`](features/conversation-history-management.md)：独立历史页的搜索、重命名、删除及跳回指定会话的数据流与权限边界。
 - [`features/admin-users-system-stats.md`](features/admin-users-system-stats.md)：管理员用户角色管理、禁止自我降权和 PostgreSQL 系统统计聚合。
-- [`features/dashboard-fixed-sidebar-layout.md`](features/dashboard-fixed-sidebar-layout.md)：Dashboard 固定侧栏、右侧独立滚动以及 Flex 嵌套滚动中的高度和宽度约束。
+- [`features/dashboard-fixed-sidebar-layout.md`](features/dashboard-fixed-sidebar-layout.md)：Dashboard 固定侧栏、右侧独立滚动、Flex 约束，以及旧 Docker 镜像排查与六页真实 Chrome 滚动验证。
 
 ## 后续文档约定
 

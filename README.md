@@ -34,12 +34,15 @@ V3:Multi-Agent + Workflow（后期）
 
 验收收尾：
 
-- Prompt、History、用户管理和系统统计已通过本地 Docker HTTP/Server Action 全链路验证；Dashboard 固定侧栏已完成代码调整，仍待真实浏览器视觉检查和公网发布验证
+- 2026-09-09 本地新增收尾：旧 JWT 的最新角色同步、中文输入法保护、SSE 完成确认与离页取消、顶部搜索、个人 Prompt 选用与会话关联；已通过本地浏览器集成，待本轮提交发布
+- 已准备本地独立 ADMIN/USER 演示账号、四条知识和一条 Prompt，见 [`人工演示步骤`](docs/acceptance/manual-demo.md)；按用户要求不制作 PPT 或录屏
+
+- Prompt、History、用户管理和系统统计已通过本地 Docker HTTP/Server Action 验证；固定侧栏已通过六页真实 Chrome 滚动检查。本轮新增修复的验证边界见 [`验证记录`](docs/acceptance/verification-2026-09-09.md)
 - Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
 - 强制联网修复已在 Render 公网通过：持续 SSE、网页引用、`done` 和最终回答落库均正常；Pro + 深度思考也已实测
 - PostgreSQL 用户/全站两级每日聊天配额已上线；默认用户上限的 200→429、`Retry-After` 及重新部署后计数保留均已实测
 - 保存账号、Knowledge 和 Conversation 后重新部署同一 SHA，Session 与全部记录仍可读取，证明数据不依赖容器文件系统
-- GitHub Actions 的 `11e29e5` 远程运行已由用户在 Actions 页面确认绿色
+- `bcbf877` 的 GitHub Actions 已成功，Render 已 live；本轮未提交的新增修复仍需单独发布
 
 ## 当前公网演示：Render Free + Neon Free
 

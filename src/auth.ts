@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
+import { loginSchema } from "@/lib/validators/auth";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -14,8 +15,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: {},
       },
       async authorize(credentials) {
-        const email = credentials.email as string;
-        const password = credentials.password as string;
+        const parsed = loginSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+        const { email, password } = parsed.data;
 
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return null;
@@ -31,9 +33,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
         token.id = user.id;
       }
+      // JWT 只证明身份。每次服务端认证都读取当前权限，降权后旧 Cookie 也不能继续越权。
+      if (typeof token.id !== "string") return null;
+      const currentUser = await prisma.user.findUnique({
+        where: { id: token.id },
+        select: { role: true },
+      });
+      if (!currentUser) return null;
+      token.role = currentUser.role;
       return token;
     },
     async session({ session, token }) {

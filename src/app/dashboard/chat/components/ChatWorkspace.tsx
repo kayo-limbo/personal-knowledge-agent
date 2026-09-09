@@ -5,12 +5,14 @@ import { ConversationSidebar } from "./ConversationSidebar";
 import { ChatMessages } from "./ChatMessages";
 import { ChatComposer } from "./ChatComposer";
 import { useActiveMessages, useChatStore } from "@/app/store/chat-store";
-import type { ChatBootstrap, ChatStreamEvent } from "@/app/dashboard/chat/types";
+import type { ChatBootstrap } from "@/app/dashboard/chat/types";
+import { consumeChatSse } from "@/lib/chat-stream";
 import type { DeepSeekModel, DeepSeekThinkingMode } from "@/lib/deepseek-models";
 import type { WebSearchMode } from "@/lib/web-search-config";
 
 interface ChatWorkspaceProps {
   bootstrap: ChatBootstrap;
+  prompts: { id: string; title: string }[];
   initialModel: DeepSeekModel;
   initialConversationId?: string;
 }
@@ -25,42 +27,9 @@ async function readError(response: Response): Promise<string> {
   }
 }
 
-/**
- * fetch 也能读取 SSE。因为这里需要 POST 消息，不能使用只支持 GET 的 EventSource。
- * buffer 用来保存“半个事件”，直到收到两个换行符才解析一帧。
- */
-async function consumeSse(
-  response: Response,
-  onEvent: (event: ChatStreamEvent) => void
-) {
-  if (!response.body) throw new Error("浏览器没有收到流式响应");
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    let boundary = buffer.indexOf("\n\n");
-    while (boundary >= 0) {
-      const frame = buffer.slice(0, boundary);
-      buffer = buffer.slice(boundary + 2);
-      const data = frame
-        .split("\n")
-        .filter((line) => line.startsWith("data:"))
-        .map((line) => line.slice(5).trimStart())
-        .join("\n");
-      if (data) onEvent(JSON.parse(data) as ChatStreamEvent);
-      boundary = buffer.indexOf("\n\n");
-    }
-  }
-}
-
-export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }: ChatWorkspaceProps) {
+export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConversationId }: ChatWorkspaceProps) {
   const [input, setInput] = useState("");
+  const [newPromptId, setNewPromptId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<DeepSeekModel>(initialModel);
   const [thinkingMode, setThinkingMode] = useState<DeepSeekThinkingMode>("disabled");
@@ -90,7 +59,13 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
       setMessages(id, list);
     });
     setActiveConversation(initialConversationId ?? bootstrap.conversations[0]?.id ?? null);
-  }, [bootstrap, initialConversationId, reset, setActiveConversation, setConversations, setMessages]);
+    return () => {
+      const controller = abortRef.current;
+      abortRef.current = null;
+      controller?.abort();
+      setStreaming(false);
+    };
+  }, [bootstrap, initialConversationId, reset, setActiveConversation, setConversations, setMessages, setStreaming]);
 
   function startNewConversation() {
     setError(null);
@@ -99,9 +74,12 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
 
   async function sendMessage() {
     const content = input.trim();
-    if (!content || isStreaming) return;
+    if (!content || isStreaming || abortRef.current) return;
 
     const previousConversationId = activeConversationId;
+    const selectedPromptId = previousConversationId
+      ? conversations.find(item => item.id === previousConversationId)?.promptId ?? null
+      : newPromptId || null;
     const controller = new AbortController();
     abortRef.current = controller;
     setInput("");
@@ -117,6 +95,8 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversationId: previousConversationId ?? undefined,
+          // 续聊由服务器解析关联，避免删除模板后旧客户端提交过期 id。
+          promptId: previousConversationId ? undefined : selectedPromptId,
           content,
           model,
           thinkingMode,
@@ -126,6 +106,7 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
       });
 
       if (!response.ok) throw new Error(await readError(response));
+      if (abortRef.current !== controller) return;
 
       const responseConversationId = response.headers.get("X-Conversation-Id");
       const userMessageId = response.headers.get("X-User-Message-Id");
@@ -142,6 +123,7 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
       const existing = conversations.find((item) => item.id === responseConversationId);
       upsertConversation({
         id: responseConversationId,
+        promptId: response.headers.get("X-Prompt-Id") || null,
         title: encodedTitle ? decodeURIComponent(encodedTitle) : existing?.title ?? "新对话",
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
@@ -161,21 +143,16 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
         isStreaming: true,
       });
 
-      await consumeSse(response, (event) => {
+      await consumeChatSse(response, (event) => {
+        if (abortRef.current !== controller) return;
         if (event.type === "delta") {
           appendToMessage(responseConversationId, responseAssistantMessageId, event.text);
         } else if (event.type === "tool") {
           upsertToolCall(responseConversationId, responseAssistantMessageId, event.toolCall);
-        } else if (event.type === "error") {
-          setError(event.message);
-          appendToMessage(
-            responseConversationId,
-            responseAssistantMessageId,
-            `> ⚠️ ${event.message}`
-          );
         }
       });
     } catch (caught: unknown) {
+      if (abortRef.current !== controller) return;
       const stopped = caught instanceof DOMException && caught.name === "AbortError";
       const message = stopped
         ? "已停止生成"
@@ -188,12 +165,14 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
         appendToMessage(conversationId, assistantMessageId, `> ⚠️ ${message}`);
       }
     } finally {
-      if (conversationId && assistantMessageId) {
-        finalizeMessage(conversationId, assistantMessageId);
-      } else {
-        setStreaming(false);
+      if (abortRef.current === controller) {
+        if (conversationId && assistantMessageId) {
+          finalizeMessage(conversationId, assistantMessageId);
+        } else {
+          setStreaming(false);
+        }
+        abortRef.current = null;
       }
-      abortRef.current = null;
     }
   }
 
@@ -211,6 +190,18 @@ export function ChatWorkspace({ bootstrap, initialModel, initialConversationId }
         onNew={startNewConversation}
       />
       <div className="flex min-w-0 flex-1 flex-col">
+        {prompts.length > 0 && (
+          <label className="flex shrink-0 items-center gap-3 border-b bg-white px-5 py-2 text-sm">
+            <span>Prompt</span>
+            <select aria-label="选择聊天 Prompt" className="min-w-0 flex-1 rounded-lg border px-2 py-1" disabled={isStreaming || !!activeConversationId}
+              value={activeConversationId ? conversations.find(item => item.id === activeConversationId)?.promptId ?? "" : newPromptId}
+              onChange={event => setNewPromptId(event.target.value)}>
+              <option value="">默认知识助手</option>
+              {prompts.map(prompt => <option key={prompt.id} value={prompt.id}>{prompt.title}</option>)}
+            </select>
+            <span className="text-xs text-muted-foreground">新建会话可切换</span>
+          </label>
+        )}
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ChatMessages messages={messages} model={model} thinkingMode={thinkingMode} />
         </div>

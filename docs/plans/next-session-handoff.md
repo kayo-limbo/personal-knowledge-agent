@@ -1,90 +1,75 @@
 # 2026-09-09 下一会话交接
 
-验收截止日期：**2026-09-13**。
+验收截止日期：2026-09-13。开始工作先阅读 AGENTS.md、roadmap、README、docs/README.md，并运行 git status 与 git log。本文记录当前状态，不根据旧会话重复实现已完成内容。
 
-这是一份短期状态快照，用于新对话快速恢复上下文。长期范围、架构与完成记录仍以 `summer-assessment-roadmap.md`、README 和各功能文档为准；开始工作前必须再运行 Git 命令确认真实状态。
+## 用户最新选择
 
-## 1. 新对话首先阅读和检查
+- 完成验收范围内剩余代码和固定演示数据。
+- 不做 PPT，不录视频，用户人工展示项目。
+- 不扩展 MCP、Multi-Agent、Workflow、向量数据库、移动端抽屉或多环境运维。
+- 不擅自 commit 或 push；用户负责 push。
 
-1. 完整阅读根目录 `AGENTS.md`。
-2. 阅读 `docs/plans/summer-assessment-roadmap.md`。
-3. 阅读 `README.md` 和 `docs/README.md`。
-4. 阅读目标功能相关的 `docs/features/*.md`。
-5. 修改 Next.js 代码前，阅读 `node_modules/next/dist/docs/` 中对应的 Next.js 16 本地文档。
-6. 运行：
+## 必须保留的修改
 
-```bash
-git status --short --branch
-git log -5 --oneline
-```
-
-## 2. 必须保护的本地修改
-
-以下两处是用户原有、尚未提交的修改，不得覆盖，也不得混入其他功能提交：
+以下两处为用户原有 Knowledge 修改，不能覆盖或混入本轮提交：
 
 ```text
 src/app/dashboard/knowledge/types.ts
 src/lib/services/knowledge.service.ts
 ```
 
-任何提交前都要使用 `git diff --cached --name-only` 再检查暂存范围。
+本轮前后哈希相同：types.ts 为 5B3090B6AEFD0DAEE30DD00AF1DB3E1520540E82FF84A1AFBBFF5390500541ED；service 为 C03E0D0E2FD2043AA70CD08077B5197546B9F829CA521C58CCE015B0146ED50A。
 
-## 3. 当前已经完成
+## Git 与公网
 
-- 登录注册、bcrypt、NextAuth JWT Session、ADMIN/USER/GUEST 角色权限与 `userId` 数据隔离。
-- Knowledge CRUD、DeepSeek Flash/Pro、普通/深度思考、SSE、停止生成、Markdown 和 PostgreSQL 会话持久化。
-- 固定知识检索与引用、`searchKnowledge` Tool Calling、有限 Agent 循环、超时、取消、错误回填。
-- DeepSeek 官方受控联网搜索及网页引用。
-- PostgreSQL Prisma migration、`adapter-pg`、连接池、幂等 seed 和每日聊天配额。
-- Next.js standalone Dockerfile、Docker Compose、健康检查、命名 volume 和 GitHub Actions 基础 CI。
-- Render Free Singapore Docker + Neon Free Singapore PostgreSQL 实际公网方案；Vercel 只保留为未通过当前网络可达性验收的历史方案。
-- Prompt 用户隔离 CRUD、历史记录搜索/重命名/删除/继续对话、管理员用户角色管理和系统统计。
-- Dashboard 固定左侧导航、固定顶部区域、右侧长内容独立滚动。
+- 当前 HEAD：bcbf877，用户已 push。
+- GitHub Actions [34253079924](https://github.com/kayo-limbo/personal-knowledge-agent/actions/runs/34253079924) 已 success。
+- Render live 部署 dep-dag3qch594qs73foe0fg，对应 bcbf877bc3f28f0f9e2633ee1bcf823f54fd7d81；公网健康检查曾返回 200、database reachable。
+- 本轮新增代码和文档尚未提交，不能声称这些改动已在 Render 上线。没有新 migration。
+- Render 自动部署关闭，用户提交并 push 后再核对 CI，按 SHA 手动部署。
 
-## 4. 已验证与尚未验证的边界
+## 本轮完成
 
-已验证：
+1. 定位并修复本地旧 Docker 镜像导致固定侧栏代码未生效。六页真实 Chrome 长内容滚动通过。
+2. 认证每次读取数据库最新角色，旧 Cookie 降权后不能继续调用管理员 Action；登录输入增加运行时校验。
+3. 中文输入法 Enter 保护、SSE 业务 done 确认、断流提示、离页取消和旧请求回调隔离。
+4. 顶部知识库/对话标题搜索入口，复用现有检索页面。
+5. 新会话可选择个人 Prompt，关联 Conversation，续聊沿用；服务端重新检查归属；删除模板解除关联。公开意向明确暂不分享。
+6. 固定本地演示数据：独立 ADMIN 和 USER，三条星河项目知识、一条隔离笔记和一条模板。
+7. 人工演示步骤、功能学习文档及可重复浏览器回归脚本。
 
-- 本次固定侧栏完成后，27/27 自动测试、ESLint、TypeScript 和 Next.js 16.2.10 生产构建全部通过。
-- Prompt、History、用户角色与统计已通过本地 Docker HTTP/Server Action 全链路验证。
-- 本地 Docker 环境的 DeepSeek Flash 最小真实流式请求成功，API Key 仅保存在被 Git 忽略的本地环境文件中。
-- 当前公网旧版本已验证登录注册、Knowledge 隔离、知识/联网 Agent、SSE、消息与配额持久化以及重新部署后数据保留。
+## 验证与运行方式
 
-尚未验证：
+31 项测试、Lint、类型检查和 Docker 生产构建通过。scripts/verify-acceptance.mjs 已验证旧 Cookie 权限、Prompt CRUD/越权、真实 DeepSeek 模板回答及落库、Markdown、IME、模拟断流/停止/离页 Abort、顶部搜索和模板删除关联。异常交互样本使用浏览器受控响应，不能说它们都是公网真实网络故障测试。
 
-- 最新管理页面和固定侧栏尚未在真实浏览器完成视觉回归。
-- 最新本地提交尚未 push，因此 GitHub Actions 和 Render 公网仍不是这批最新代码。
+本地运行使用 Compose；宿主机 .env 仍可能有旧 SQLite 地址，不直接 npm run dev。执行：
 
-本机环境提醒：`.env.local` 当前没有 `DATABASE_URL`，`.env` 中仍是迁移前的 SQLite `file:` 地址。直接运行宿主机 `npm run dev` 或不覆盖环境变量的 build 会触发“必须使用 postgresql 协议”。本次生产构建使用与 CI 同类的无敏感 PostgreSQL 占位 URL，只验证编译且没有连接数据库。Docker Compose 使用被 Git 忽略的 `.env.docker`，已经是 PostgreSQL 配置。若以后要直接运行宿主机开发服务器，应自行在 `.env.local` 写入可由宿主机访问的真实 PostgreSQL URL，不要把连接串发送到聊天或提交 Git。
-
-## 5. 当前 Git 与发布关系
-
-交接文件创建前，本地 `main` 比 `origin/main` 领先 2 个提交：
-
-```text
-62c6a13 feat(dashboard): 补齐管理与历史功能闭环
-69f8555 fix(deploy): 修复本地 Compose 认证并记录公网验收
+```bash
+docker compose --env-file .env.docker up --build -d app
+node scripts/verify-acceptance.mjs
 ```
 
-固定侧栏及本交接文档应作为新的独立界面提交；实际提交号以 `git log -5 --oneline` 为准。用户负责 push，助手不要擅自 push。Render 自动部署已关闭，push 后还需要在 Render 控制台按最新 commit 手动部署。
+回归脚本仅连 localhost，创建随机临时用户并按精确 ID 清理；每次完整执行包含一次真实 DeepSeek 请求，全站配额保留。固定演示账号与数据不会被清理。
 
-## 6. 下一步只做这些
+## 人工演示数据
 
-1. 在真实浏览器登录 ADMIN，检查所有 Dashboard 页面和长内容滚动，尤其确认左侧导航不移动。
-2. 只暂存固定侧栏、文档索引、README、roadmap、AGENTS 和本交接文件，排除两处 Knowledge 修改。
-3. 创建一个中文界面提交，然后由用户 push。
-4. 在 GitHub Actions 确认最新提交绿色。
-5. 在 Render 控制台手动部署最新 commit，随后公网回归六个导航页面、Prompt CRUD、历史续聊、角色管理、统计与 AI 流式对话。
-6. 准备固定演示账号/数据、5—10 分钟演示脚本、PPT 和备用录屏。
-7. 用验收现场同类网络测试 Render 冷启动、Markdown 显示和停止生成按钮。
+访问 http://localhost:3000。账号及随机密码保存在被 Git 忽略的 .env.acceptance-demo.json，只在本地编辑器查看。账号：summer-assessment@example.com（ADMIN）、summer-viewer@example.com（USER）。已验证两者登录和知识隔离。
 
-不要新增 MCP、Multi-Agent、Workflow、Kubernetes、Redis、向量数据库、自动 CD 或多环境。
+`node scripts/prepare-demo.mjs` 可幂等补充本地固定数据，不覆盖同名知识、模板或密码，不调用 AI、不录屏、不连接 Neon。内容与问题见 [人工演示步骤](../acceptance/manual-demo.md)。
 
-## 7. 常用网址
+## 下一步
 
-- 公网应用：https://personal-knowledge-agent.onrender.com
-- Render Web Service：https://dashboard.render.com/web/srv-daeqsdvqj5pc73aj0h80
-- Neon 控制台：https://console.neon.tech/
-- GitHub Actions：https://github.com/kayo-limbo/personal-knowledge-agent/actions
+1. 审阅本轮改动，按人工演示文档中的明确 git add 范围提交，排除两处 Knowledge 文件和所有环境文件。
+2. 用户 push 后检查对应 CI，手动部署 Render 新 SHA。
+3. 完成新版本公网登录后的功能/视觉回归，并检查现场同类网络和冷启动。
+4. 用户按人工步骤完成一次固定问答，保留真实回答用于现场备用。PPT 和录像已取消。
 
-不要在聊天、截图、Git 提交或日志中暴露 `DATABASE_URL`、`DIRECT_URL`、数据库密码、`AUTH_SECRET` 或 `DEEPSEEK_API_KEY`。
+本地固定数据尚未导入 Neon；公网演示需要另行明确对应账号和数据，不能自动执行生产 seed。
+
+常用网址：
+
+- https://personal-knowledge-agent.onrender.com
+- https://dashboard.render.com/web/srv-daeqsdvqj5pc73aj0h80
+- https://github.com/kayo-limbo/personal-knowledge-agent/actions
+
+不要输出或提交 DATABASE_URL、DIRECT_URL、AUTH_SECRET、DEEPSEEK_API_KEY 或演示密码。
