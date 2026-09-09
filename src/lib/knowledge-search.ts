@@ -35,6 +35,8 @@ export interface KnowledgeSearchCandidate {
   tags: string | null;
   source: string | null;
   updatedAt: Date;
+  /** PostgreSQL 全文检索的相关度；关键词召回的候选可以没有这个字段。 */
+  fullTextRank?: number;
 }
 
 export interface KnowledgeSearchResult {
@@ -83,11 +85,18 @@ export function createKnowledgeSearchWhere(userId: string, keywords: string[]) {
   return {
     userId,
     OR: keywords.flatMap((keyword) => [
-      { title: { contains: keyword } },
-      { content: { contains: keyword } },
-      { tags: { contains: keyword } },
+      { title: { contains: keyword, mode: "insensitive" as const } },
+      { content: { contains: keyword, mode: "insensitive" as const } },
+      { tags: { contains: keyword, mode: "insensitive" as const } },
     ]),
   };
+}
+
+/** PostgreSQL simple 词典适合英文和数字；中文继续由二元关键词召回负责。 */
+export function extractFullTextTerms(keywords: string[]): string[] {
+  return keywords
+    .filter((keyword) => /^[a-z0-9_-]+$/iu.test(keyword))
+    .slice(0, 12);
 }
 
 function parseTags(tags: string | null): string[] {
@@ -105,7 +114,7 @@ function fieldScore(value: string | null, keyword: string, weight: number): numb
 }
 
 function scoreCandidate(candidate: KnowledgeSearchCandidate, keywords: string[]): number {
-  return keywords.reduce(
+  const keywordScore = keywords.reduce(
     (score, keyword) =>
       score +
       fieldScore(candidate.title, keyword, 8) +
@@ -114,6 +123,13 @@ function scoreCandidate(candidate: KnowledgeSearchCandidate, keywords: string[])
       fieldScore(candidate.content, keyword, 1),
     0
   );
+  const matchedKeywords = keywords.filter((keyword) =>
+    [candidate.title, candidate.tags, candidate.summary, candidate.content].some((value) =>
+      value?.toLocaleLowerCase().includes(keyword)
+    )
+  ).length;
+  // ts_rank_cd 通常是小数，放大后与字段权重共同排序；覆盖更多查询词也应优先。
+  return keywordScore + matchedKeywords * 4 + (candidate.fullTextRank ?? 0) * 120;
 }
 
 function createExcerpt(content: string, keywords: string[], maxCharacters: number): string {

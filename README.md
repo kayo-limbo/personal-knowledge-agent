@@ -7,7 +7,7 @@ Personal Knowledge Agent
 技术栈：Next.js 16 + React 19 + TypeScript + TailwindCSS + Zustand + Prisma + PostgreSQL + NextAuth
 
 V1 目标:登录/RBAC + Chat(SSE流式+Markdown) + Prompt管理 + Knowledge CRUD + History + Tool Calling(调用自己的 Knowledge Search)
-V2:文件上传解析 + MCP + 更多工具
+V2:文件上传解析与混合检索（已完成）；MCP 与更多工具延期
 V3:Multi-Agent + Workflow（后期）
 
 ## 当前进度
@@ -19,7 +19,8 @@ V3:Multi-Agent + Workflow（后期）
 - Dashboard 数据概览
 - DeepSeek V4 Flash/Pro 多模型选择、普通/深度思考模式、SSE 流式输出和会话历史持久化
 - Knowledge 页面、Server Action、Service 和 REST API 的 CRUD
-- 固定 `searchKnowledge` 关键词检索、知识上下文注入和可持久化引用来源
+- PDF/TXT/MD 文件导入、服务端纯文本提取、可控分块和文件来源元数据
+- 固定 `searchKnowledge` 中英文关键词 + PostgreSQL 英文全文混合检索、知识上下文注入和可持久化引用来源（不是向量检索）
 - DeepSeek `tool_use/tool_result`、最多 4 轮/3 次工具调用的 Agent 循环与实时工具状态
 - DeepSeek 官方 Web Search，支持自动/强制/禁止三档、跨轮工具控制和网页来源链接（上游内部搜索次数不是硬保证）
 - Prisma PostgreSQL 数据模型、`adapter-pg`、初始 migration、常用索引和幂等种子数据
@@ -36,6 +37,7 @@ V3:Multi-Agent + Workflow（后期）
 
 - 2026-09-09 本地新增收尾：旧 JWT 的最新角色同步、中文输入法保护、SSE 完成确认与离页取消、顶部搜索、个人 Prompt 选用与会话关联；已通过本地浏览器集成，待本轮提交发布
 - 已准备本地独立 ADMIN/USER 演示账号、四条知识和一条 Prompt，见 [`人工演示步骤`](docs/acceptance/manual-demo.md)；按用户要求不制作 PPT 或录屏
+- 已准备可直接人工上传的 [`Polaris 灾备运行手册`](docs/acceptance/demo-import-source.md)，用于展示“文件导入—Agent 检索—引用来源”闭环
 
 - Prompt、History、用户管理和系统统计已通过本地 Docker HTTP/Server Action 验证；固定侧栏已通过六页真实 Chrome 滚动检查。本轮新增修复的验证边界见 [`验证记录`](docs/acceptance/verification-2026-09-09.md)
 - Neon migration 和 Render Free 公网部署已完成；登录、Knowledge 隔离、知识检索、Flash SSE、消息保存与请求取消已实测
@@ -48,7 +50,7 @@ V3:Multi-Agent + Workflow（后期）
 
 访问 [Personal Knowledge Agent](https://personal-knowledge-agent.onrender.com)。实际架构为 **Render Singapore Docker Web Service + Neon AWS Singapore PostgreSQL**；免费额度内托管费用为 0，DeepSeek 调用仍收费。
 
-Vercel 部署虽已 Ready，但当前测试网络访问失败，因此启用了原定 Render 备用方案。不能把当前线上架构写成 Vercel Serverless 或香港 VPS Compose。Render 免费实例空闲会休眠，演示前需要暖机，并保留本地 Compose 与备用录屏。
+Vercel 部署虽已 Ready，但当前测试网络访问失败，因此启用了原定 Render 备用方案。不能把当前线上架构写成 Vercel Serverless 或香港 VPS Compose。Render 免费实例空闲会休眠，演示前需要暖机，并保留本地 Compose 作为人工展示备用环境；按用户要求不录制备用视频。
 
 部署配置、控制台网址、真实验证记录和剩余清单见 [`docs/features/render-neon-free-deployment.md`](docs/features/render-neon-free-deployment.md)。
 
@@ -176,10 +178,11 @@ API Key 只会由 `src/lib/deepseek.ts` 在服务端读取，不会发送给浏�
 5. `src/lib/validators/knowledge.ts`：为什么服务端仍然需要校验输入。
 6. `src/lib/services/knowledge.service.ts`：业务逻辑如何通过 Prisma 读写数据库。
 7. `src/app/api/knowledge/route.ts`：同一套业务逻辑如何暴露为 REST API。
-8. `src/lib/knowledge-search.ts`：理解关键词、排序、片段预算与引用 Prompt。
-9. `src/lib/services/knowledge-search.service.ts`：理解检索如何按 Session 用户隔离。
-10. `src/lib/knowledge-agent.ts`：理解 Tool Schema、参数校验、工具结果回填与有限循环。
-11. `src/app/api/chat/route.ts`：理解 Agent 循环、DeepSeek、SSE 与消息持久化如何串联。
+8. `src/app/api/knowledge/import/route.ts` 与 `src/lib/knowledge-import.ts`：理解文件认证、校验、解析和分块。
+9. `src/lib/knowledge-search.ts`：理解关键词、全文排名、排序、片段预算与引用 Prompt。
+10. `src/lib/services/knowledge-search.service.ts`：理解两路召回如何合并并按 Session 用户隔离。
+11. `src/lib/knowledge-agent.ts`：理解 Tool Schema、参数校验、工具结果回填与有限循环。
+12. `src/app/api/chat/route.ts`：理解 Agent 循环、DeepSeek、SSE 与消息持久化如何串联。
 
 Knowledge 新建流程可以简化为：
 

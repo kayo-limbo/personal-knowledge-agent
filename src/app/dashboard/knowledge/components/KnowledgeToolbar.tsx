@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 import { KnowledgeForm } from "./KnowledgeForm";
+import { KnowledgeImportDialog } from "./KnowledgeImportDialog";
 import { KNOWLEDGE_SOURCES } from "../constants";
 
 export function KnowledgeToolbar() {
@@ -13,6 +14,7 @@ export function KnowledgeToolbar() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState(searchParams.get("query") ?? "");
 
   function updateParams(next: Record<string, string | undefined>) {
@@ -49,9 +51,19 @@ export function KnowledgeToolbar() {
         </select>
       </div>
 
-      <Button onClick={() => setCreateOpen(true)} disabled={isPending}>新建知识条目</Button>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setImportOpen(true)} disabled={isPending}>
+          导入文件
+        </Button>
+        <Button onClick={() => setCreateOpen(true)} disabled={isPending}>新建知识条目</Button>
+      </div>
 
       <KnowledgeForm mode="create" open={createOpen} onClose={() => setCreateOpen(false)} onSuccess={() => router.refresh()} />
+      <KnowledgeImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onSuccess={() => router.refresh()}
+      />
     </div>
   );
 }

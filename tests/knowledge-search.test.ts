@@ -6,6 +6,7 @@ import {
   buildKnowledgeContextPrompt,
   buildKnowledgeSourcesMarkdown,
   createKnowledgeSearchWhere,
+  extractFullTextTerms,
   extractKnowledgeKeywords,
   rankKnowledgeCandidates,
   type KnowledgeSearchCandidate,
@@ -41,9 +42,17 @@ test("数据库条件始终包含当前 Session 的 userId，并搜索标题、�
 
   assert.equal(where.userId, "session-user");
   assert.deepEqual(where.OR, [
-    { title: { contains: "部署" } },
-    { content: { contains: "部署" } },
-    { tags: { contains: "部署" } },
+    { title: { contains: "部署", mode: "insensitive" } },
+    { content: { contains: "部署", mode: "insensitive" } },
+    { tags: { contains: "部署", mode: "insensitive" } },
+  ]);
+});
+
+test("PostgreSQL 全文检索只接收适合 simple 词典的英文和数字词", () => {
+  assert.deepEqual(extractFullTextTerms(["docker", "部署", "next-js", "2026"]), [
+    "docker",
+    "next-js",
+    "2026",
   ]);
 });
 
@@ -58,6 +67,18 @@ test("标题命中优先于正文命中", () => {
 
   assert.equal(results[0]?.id, "title");
   assert.equal(results[0]?.citation, "[知识库 1]");
+});
+
+test("全文排名可以补充关键词字段权重", () => {
+  const results = rankKnowledgeCandidates(
+    [
+      candidate("plain", { content: "Docker 部署" }),
+      candidate("fts", { content: "Docker 部署", fullTextRank: 0.5 }),
+    ],
+    ["docker"]
+  );
+
+  assert.equal(results[0]?.id, "fts");
 });
 
 test("空结果返回空数组", () => {

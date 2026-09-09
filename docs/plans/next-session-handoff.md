@@ -6,7 +6,7 @@
 
 - 完成验收范围内剩余代码和固定演示数据。
 - 不做 PPT，不录视频，用户人工展示项目。
-- 不扩展 MCP、Multi-Agent、Workflow、向量数据库、移动端抽屉或多环境运维。
+- 用户在核心收尾后明确追加文件知识导入与无 Embedding 方案；实现混合文本检索，不扩展 MCP、Multi-Agent、Workflow、向量数据库、移动端抽屉或多环境运维。
 - 不擅自 commit 或 push；用户负责 push。
 
 ## 必须保留的修改
@@ -22,7 +22,7 @@ src/lib/services/knowledge.service.ts
 
 ## Git 与公网
 
-- 当前 HEAD：bcbf877，用户已 push。
+- 当前本地 HEAD：1f27fec，比 origin/main 的 bcbf877 领先 1 个提交；用户尚未 push 该提交。
 - GitHub Actions [34253079924](https://github.com/kayo-limbo/personal-knowledge-agent/actions/runs/34253079924) 已 success。
 - Render live 部署 dep-dag3qch594qs73foe0fg，对应 bcbf877bc3f28f0f9e2633ee1bcf823f54fd7d81；公网健康检查曾返回 200、database reachable。
 - 本轮新增代码和文档尚未提交，不能声称这些改动已在 Render 上线。没有新 migration。
@@ -30,6 +30,7 @@ src/lib/services/knowledge.service.ts
 
 ## 本轮完成
 
+0. 新增 PDF/TXT/MD 文件导入、服务端限制与解析、约 6000 字符分块、上传来源元数据；检索合并中文关键词和 PostgreSQL 英文全文排名，仍明确不是向量检索。人工导入样例位于 `docs/acceptance/demo-import-source.md`。
 1. 定位并修复本地旧 Docker 镜像导致固定侧栏代码未生效。六页真实 Chrome 长内容滚动通过。
 2. 认证每次读取数据库最新角色，旧 Cookie 降权后不能继续调用管理员 Action；登录输入增加运行时校验。
 3. 中文输入法 Enter 保护、SSE 业务 done 确认、断流提示、离页取消和旧请求回调隔离。
@@ -40,7 +41,7 @@ src/lib/services/knowledge.service.ts
 
 ## 验证与运行方式
 
-31 项测试、Lint、类型检查和 Docker 生产构建通过。scripts/verify-acceptance.mjs 已验证旧 Cookie 权限、Prompt CRUD/越权、真实 DeepSeek 模板回答及落库、Markdown、IME、模拟断流/停止/离页 Abort、顶部搜索和模板删除关联。异常交互样本使用浏览器受控响应，不能说它们都是公网真实网络故障测试。
+39 项测试、Lint、类型检查和 Docker 生产构建通过。scripts/verify-acceptance.mjs 已额外验证真实 Chrome 同时导入 Markdown/PDF、Linux standalone 解析、当前账号落库，以及真实 DeepSeek 对导入内容的检索、事实回答、文件引用和持久化。首次容器验证暴露的 canvas/worker 缺失已通过 Next.js 文件追踪配置修复。异常交互样本使用浏览器受控响应，不能说它们都是公网真实网络故障测试。
 
 本地运行使用 Compose；宿主机 .env 仍可能有旧 SQLite 地址，不直接 npm run dev。执行：
 

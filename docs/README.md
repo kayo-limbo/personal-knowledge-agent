@@ -16,6 +16,7 @@
 
 ## 功能讲解
 
+- [`features/file-import-hybrid-knowledge-search.md`](features/file-import-hybrid-knowledge-search.md)：PDF/TXT/MD 服务端解析、资源限制、分块落库、PostgreSQL 全文与中英文关键词混合检索、文件引用及非向量方案边界。
 - [`features/manual-demo-data.md`](features/manual-demo-data.md)：独立本地演示账号、固定知识和模板的幂等准备与隔离验证。
 
 - [`features/chat-prompt-selection.md`](features/chat-prompt-selection.md)：个人模板选用、会话关联、服务端归属校验和删除后的默认行为。
