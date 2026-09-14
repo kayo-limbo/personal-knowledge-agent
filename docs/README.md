@@ -16,6 +16,8 @@
 
 ## 功能讲解
 
+- [`features/dashboard-navigation-loading.md`](features/dashboard-navigation-loading.md)：侧栏真实导航等待状态、各页面加载骨架、无障碍反馈和实际请求耗时排查方法。
+
 - [`features/file-import-hybrid-knowledge-search.md`](features/file-import-hybrid-knowledge-search.md)：PDF/TXT/MD 服务端解析、资源限制、分块落库、PostgreSQL 全文与中英文关键词混合检索、文件引用及非向量方案边界。
 - [`features/manual-demo-data.md`](features/manual-demo-data.md)：独立本地演示账号、固定知识和模板的幂等准备与隔离验证。
 
