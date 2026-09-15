@@ -12,6 +12,14 @@ V3:Multi-Agent + Workflow（后期）
 
 ## 当前进度
 
+### 语义检索升级（2026-09-15）
+
+已新增可选 Embedding + pgvector 混合检索，支持知识变更后索引失效、后台更新、页面补建和效果评测。默认采用百炼 `text-embedding-v4` / 1024 维。没有配置 Key 时保留文本检索。
+
+本轮代码与构建检查已完成；真实数据库、供应商效果及公网发布仍待验证。启用需先执行 pgvector migration，再在服务端配置 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`；不要直接升级未备份的旧 Compose 数据卷。
+
+配置、架构、测试和提交范围见 [Embedding 功能讲解](docs/features/embedding-hybrid-retrieval.md)。
+
 已经可以使用或已经打通：
 
 - Credentials 登录、JWT Session 和角色导航

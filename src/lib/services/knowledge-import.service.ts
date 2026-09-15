@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { scheduleKnowledgeEmbedding } from "./knowledge-embedding.service";
 import type { PreparedKnowledgeFile } from "@/lib/knowledge-import";
 
 /** 解析全部成功后再一次性落库，避免只导入请求中的一部分文件。 */
@@ -12,7 +13,8 @@ export async function savePreparedKnowledgeFiles(
     file.chunks.map((chunk) => ({ ...chunk, userId }))
   );
 
-  await prisma.knowledgeDoc.createMany({ data: rows });
+  const saved = await prisma.knowledgeDoc.createManyAndReturn({ data: rows, select: { id: true } });
+  scheduleKnowledgeEmbedding(userId, saved.map((doc) => doc.id));
   return {
     fileCount: files.length,
     chunkCount: rows.length,

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { listKnowledge } from "@/lib/services/knowledge.service";
 import { KnowledgeToolbar } from "./components/KnowledgeToolbar";
+import { KnowledgeEmbeddingStatus } from "./components/KnowledgeEmbeddingStatus";
 import { KnowledgeTable } from "./components/KnowledgeTable";
 import { EmptyKnowledge } from "./components/EmptyKnowledge";
 import type { KnowledgeSource } from "./types";
@@ -30,6 +31,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
   return (
     <div className="space-y-4">
       <KnowledgeToolbar />
+      <KnowledgeEmbeddingStatus />
       {items.length === 0 ? (
         <EmptyKnowledge />
       ) : (

@@ -1,0 +1,22 @@
+[
+  { "query": "AbortController 的作用是什么？", "expectedIds": ["替换为取消请求笔记ID"] },
+  { "query": "点停止以后怎样让模型别继续生成？", "expectedIds": ["替换为取消请求笔记ID"] },
+  { "query": "离开聊天页面后还能避免继续消耗 token 吗？", "expectedIds": ["替换为取消请求笔记ID"] },
+  { "query": "用户取消回答时服务端要做什么？", "expectedIds": ["替换为取消请求笔记ID"] },
+  { "query": "怎样防止看到别人的知识？", "expectedIds": ["替换为用户隔离笔记ID"] },
+  { "query": "按 Session userId 隔离查询是什么意思？", "expectedIds": ["替换为用户隔离笔记ID"] },
+  { "query": "只把管理员入口藏起来安全吗？", "expectedIds": ["替换为用户隔离笔记ID"] },
+  { "query": "拿到另一位用户的资源编号能读取他的资料吗？", "expectedIds": ["替换为用户隔离笔记ID"] },
+  { "query": "Render 和 Neon 分别运行什么？", "expectedIds": ["替换为部署笔记ID"] },
+  { "query": "重新发布后以前的对话为什么还在？", "expectedIds": ["替换为部署笔记ID"] },
+  { "query": "应用容器删除后资料会丢吗？", "expectedIds": ["替换为部署笔记ID"] },
+  { "query": "项目线上架构是什么？", "expectedIds": ["替换为部署笔记ID"] },
+  { "query": "SSE 为什么需要 buffer？", "expectedIds": ["替换为流式消息笔记ID"] },
+  { "query": "文字一段段显示时怎么避免中文乱码？", "expectedIds": ["替换为流式消息笔记ID"] },
+  { "query": "网络收到的一段数据就是一条完整消息吗？", "expectedIds": ["替换为流式消息笔记ID"] },
+  { "query": "怎么判断回答完成而非网络突然断了？", "expectedIds": ["替换为流式消息笔记ID"] },
+  { "query": "我的资料中记载的银行账户号码是多少？", "expectedIds": [] },
+  { "query": "知识库里有没有记录我的血型？", "expectedIds": [] },
+  { "query": "我的护照什么时候到期？", "expectedIds": [] },
+  { "query": "我昨天午饭吃了什么？", "expectedIds": [] }
+]

@@ -5,11 +5,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 
 <!-- BEGIN:project-learning-rules -->
-# 功能讲解与 Git 提醒
+# 文档与 Git 提醒
 
-- 每完成一个独立功能，都要在 `docs/features/` 下新增或更新一份独立的中文讲解文件，并同步更新 `docs/README.md` 索引。
-- 功能文档至少包含：目标与结果、相关文件职责、数据流、关键代码解释、设计取舍、面试重点、易错点、验证方法和后续改进。
-- 讲解要面向第一次做 Agent 项目的学习者，解释“为什么这样写”，不能只罗列文件名。
+- 用户于 2026-09-15 更新偏好：以后不再自动生成独立的代码解释或功能教学文档；只有用户明确要求时才编写。
+- 必要的运行配置、部署步骤、验证结果与进度交接仍按实际改动维护；无需为每个功能新增 `docs/features/` 文档或索引。
 - 每完成一块功能后，都要明确告诉用户当前改动是否需要提交 Git；需要时给出具体的 `git add` 范围和符合仓库习惯的中文提交说明。
 - 除非用户明确要求提交，否则只提醒并给出命令，不自动创建 Git commit。
 <!-- END:project-learning-rules -->
@@ -48,6 +47,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - 每次只做一个可以单独验证和演示的纵向功能块，不同时引入多个陌生基础设施。
 - 安全边界必须保留：API Key 只在服务端、所有输入运行时校验、所有用户数据查询按 `userId` 隔离、搜索结果视为不可信输入。
-- 每个功能必须有测试或明确的手工验证清单、独立中文讲解文档和 Git 提醒。
+- 每个功能必须有测试或明确的手工验证清单和 Git 提醒；独立中文讲解文档按上方最新用户偏好处理。
 - 面试价值以“能解释设计、取舍、风险和改进”为准，不以使用的工具数量为准。
 <!-- END:summer-assessment-constraints -->

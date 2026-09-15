@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { scheduleKnowledgeEmbedding } from "./knowledge-embedding.service";
 import type { KnowledgeDoc } from "@/app/dashboard/knowledge/types"
 import type {
   KnowledgeFormValues,
@@ -73,7 +74,7 @@ export async function getKnowledgeById(id: string, userId: string): Promise<Know
 }
 
 export async function createKnowledge(userId: string, input: KnowledgeFormValues): Promise<KnowledgeDoc> {
-  return prisma.knowledgeDoc.create({
+  const doc = await prisma.knowledgeDoc.create({
     data: {
       title: input.title,
       content: input.content,
@@ -83,6 +84,8 @@ export async function createKnowledge(userId: string, input: KnowledgeFormValues
       userId,
     },
   });
+  scheduleKnowledgeEmbedding(userId, [doc.id]);
+  return doc;
 }
 
 export async function updateKnowledge(
@@ -93,7 +96,7 @@ export async function updateKnowledge(
   const existing = await getKnowledgeById(id, userId);
   if (!existing) throw new Error("知识条目不存在或无权限");
 
-  return prisma.knowledgeDoc.update({
+  const doc = await prisma.knowledgeDoc.update({
     where: { id },
     data: {
       ...(input.title !== undefined ? { title: input.title } : {}),
@@ -103,6 +106,8 @@ export async function updateKnowledge(
       ...(input.source !== undefined ? { source: input.source } : {}),
     },
   });
+  scheduleKnowledgeEmbedding(userId, [doc.id]);
+  return doc;
 }
 
 export async function deleteKnowledge(id: string, userId: string): Promise<void> {

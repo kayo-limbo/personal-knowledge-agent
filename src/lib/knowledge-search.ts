@@ -159,19 +159,44 @@ export function rankKnowledgeCandidates(
   candidates: KnowledgeSearchCandidate[],
   keywords: string[]
 ): KnowledgeSearchResult[] {
-  const ranked = candidates
+  return formatKnowledgeCandidates(sortKnowledgeCandidates(candidates, keywords), keywords);
+}
+
+export function sortKnowledgeCandidates(candidates: KnowledgeSearchCandidate[], keywords: string[]): KnowledgeSearchCandidate[] {
+  return candidates
     .map((candidate) => ({ candidate, score: scoreCandidate(candidate, keywords) }))
     .filter((item) => item.score > 0)
     .sort(
       (left, right) =>
         right.score - left.score ||
         right.candidate.updatedAt.getTime() - left.candidate.updatedAt.getTime()
-    );
+    ).map(({ candidate }) => candidate);
+}
+
+/** 两路各投一次票；向量命中时使用对应的短原文，避免引用长文开头而遗漏命中段落。 */
+export function fuseKnowledgeCandidates(
+  lexical: KnowledgeSearchCandidate[], semantic: KnowledgeSearchCandidate[],
+): KnowledgeSearchCandidate[] {
+  const fused = new Map<string, { candidate: KnowledgeSearchCandidate; score: number }>();
+  for (const list of [lexical, semantic]) {
+    const seen = new Set<string>();
+    list.forEach((candidate, index) => {
+      if (seen.has(candidate.id)) return;
+      seen.add(candidate.id);
+      const previous = fused.get(candidate.id);
+      fused.set(candidate.id, { candidate, score: (previous?.score ?? 0) + 1 / (60 + index + 1) });
+    });
+  }
+  return [...fused.values()].sort((a, b) => b.score - a.score || a.candidate.id.localeCompare(b.candidate.id))
+    .map(({ candidate }) => candidate);
+}
+
+export function formatKnowledgeCandidates(ranked: KnowledgeSearchCandidate[], keywords: string[]): KnowledgeSearchResult[] {
 
   const results: KnowledgeSearchResult[] = [];
   let usedCharacters = 0;
 
-  for (const { candidate } of ranked) {
+  for (const candidate of ranked) {
     if (results.length >= MAX_KNOWLEDGE_RESULTS) break;
 
     const tags = parseTags(candidate.tags);

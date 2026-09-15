@@ -16,6 +16,8 @@
 
 ## 功能讲解
 
+- [`features/embedding-hybrid-retrieval.md`](features/embedding-hybrid-retrieval.md)：Embedding、pgvector、RRF 混合检索、索引失效与重试、效果评测及待真实环境验证边界。
+
 - [`features/dashboard-navigation-loading.md`](features/dashboard-navigation-loading.md)：侧栏真实导航等待状态、各页面加载骨架、无障碍反馈和实际请求耗时排查方法。
 
 - [`features/file-import-hybrid-knowledge-search.md`](features/file-import-hybrid-knowledge-search.md)：PDF/TXT/MD 服务端解析、资源限制、分块落库、PostgreSQL 全文与中英文关键词混合检索、文件引用及非向量方案边界。

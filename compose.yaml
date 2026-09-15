@@ -2,7 +2,7 @@ name: personal-knowledge-agent
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-personal_knowledge_agent}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -42,6 +42,10 @@ services:
       AUTH_TRUST_HOST: "true"
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-flash}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
+      EMBEDDING_MIN_SIMILARITY: ${EMBEDDING_MIN_SIMILARITY:-0.35}
       CHAT_DAILY_USER_LIMIT: ${CHAT_DAILY_USER_LIMIT:-20}
       CHAT_DAILY_GLOBAL_LIMIT: ${CHAT_DAILY_GLOBAL_LIMIT:-60}
     ports:

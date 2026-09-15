@@ -1,5 +1,17 @@
 # 2026-09-09 下一会话交接
 
+## 2026-09-15 Embedding 最新交接（优先于下方历史记录）
+
+- 用户已明确要求实现 Embedding，原“不扩展向量检索”决定已更新。
+- 实现默认 `text-embedding-v4` / 1024 维的兼容接口、pgvector migration、分块索引、更新失效触发器、租约重试、RRF 混合检索、状态与补建 UI、评测脚本。未配置 Key 时仍使用文本检索。
+- 44 项测试、Lint、类型和生产构建通过；构建需临时 PostgreSQL 地址，因为现有环境有非 PostgreSQL DATABASE_URL，未擅自修改环境文件。
+- Docker Desktop 尝试启动后引擎仍不可用，真实 pgvector 集成测试只写好、未通过运行；CI 已新增隔离 pgvector 服务与 migration/integration 步骤，未 push。
+- 用户尚未选择/配置服务商 Key；已建议百炼，真实中文效果待评测。需要用户在本机 `.env.local` 或控制台配置 Key 和对应地域 base URL，禁止把 Key 发到聊天。
+- 未修改 Neon、未切换本地旧 volume、未提交/部署。Compose 新镜像与旧 volume 的迁移需先备份验证。
+- 本轮保留了原有未提交改动；knowledge.service.ts 仅增补索引安排，提交时该文件及 README/docs 索引用 `git add -p`。
+- 下一步：可用的本机 pgvector 测试库 → migration/integration → Key 配置 → 补建与 20 问评测 → 浏览器验证 → 用户提交/push/CI/部署。
+- 完整说明与提交范围：`../features/embedding-hybrid-retrieval.md`。
+
 验收截止日期：2026-09-13。开始工作先阅读 AGENTS.md、roadmap、README、docs/README.md，并运行 git status 与 git log。本文记录当前状态，不根据旧会话重复实现已完成内容。
 
 ## 用户最新选择

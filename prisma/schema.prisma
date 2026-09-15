@@ -94,7 +94,31 @@ model KnowledgeDoc {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+  embeddingIndex KnowledgeEmbeddingIndex?
+
   @@index([userId, updatedAt])
+}
+
+model KnowledgeEmbeddingIndex {
+  documentId String @id
+  document KnowledgeDoc @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  modelKey String
+  sourceHash String
+  status String
+  claimToken String
+  leaseUntil DateTime @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @db.Timestamp(3)
+  chunks KnowledgeEmbeddingChunk[]
+}
+
+model KnowledgeEmbeddingChunk {
+  documentId String
+  index KnowledgeEmbeddingIndex @relation(fields: [documentId], references: [documentId], onDelete: Cascade)
+  position Int
+  content String
+  embedding Unsupported("vector(1024)")
+
+  @@id([documentId, position])
 }
 
 /// 每日聊天配额桶。既保存用户桶，也保存全站桶；subjectId 不设置外键，
