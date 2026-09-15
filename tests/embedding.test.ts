@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isSameOriginRequest } from "../src/lib/request-origin.ts";
 import {
   EMBEDDING_DIMENSIONS, createEmbeddingChunks, readEmbeddingConfig,
   parseEmbeddingResponse, requestEmbeddings, embeddingDocumentHash,
@@ -13,6 +14,18 @@ const vector = (axis = 0) => Array.from({ length: EMBEDDING_DIMENSIONS }, (_, in
 const config = readEmbeddingConfig({ EMBEDDING_API_KEY: "test-secret", EMBEDDING_BASE_URL: "https://example.test/v1" })!;
 const doc = { title: "取消请求", content: "内容", summary: null, tags: null };
 const candidate = (id: string, content = "内容"): KnowledgeSearchCandidate => ({ ...doc, id, content, source: "manual", updatedAt: new Date(0) });
+
+test("索引写入校验使用公开地址并拒绝跨域、错误协议和缺失 Origin", () => {
+  const request = (origin: string) => new Request("http://localhost:3107/api/knowledge/embeddings", {
+    headers: { origin, host: "127.0.0.1:3107" },
+  });
+  assert.equal(isSameOriginRequest(request("http://127.0.0.1:3107")), true);
+  assert.equal(isSameOriginRequest(request("https://app.example"), "https://app.example"), true);
+  assert.equal(isSameOriginRequest(request("https://external.example"), "https://app.example"), false);
+  assert.equal(isSameOriginRequest(request("http://app.example"), "https://app.example"), false);
+  assert.equal(isSameOriginRequest(request("null")), false);
+  assert.equal(isSameOriginRequest(new Request("https://app.example")), false);
+});
 
 test("缺少 Key 时关闭；拒绝无效地址与阈值；模型空间与 Key 解耦", () => {
   assert.equal(readEmbeddingConfig({}), null);

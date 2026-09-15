@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { readEmbeddingConfig } from "@/lib/embedding";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import { getEmbeddingStatus, rebuildKnowledgeEmbeddings } from "@/lib/knowledge-embedding-index";
 
 export const runtime = "nodejs";
@@ -10,7 +11,7 @@ async function handle(request: Request, rebuild: boolean) {
   const session = await auth();
   if (!session?.user?.id) return Response.json({ error: "未登录" }, { status: 401 });
   if (session.user.role === "GUEST") return Response.json({ error: "访客无权管理知识索引" }, { status: 403 });
-  if (rebuild && request.headers.get("origin") !== new URL(request.url).origin) {
+  if (rebuild && !isSameOriginRequest(request, process.env.AUTH_URL)) {
     return Response.json({ error: "请求来源无效" }, { status: 403 });
   }
   try {
