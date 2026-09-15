@@ -3,7 +3,7 @@ import test from "node:test";
 import { isSameOriginRequest } from "../src/lib/request-origin.ts";
 import {
   EMBEDDING_DIMENSIONS, createEmbeddingChunks, readEmbeddingConfig,
-  parseEmbeddingResponse, requestEmbeddings, embeddingDocumentHash,
+  parseEmbeddingResponse, requestEmbeddings, embeddingDocumentHash, describeEmbeddingFailure,
 } from "../src/lib/embedding.ts";
 import {
   formatKnowledgeCandidates, fuseKnowledgeCandidates, MAX_KNOWLEDGE_CONTEXT_CHARACTERS,
@@ -14,6 +14,13 @@ const vector = (axis = 0) => Array.from({ length: EMBEDDING_DIMENSIONS }, (_, in
 const config = readEmbeddingConfig({ EMBEDDING_API_KEY: "test-secret", EMBEDDING_BASE_URL: "https://example.test/v1" })!;
 const doc = { title: "取消请求", content: "内容", summary: null, tags: null };
 const candidate = (id: string, content = "内容"): KnowledgeSearchCandidate => ({ ...doc, id, content, source: "manual", updatedAt: new Date(0) });
+
+test("索引错误区分网络权限和供应商状态，日志不包含凭据与资料正文", () => {
+  assert.deepEqual(describeEmbeddingFailure(new TypeError("fetch failed", { cause: { code: "EACCES" } })), { category: "network_access_denied", code: "EACCES" });
+  assert.deepEqual(describeEmbeddingFailure(new Error("Embedding 请求失败（HTTP 429）")), { category: "provider_http", httpStatus: 429 });
+  assert.deepEqual(describeEmbeddingFailure(new Error("secret-key and private document", { cause: { code: "secret-key" } })), { category: "unknown" });
+  assert.deepEqual(describeEmbeddingFailure(new DOMException("private content", "TimeoutError")), { category: "cancelled_or_timeout" });
+});
 
 test("索引写入校验使用公开地址并拒绝跨域、错误协议和缺失 Origin", () => {
   const request = (origin: string) => new Request("http://localhost:3107/api/knowledge/embeddings", {

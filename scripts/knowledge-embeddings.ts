@@ -1,4 +1,4 @@
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { PrismaClient } from "../src/generated/prisma/client.ts";
@@ -7,7 +7,7 @@ import { readEmbeddingConfig } from "../src/lib/embedding.ts";
 import { getEmbeddingStatus, rebuildKnowledgeEmbeddings, searchKnowledgeVectors } from "../src/lib/knowledge-embedding-index.ts";
 import { retrieveKnowledge } from "../src/lib/knowledge-retrieval.ts";
 
-loadEnvConfig(process.cwd());
+nextEnv.loadEnvConfig(process.cwd());
 const [mode, userId, evaluationPath] = process.argv.slice(2);
 if (!["status", "rebuild", "evaluate"].includes(mode) || !userId || (mode === "evaluate" && !evaluationPath)) {
   throw new Error("用法：npm run knowledge:embeddings -- status|rebuild|evaluate <userId> [问题集.json]");

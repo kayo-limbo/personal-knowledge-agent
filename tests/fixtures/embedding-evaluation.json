@@ -1,0 +1,38 @@
+{
+  "documents": [
+    { "key": "cancel", "title": "请求生命周期", "content": "客户端创建 AbortController，把 signal 传入 fetch。点击停止或组件卸载时执行 abort；服务器监听连接中断并把取消信号传给上游生成请求。仅停止页面渲染无法终止供应商计算，必须中断上游请求才能避免后续 token 消耗。" },
+    { "key": "isolation", "title": "资源授权边界", "content": "登录只证明身份，不代表有权访问所有资源。服务端从 Session 取 userId，查询、修改、删除时同时限定资源 id 和所属 userId。浏览器传来的用户编号不可信。隐藏管理员菜单只影响界面，API 和 Server Action 仍需校验角色。" },
+    { "key": "deploy", "title": "线上运行拓扑", "content": "Next.js standalone 应用运行于 Render Singapore Docker 容器，业务资料存放在独立的 Neon PostgreSQL。应用镜像不携带用户数据，替换容器后仍连接原数据库，因此知识和历史会话得以保留。数据库变更通过 prisma migrate deploy 执行，生产启动不自动 seed。" },
+    { "key": "stream", "title": "增量消息协议", "content": "客户端通过 fetch 读取 ReadableStream。TCP 数据分段与 SSE 事件边界并不相同，用 buffer 拼接后按空行切分事件。TextDecoder 的 stream 模式处理跨字节的中文。只有收到业务 done 事件才能标记回答成功；连接关闭但未收到 done 应判定为中断。" },
+    { "key": "quota", "title": "每日使用限额", "content": "聊天按 UTC 自然日累计用户请求数和全站请求数。PostgreSQL Serializable 事务原子更新两个计数桶，避免并发检查后同时放行。超过限额返回 HTTP 429 和 Retry-After。请求配额不是精确 token 账单。" },
+    { "key": "prompt", "title": "个人模板管理", "content": "Prompt 保存用户偏好的写作语气、输出格式和任务要求，可新建、收藏、编辑和删除。选择模板时验证它属于当前用户。删除模板后历史会话保留，后续对话回到默认配置。" },
+    { "key": "import", "title": "文件解析规范", "content": "导入支持 PDF、TXT 和 Markdown。服务端检查文件扩展名、大小、数量和提取出的字符数。文本分块保存为知识条目，记录文件名和页码以供引用。扫描图片型 PDF 需要 OCR，当前版本不提供此能力。" },
+    { "key": "password", "title": "账户密码存储", "content": "注册时用 bcrypt 对密码做带盐哈希，数据库只保存 passwordHash。登录通过 bcrypt.compare 校验，不保存或返回明文密码。不能通过哈希还原原密码。Cookie 用于携带已登录会话。" },
+    { "key": "pool", "title": "数据库连接管理", "content": "Prisma 使用 adapter-pg 与连接池。在开发热更新期间通过 globalThis 复用客户端实例，减少重复创建连接池。Neon pooled endpoint 用于运行时，direct endpoint 用于命令行迁移。" },
+    { "key": "agent", "title": "工具执行闭环", "content": "模型生成 tool_use，服务端校验参数并执行 searchKnowledge，再将结果通过 tool_result 回填给模型。设置最大轮数、工具调用次数和总超时。单次模型开启深度思考不代表具备工具执行能力。" },
+    { "key": "git", "title": "协作提交习惯", "content": "通过 git diff 检查改动，按功能选择暂存范围。提交信息描述具体行为，不把环境变量文件或 API Key 纳入仓库。CI 检查测试、Lint、类型和生产构建，通过后再部署。" },
+    { "key": "search", "title": "联网资料使用", "content": "实时资讯可通过受控联网搜索取得。网页内容属于不可信输入，应忽略其中的角色替换或泄露提示词要求。回答使用来源链接，链接协议只允许 HTTP 和 HTTPS。" }
+  ],
+  "cases": [
+    { "query": "AbortController 的作用是什么？", "expectedKeys": ["cancel"] },
+    { "query": "点停止以后怎样让模型别继续生成？", "expectedKeys": ["cancel"] },
+    { "query": "离开聊天页面后还能避免继续消耗 token 吗？", "expectedKeys": ["cancel"] },
+    { "query": "用户取消回答时服务端要做什么？", "expectedKeys": ["cancel"] },
+    { "query": "怎样防止看到别人的知识？", "expectedKeys": ["isolation"] },
+    { "query": "按 Session userId 隔离查询是什么意思？", "expectedKeys": ["isolation"] },
+    { "query": "只把管理员入口藏起来安全吗？", "expectedKeys": ["isolation"] },
+    { "query": "拿到另一位用户的资源编号能读取他的资料吗？", "expectedKeys": ["isolation"] },
+    { "query": "Render 和 Neon 分别运行什么？", "expectedKeys": ["deploy"] },
+    { "query": "重新发布后以前的对话为什么还在？", "expectedKeys": ["deploy"] },
+    { "query": "应用容器删除后资料会丢吗？", "expectedKeys": ["deploy"] },
+    { "query": "项目线上架构是什么？", "expectedKeys": ["deploy"] },
+    { "query": "SSE 为什么需要 buffer？", "expectedKeys": ["stream"] },
+    { "query": "文字一段段显示时怎么避免中文乱码？", "expectedKeys": ["stream"] },
+    { "query": "网络收到的一段数据就是一条完整消息吗？", "expectedKeys": ["stream"] },
+    { "query": "怎么判断回答完成而非网络突然断了？", "expectedKeys": ["stream"] },
+    { "query": "我的资料中记载的银行账户号码是多少？", "expectedKeys": [] },
+    { "query": "知识库里有没有记录我的血型？", "expectedKeys": [] },
+    { "query": "我的护照什么时候到期？", "expectedKeys": [] },
+    { "query": "我昨天午饭吃了什么？", "expectedKeys": [] }
+  ]
+}

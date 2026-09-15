@@ -1,0 +1,637 @@
+{
+  "evaluatedAt": "2026-09-15T13:27:55.226Z",
+  "model": "text-embedding-v4",
+  "dimensions": 1024,
+  "minSimilarity": 0.35,
+  "corpus": "公开合成的 12 条知识，16 道有答案问题与 4 道无答案问题；不能代表真实用户资料整体质量",
+  "requests": 32,
+  "tokens": 1020,
+  "averageMilliseconds": 217,
+  "lexical": {
+    "hitAt1": 0.625,
+    "hitAt5": 0.875,
+    "mrrAt5": 0.7395833333333333,
+    "emptyCorrect": 2,
+    "unanswerableCount": 4
+  },
+  "hybrid": {
+    "hitAt1": 0.8125,
+    "hitAt5": 1,
+    "mrrAt5": 0.8802083333333334,
+    "emptyCorrect": 1,
+    "unanswerableCount": 4
+  },
+  "report": [
+    {
+      "query": "AbortController 的作用是什么？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "milliseconds": 307,
+      "vectorMilliseconds": 304,
+      "lexical": {
+        "keys": [
+          "cancel"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "stream",
+          "git",
+          "agent",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "点停止以后怎样让模型别继续生成？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "milliseconds": 257,
+      "vectorMilliseconds": 249,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "agent",
+          "cancel",
+          "prompt",
+          "deploy",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "离开聊天页面后还能避免继续消耗 token 吗？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "milliseconds": 186,
+      "vectorMilliseconds": 186,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "quota",
+          "isolation",
+          "stream",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "用户取消回答时服务端要做什么？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "milliseconds": 217,
+      "vectorMilliseconds": 216,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "cancel",
+          "import",
+          "agent",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "isolation",
+          "quota",
+          "stream",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "怎样防止看到别人的知识？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "milliseconds": 203,
+      "vectorMilliseconds": 202,
+      "lexical": {
+        "keys": [
+          "deploy",
+          "import"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "import",
+          "deploy",
+          "search",
+          "isolation",
+          "agent"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.25,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "按 Session userId 隔离查询是什么意思？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "milliseconds": 217,
+      "vectorMilliseconds": 217,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "stream",
+          "quota",
+          "git"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "quota",
+          "stream",
+          "git",
+          "deploy"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "只把管理员入口藏起来安全吗？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "milliseconds": 201,
+      "vectorMilliseconds": 201,
+      "lexical": {
+        "keys": [
+          "prompt",
+          "pool",
+          "isolation"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.3333333333333333,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "prompt",
+          "pool",
+          "password",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "拿到另一位用户的资源编号能读取他的资料吗？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "milliseconds": 213,
+      "vectorMilliseconds": 213,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "deploy",
+          "stream",
+          "quota",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "quota",
+          "stream",
+          "deploy",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "Render 和 Neon 分别运行什么？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "milliseconds": 183,
+      "vectorMilliseconds": 183,
+      "lexical": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "quota",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "agent",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "重新发布后以前的对话为什么还在？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "milliseconds": 212,
+      "vectorMilliseconds": 212,
+      "lexical": {
+        "keys": [
+          "prompt"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "prompt",
+          "quota",
+          "deploy",
+          "stream",
+          "cancel"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.3333333333333333,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "应用容器删除后资料会丢吗？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "milliseconds": 210,
+      "vectorMilliseconds": 210,
+      "lexical": {
+        "keys": [
+          "search",
+          "deploy",
+          "isolation",
+          "prompt"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "isolation",
+          "prompt",
+          "search",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "项目线上架构是什么？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "milliseconds": 197,
+      "vectorMilliseconds": 197,
+      "lexical": {
+        "keys": [
+          "deploy"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "git"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "SSE 为什么需要 buffer？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "milliseconds": 200,
+      "vectorMilliseconds": 200,
+      "lexical": {
+        "keys": [
+          "stream",
+          "import"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "cancel",
+          "import",
+          "deploy",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "文字一段段显示时怎么避免中文乱码？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "milliseconds": 215,
+      "vectorMilliseconds": 215,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "stream",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "cancel",
+          "password",
+          "import",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "网络收到的一段数据就是一条完整消息吗？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "milliseconds": 228,
+      "vectorMilliseconds": 227,
+      "lexical": {
+        "keys": [
+          "stream",
+          "pool",
+          "deploy",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "password",
+          "deploy",
+          "pool",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "怎么判断回答完成而非网络突然断了？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "milliseconds": 204,
+      "vectorMilliseconds": 203,
+      "lexical": {
+        "keys": [
+          "stream",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "search",
+          "cancel",
+          "quota",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我的资料中记载的银行账户号码是多少？",
+      "expectedKeys": [],
+      "milliseconds": 195,
+      "vectorMilliseconds": 195,
+      "lexical": {
+        "keys": [
+          "password",
+          "search",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "password",
+          "search",
+          "deploy",
+          "prompt",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "知识库里有没有记录我的血型？",
+      "expectedKeys": [],
+      "milliseconds": 207,
+      "vectorMilliseconds": 207,
+      "lexical": {
+        "keys": [
+          "import",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "import",
+          "search",
+          "deploy",
+          "prompt",
+          "agent"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我的护照什么时候到期？",
+      "expectedKeys": [],
+      "milliseconds": 281,
+      "vectorMilliseconds": 281,
+      "lexical": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      },
+      "hybrid": {
+        "keys": [
+          "search",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我昨天午饭吃了什么？",
+      "expectedKeys": [],
+      "milliseconds": 216,
+      "vectorMilliseconds": 216,
+      "lexical": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      },
+      "hybrid": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      }
+    }
+  ]
+}

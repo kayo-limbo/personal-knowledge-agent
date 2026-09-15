@@ -6,6 +6,24 @@ export const EMBEDDING_CHUNK_SIZE = 1000;
 export const EMBEDDING_CHUNK_OVERLAP = 150;
 export const EMBEDDING_BATCH_SIZE = 10;
 
+/** 只输出允许的错误类别，不回显供应商正文、请求参数或 Key。 */
+export function describeEmbeddingFailure(error: unknown): { category: string; code?: string; httpStatus?: number } {
+  if (!(error instanceof Error)) return { category: "unknown" };
+  const cause = error.cause as { code?: unknown } | undefined;
+  const code = typeof cause?.code === "string" ? cause.code : undefined;
+  if (code && ["EACCES", "EPERM"].includes(code)) return { category: "network_access_denied", code };
+  if (code && ["ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT"].includes(code)) {
+    return { category: "network", code };
+  }
+  if (["AbortError", "TimeoutError"].includes(error.name)) return { category: "cancelled_or_timeout" };
+  const http = /^Embedding 请求失败（HTTP (\d{3})）$/.exec(error.message);
+  if (http) return { category: "provider_http", httpStatus: Number(http[1]) };
+  const databaseCode = (error as Error & { code?: unknown }).code;
+  if (typeof databaseCode === "string" && /^P\d{4}$/.test(databaseCode)) return { category: "database", code: databaseCode };
+  if (error.name === "ZodError") return { category: "invalid_response" };
+  return { category: "unknown" };
+}
+
 export interface EmbeddingConfig {
   apiKey: string;
   baseUrl: string;

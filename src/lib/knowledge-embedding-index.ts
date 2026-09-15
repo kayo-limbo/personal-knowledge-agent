@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Prisma, type PrismaClient } from "../generated/prisma/client.ts";
 import {
-  EMBEDDING_BATCH_SIZE, createEmbeddingChunks, embeddingDocumentHash, requestEmbeddings,
+  EMBEDDING_BATCH_SIZE, createEmbeddingChunks, embeddingDocumentHash, requestEmbeddings, describeEmbeddingFailure,
   type EmbeddingConfig, type EmbeddingDocument,
 } from "./embedding.ts";
 import type { KnowledgeSearchCandidate } from "./knowledge-search.ts";
@@ -83,7 +83,8 @@ export async function indexKnowledgeDocument(
       `);
       return "ready";
     });
-  } catch {
+  } catch (error) {
+    console.warn("knowledge.embedding.failed", { documentId, ...describeEmbeddingFailure(error) });
     // 旧任务不能覆盖新任务；失败冷却一分钟，避免连续点击触发重复收费。
     await db.$executeRaw(Prisma.sql`
       UPDATE "KnowledgeEmbeddingIndex" SET status = 'failed', "updatedAt" = CURRENT_TIMESTAMP,
