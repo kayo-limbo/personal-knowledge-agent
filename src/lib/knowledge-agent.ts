@@ -6,12 +6,13 @@ import type {
   Tool,
 } from "@anthropic-ai/sdk/resources/messages";
 import type { KnowledgeSearchResult } from "./knowledge-search.ts";
+import { KnowledgeEvidenceError } from "./knowledge-evidence.ts";
 
 export const SEARCH_KNOWLEDGE_TOOL_NAME = "searchKnowledge";
 export const MAX_AGENT_ROUNDS = 4;
 export const MAX_AGENT_TOOL_CALLS = 3;
 export const AGENT_TOTAL_TIMEOUT_MS = 50_000;
-export const AGENT_TOOL_TIMEOUT_MS = 5_000;
+export const AGENT_TOOL_TIMEOUT_MS = 10_000;
 
 export const searchKnowledgeToolInputSchema = z
   .object({
@@ -32,7 +33,7 @@ export const SEARCH_KNOWLEDGE_TOOL = {
     properties: {
       query: {
         type: "string",
-        description: "用于搜索个人知识库的简短关键词或问题，不要包含 userId。",
+        description: "用于搜索个人知识库的问题，保留所问对象、时间和具体属性，不要包含 userId。",
       },
     },
     required: ["query"],
@@ -70,7 +71,7 @@ interface RunKnowledgeAgentOptions {
     signal: AbortSignal,
     onTextDelta: (delta: string) => void
   ) => Promise<AgentModelTurn>;
-  executeSearch: (query: string) => Promise<KnowledgeSearchResult[]>;
+  executeSearch: (query: string, signal: AbortSignal) => Promise<KnowledgeSearchResult[]>;
   formatToolResult: (results: KnowledgeSearchResult[]) => string;
   onTextDelta: (delta: string) => void;
   onToolExecution?: (execution: AgentToolExecution) => void;
@@ -110,13 +111,14 @@ function abortError(signal: AbortSignal): Error {
 }
 
 function withTimeout<T>(
-  operation: () => Promise<T>,
+  operation: (signal: AbortSignal) => Promise<T>,
   timeoutMs: number,
   signal: AbortSignal
 ): Promise<T> {
   if (signal.aborted) return Promise.reject(abortError(signal));
 
   return new Promise<T>((resolve, reject) => {
+    const operationController = new AbortController();
     let settled = false;
     const finish = (callback: () => void) => {
       if (settled) return;
@@ -126,13 +128,13 @@ function withTimeout<T>(
       callback();
     };
     const timer = setTimeout(
-      () => finish(() => reject(new AgentToolTimeoutError())),
+      () => finish(() => { operationController.abort(new AgentToolTimeoutError()); reject(new AgentToolTimeoutError()); }),
       timeoutMs
     );
-    const onAbort = () => finish(() => reject(abortError(signal)));
+    const onAbort = () => finish(() => { operationController.abort(signal.reason); reject(abortError(signal)); });
     signal.addEventListener("abort", onAbort, { once: true });
 
-    operation().then(
+    Promise.resolve().then(() => operation(operationController.signal)).then(
       (value) => finish(() => resolve(value)),
       (error) => finish(() => reject(error))
     );
@@ -146,9 +148,10 @@ function isToolUseBlock(
 }
 
 function sanitizeToolError(error: unknown): string {
+  if (error instanceof KnowledgeEvidenceError) return error.message;
   return error instanceof AgentToolTimeoutError
     ? error.message
-    : "searchKnowledge 执行失败";
+    : "searchKnowledge 执行失败，不能据此判断资料不存在";
 }
 
 function registerSources(
@@ -299,7 +302,7 @@ export async function runKnowledgeAgent({
 
       try {
         const rawResults = await withTimeout(
-          () => executeSearch(parsed.data.query),
+          (toolSignal) => executeSearch(parsed.data.query, toolSignal),
           toolTimeoutMs,
           signal
         );

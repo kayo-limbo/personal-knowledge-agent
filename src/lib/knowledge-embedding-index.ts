@@ -142,6 +142,6 @@ export async function searchKnowledgeVectors(
       SELECT DISTINCT ON (id) id, title, summary, tags, source, "updatedAt", content, similarity
       FROM scored WHERE similarity >= ${config.minSimilarity}
       ORDER BY id, similarity DESC, position
-    ) SELECT id, title, summary, tags, source, "updatedAt", content FROM best ORDER BY similarity DESC, id LIMIT 40
+    ) SELECT id, title, summary, tags, source, "updatedAt", content, similarity AS "semanticSimilarity" FROM best ORDER BY similarity DESC, id LIMIT 40
   `);
 }

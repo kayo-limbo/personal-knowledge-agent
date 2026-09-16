@@ -7,6 +7,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { readEmbeddingConfig } from "../src/lib/embedding.ts";
 import { getEmbeddingStatus, rebuildKnowledgeEmbeddings, searchKnowledgeVectors } from "../src/lib/knowledge-embedding-index.ts";
 import { retrieveKnowledge } from "../src/lib/knowledge-retrieval.ts";
+import Anthropic from "@anthropic-ai/sdk";
+import { KNOWLEDGE_EVIDENCE_TIMEOUT_MS, verifyKnowledgeEvidence } from "../src/lib/knowledge-evidence.ts";
 
 nextEnv.loadEnvConfig(process.cwd());
 const config = readEmbeddingConfig(process.env);
@@ -20,7 +22,7 @@ if (!["127.0.0.1", "localhost"].includes(url.hostname) || !url.pathname.endsWith
 const fixture = z.object({
   documents: z.array(z.object({ key: z.string(), title: z.string(), content: z.string() })).max(20),
   cases: z.array(z.object({ query: z.string().max(500), expectedKeys: z.array(z.string()) })).max(40),
-}).parse(JSON.parse(await readFile(new URL("../tests/fixtures/embedding-evaluation.json", import.meta.url), "utf8")));
+}).parse(JSON.parse(await readFile(process.env.EMBEDDING_EVAL_FIXTURE ?? new URL("../tests/fixtures/embedding-evaluation.json", import.meta.url), "utf8")));
 const keys = new Set(fixture.documents.map((doc) => doc.key));
 if (keys.size !== fixture.documents.length || fixture.cases.some((entry) => entry.expectedKeys.some((key) => !keys.has(key)))) {
   throw new Error("评测数据的知识 key 重复或引用不存在");
@@ -29,6 +31,23 @@ const db = new PrismaClient({ adapter: new PrismaPg({ connectionString, max: 4 }
 const userId = `embedding-eval-${randomUUID()}`;
 let requests = 0;
 let tokens = 0;
+const verifyEvidence = process.env.EMBEDDING_EVAL_VERIFY_EVIDENCE === "1";
+if (verifyEvidence && !process.env.DEEPSEEK_API_KEY?.trim()) throw new Error("核验评测需要 DEEPSEEK_API_KEY");
+let evidenceRequests = 0;
+let evidenceTokens = 0;
+let evidenceResponse: unknown;
+const evidenceClient = verifyEvidence ? new Anthropic({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: "https://api.deepseek.com/anthropic", maxRetries: 0,
+  fetch: async (...args) => {
+    evidenceRequests++;
+    const response = await fetch(...args);
+    if (response.ok) {
+      const payload = await response.clone().json();
+      evidenceTokens += Number(payload.usage?.input_tokens ?? 0) + Number(payload.usage?.output_tokens ?? 0);
+      evidenceResponse = { stopReason: payload.stop_reason, content: payload.content };
+    }
+    return response;
+  },
+}) : undefined;
 const capture: typeof fetch = async (...args) => {
   requests++;
   const response = await fetch(...args);
@@ -46,11 +65,13 @@ try {
   if (status.ready !== fixture.documents.length) throw new Error(`索引未全部完成：${status.ready}/${status.total}`);
   const report = [];
   for (const entry of fixture.cases) {
+    let semanticScores: { key: string; similarity: number | undefined }[] = [];
     let vectorMilliseconds = 0;
     const start = performance.now();
     const result = await retrieveKnowledge(db, userId, entry.query, async () => {
       const vectorStart = performance.now();
       const candidates = await searchKnowledgeVectors(db, userId, entry.query, config, AbortSignal.timeout(2500), capture);
+      semanticScores = candidates.map((row) => ({ key: row.id.slice(userId.length + 1), similarity: row.semanticSimilarity }));
       vectorMilliseconds = Math.round(performance.now() - vectorStart);
       return candidates;
     });
@@ -59,21 +80,35 @@ try {
       const rank = resultKeys.findIndex((key) => entry.expectedKeys.includes(key)) + 1;
       return { keys: resultKeys, hitAt1: rank === 1, hitAt5: rank > 0, reciprocalRank: rank ? 1 / rank : 0, emptyCorrect: entry.expectedKeys.length === 0 && resultKeys.length === 0 };
     };
-    report.push({ ...entry, milliseconds: Math.round(performance.now() - start), vectorMilliseconds, lexical: project(result.lexical), hybrid: project(result.hybrid) });
+    const retrievalMilliseconds = Math.round(performance.now() - start);
+    let evidence: ReturnType<typeof project> | undefined;
+    let evidenceError = false;
+    const evidenceStart = performance.now();
+    evidenceResponse = undefined;
+    if (evidenceClient) {
+      try {
+        evidence = project(await verifyKnowledgeEvidence(evidenceClient, entry.query, result.hybrid, AbortSignal.timeout(KNOWLEDGE_EVIDENCE_TIMEOUT_MS)));
+      } catch { evidenceError = true; console.error(JSON.stringify({ query: entry.query, evidenceResponse })); }
+    }
+    report.push({ ...entry, semanticScores, milliseconds: retrievalMilliseconds, vectorMilliseconds,
+      evidenceMilliseconds: evidenceClient ? Math.round(performance.now() - evidenceStart) : undefined,
+      evidence, evidenceError, lexical: project(result.lexical), hybrid: project(result.hybrid) });
   }
   const answerable = report.filter((row) => row.expectedKeys.length);
   const unanswerable = report.filter((row) => !row.expectedKeys.length);
-  const summary = (mode: "lexical" | "hybrid") => ({
-    hitAt1: answerable.filter((row) => row[mode].hitAt1).length / answerable.length,
-    hitAt5: answerable.filter((row) => row[mode].hitAt5).length / answerable.length,
-    mrrAt5: answerable.reduce((sum, row) => sum + row[mode].reciprocalRank, 0) / answerable.length,
-    emptyCorrect: unanswerable.filter((row) => row[mode].emptyCorrect).length,
+  const summary = (mode: "lexical" | "hybrid" | "evidence") => ({
+    hitAt1: answerable.filter((row) => row[mode]?.hitAt1).length / answerable.length,
+    hitAt5: answerable.filter((row) => row[mode]?.hitAt5).length / answerable.length,
+    mrrAt5: answerable.reduce((sum, row) => sum + (row[mode]?.reciprocalRank ?? 0), 0) / answerable.length,
+    emptyCorrect: unanswerable.filter((row) => row[mode]?.emptyCorrect).length,
     unanswerableCount: unanswerable.length,
   });
   const result = { evaluatedAt: new Date().toISOString(), model: config.model, dimensions: 1024, minSimilarity: config.minSimilarity,
-    corpus: "公开合成的 12 条知识，16 道有答案问题与 4 道无答案问题；不能代表真实用户资料整体质量", requests, tokens,
+    corpus: `公开合成的 ${fixture.documents.length} 条知识，${answerable.length} 道有答案问题与 ${unanswerable.length} 道无答案问题；不能代表真实用户资料整体质量`, requests, tokens,
     averageMilliseconds: Math.round(report.reduce((sum, row) => sum + row.milliseconds, 0) / report.length),
-    lexical: summary("lexical"), hybrid: summary("hybrid"), report };
+    lexical: summary("lexical"), hybrid: summary("hybrid"),
+    evidence: evidenceClient ? { ...summary("evidence"), errors: report.filter((row) => row.evidenceError).length,
+      requests: evidenceRequests, tokens: evidenceTokens, averageMilliseconds: Math.round(report.reduce((sum, row) => sum + (row.evidenceMilliseconds ?? 0), 0) / report.length) } : undefined, report };
   const output = process.argv[2];
   if (output) await writeFile(output, JSON.stringify(result, null, 2) + "\n");
   console.log(JSON.stringify({ ...result, report: undefined }, null, 2));

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import "./knowledge-evidence.test.ts";
 import {
   MAX_KNOWLEDGE_CONTEXT_CHARACTERS,
   MAX_KNOWLEDGE_RESULTS,

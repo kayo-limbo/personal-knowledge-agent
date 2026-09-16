@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client.ts";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { embeddingDocumentHash } from "../src/lib/embedding.ts";
+import { consumeChatSse } from "../src/lib/chat-stream.ts";
 
 const connectionString = process.env.EMBEDDING_TEST_DATABASE_URL;
 const base = process.env.EMBEDDING_TEST_BASE_URL;
@@ -21,7 +22,7 @@ async function request(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("cookie", [...cookies].map(([key, value]) => `${key}=${value}`).join("; "));
   headers.set("origin", appUrl.origin);
-  const response = await fetch(new URL(path, base), { ...init, headers, redirect: "manual", signal: AbortSignal.timeout(35_000) });
+  const response = await fetch(new URL(path, base), { ...init, headers, redirect: "manual", signal: AbortSignal.timeout(55_000) });
   for (const cookie of response.headers.getSetCookie()) {
     const pair = cookie.split(";")[0];
     const split = pair.indexOf("=");
@@ -66,10 +67,41 @@ try {
   assert.equal((await retried.json()).completed, 1);
   await waitReady(id, changed);
   console.log("PASS: explicit retry recovers failed index");
+  if (process.argv.includes("--chat")) {
+    for (const scenario of [
+      { model: "deepseek-flash", thinkingMode: "disabled", content: "请检索我的知识库，告诉我怎样避免 SSE 分段中文乱码？", answerable: true },
+      { model: "deepseek-v4-flash", thinkingMode: "enabled", content: "请检索我的知识库，说明应该如何拼接 SSE 消息。", answerable: true },
+      { model: "deepseek-flash", thinkingMode: "disabled", content: "请检索我的知识库，上周 SSE 中断事故发生在几月几日？资料没有记载就明确说明。", answerable: false },
+    ]) {
+      const started = performance.now();
+      const response = await request("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...scenario, webSearchMode: "never" }) });
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("x-model"), "deepseek-flash");
+      let text = "";
+      let done = false;
+      let successfulSearch = false;
+      await consumeChatSse(response, (event) => {
+        if (event.type === "delta") text += event.text;
+        if (event.type === "done") done = true;
+        if (event.type === "tool" && event.toolCall.name === "searchKnowledge" && event.toolCall.status === "success") successfulSearch = true;
+        if (event.type === "tool") assert.notEqual(event.toolCall.status, "error");
+      });
+      assert.ok(done && successfulSearch);
+      if (scenario.answerable) assert.match(text, /\[知识库 \d+\]/);
+      else { assert.doesNotMatch(text, /\[知识库 \d+\]/); assert.match(text, /不足|没有|未记录|未记载|无法确认|未找到/); }
+      const saved = await db.message.findFirst({ where: { id: response.headers.get("x-assistant-message-id")!, role: "assistant", conversation: { userId } } });
+      assert.equal(saved?.content, text);
+      console.log(JSON.stringify({ pass: true, model: scenario.model, thinkingMode: scenario.thinkingMode, answerable: scenario.answerable,
+        milliseconds: Math.round(performance.now() - started), response: text }));
+    }
+  }
   assert.equal((await request(`/api/knowledge/${id}`, { method: "DELETE" })).status, 204);
   assert.equal(await db.knowledgeEmbeddingIndex.count({ where: { documentId: id } }), 0);
   console.log("PASS: delete cascades index and chunks");
 } finally {
+  await db.message.deleteMany({ where: { conversation: { userId } } });
+  await db.conversation.deleteMany({ where: { userId } });
+  await db.chatQuota.deleteMany({ where: { subjectId: userId, scope: "user" } });
   await db.knowledgeDoc.deleteMany({ where: { userId } });
   await db.user.deleteMany({ where: { id: userId } });
   await db.$disconnect();

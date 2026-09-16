@@ -16,12 +16,13 @@ export function scheduleKnowledgeEmbedding(userId: string, documentIds: string[]
   });
 }
 
-export async function searchKnowledgeSemantic(userId: string, query: string) {
+export async function searchKnowledgeSemantic(userId: string, query: string, signal?: AbortSignal) {
   try {
     const config = readEmbeddingConfig(process.env);
     if (!config || !query.trim()) return [];
-    // 给已有 5 秒工具预算留出文本检索与数据库时间。
-    return await searchKnowledgeVectors(prisma, userId, query, config, AbortSignal.timeout(2_500));
+    // 给工具总预算留出文本检索、数据库与证据核验时间。
+    return await searchKnowledgeVectors(prisma, userId, query, config,
+      AbortSignal.any([AbortSignal.timeout(2_500), ...(signal ? [signal] : [])]));
   } catch (error) {
     console.warn("语义检索不可用，本次使用文本检索", describeEmbeddingFailure(error));
     return [];

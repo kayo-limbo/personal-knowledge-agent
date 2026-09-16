@@ -16,7 +16,9 @@ V3:Multi-Agent + Workflow（后期）
 
 已新增可选 Embedding + pgvector 混合检索，支持知识变更后索引失效、后台更新、页面补建和效果评测。默认采用百炼 `text-embedding-v4` / 1024 维。没有配置 Key 时保留文本检索。
 
-代码与构建检查、独立本机 pgvector 数据库迁移和生命周期集成测试已通过；真实供应商效果及公网发布仍待验证。启用需先执行 pgvector migration，再在服务端配置 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`；不要直接升级未备份的旧 Compose 数据卷。
+已完成真实供应商评测和本机 HTTP 闭环。2026-09-15 新增召回后的证据核验：仅保留能够支持具体问题且引文逐字可验证的资料，核验错误不会被当成“资料不存在”。40 道合成问题实测通过，平均增加约 0.7 秒及一次短 Flash 请求；实际资料仍可能误判。本轮新增代码待 push、CI 与部署验证。启用需先执行 pgvector migration，再在服务端配置 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`；不要直接升级未备份的旧 Compose 数据卷。
+
+聊天默认 API 模型已更新为 `deepseek-flash`（V4.1 Flash），兼容旧 `deepseek-v4-flash` 配置和客户端；保留 V4 Pro。依据 [DeepSeek 官方模型说明](https://api-docs.deepseek.com/quick_start/pricing/)。
 
 配置、架构、测试和提交范围见 [Embedding 功能讲解](docs/features/embedding-hybrid-retrieval.md)。
 

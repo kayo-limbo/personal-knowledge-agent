@@ -1,5 +1,26 @@
 # 2026-09-09 下一会话交接
 
+## 2026-09-15 证据核验与 V4.1 Flash 更新（最新）
+
+- 用户要求改善无答案误召回并更新 DeepSeek Flash。用户于 2026-09-16 要求提交本轮代码；本次提交包含以下更新，尚未 push、未部署。提交前 HEAD 为 1803204。
+- 官方现行模型名称为 deepseek-flash，对应 V4.1 Flash；旧 deepseek-v4-flash 已由供应商转发至新版本。项目更新默认值、界面标签、示例环境与服务端白名单，并兼容旧客户端/旧环境配置。V4 Pro 继续保留。来源：https://api-docs.deepseek.com/quick_start/pricing/ 和 https://api-docs.deepseek.com/guides/anthropic_api/ 。
+- 检索先保留原关键词+向量召回，再由固定 Flash 普通模式核验是否有证据支持原始问题。核验只能选择已有候选并提供逐字存在的引文；未知 ID、伪造引文、截断、超时与供应商失败均不能放行。核验错误作为工具失败回填，不能冒充无答案。相似度仍为相关性，不是正确率。
+- 核验上限 5 秒、不重试、不提供工具；单次工具总预算调为 10 秒，总 Agent 预算仍 50 秒/4 轮/3 次工具。取消信号传至向量请求和证据核验。每次非空召回增加一次 Flash 请求，受原工具次数与用户请求配额约束；请求配额不是 Token 账单。
+- 最终两组共 40 问：原集 16 道有答案/4 道无答案，新增问题集 12/8；正确证据均保留，无答案均过滤，核验错误为零。平均额外核验时间分别 659ms/733ms。两组均为同一小型合成资料集，不能视为真实用户全量质量保证；开发阶段曾出现误拒，后续仍需积累真实问题评测。结果见 acceptance/embedding-evidence-evaluation-2026-09-15.json 和 acceptance/embedding-evidence-holdout-2026-09-15.json。
+- 52 项单元测试、真实 pgvector 集成、Lint、类型检查和生产构建通过。本机 HTTP 使用真实供应商验证新 Flash 普通、旧名称深度思考、无答案场景；均验证工具成功、SSE done、引用和数据库持久化。三个请求约 4.9/6.9/3.1 秒。没有用 API 测试冒充浏览器视觉或公网验收。
+- 复跑真实聊天：在独立本机 _embedding_test 数据库与本机应用正确启动后，设置 EMBEDDING_TEST_DATABASE_URL、EMBEDDING_TEST_BASE_URL，直接运行 node --experimental-strip-types scripts/verify-embedding-http.ts --chat。PowerShell 下本轮 npm 转发 --chat 未生效，需直接运行 Node。仅使用公开测试资料并清理自身临时账号/会话。
+- 复跑证据评测：设置 EMBEDDING_EVAL_DATABASE_URL、EMBEDDING_EVAL_VERIFY_EVIDENCE=1，运行 knowledge:evaluate-fixture；可通过 EMBEDDING_EVAL_FIXTURE 指定 tests/fixtures/embedding-evidence-holdout.json。
+- 发布：本轮没有新增 migration，前提是先前 Embedding migration 已部署。Render 可以把 DEEPSEEK_MODEL 更新为 deepseek-flash；旧值也兼容，不需要新 Key，Embedding 服务配置不变。提交、push、CI 后手动部署该 SHA；本轮未检查 Render 真实 live 状态。
+- 提交时保留原有用户改动，尤其 README、src/app/api/chat/route.ts 和 src/lib/deepseek.ts 中已有修改。建议中文说明：feat(chat): 增加知识证据核验并升级 Flash 模型。
+
+暂存范围（混合文件用 -p 只选本轮变更）：
+
+~~~powershell
+git add -- .env.example .env.docker.example scripts/evaluate-embeddings.ts scripts/verify-embedding-http.ts src/lib/deepseek-models.ts src/lib/knowledge-evidence.ts src/lib/knowledge-agent.ts src/lib/knowledge-embedding-index.ts src/lib/knowledge-search.ts src/lib/services/knowledge-search.service.ts src/lib/services/knowledge-embedding.service.ts src/lib/validators/chat.ts tests/knowledge-evidence.test.ts tests/knowledge-agent.test.ts tests/knowledge-search.test.ts tests/fixtures/embedding-evidence-holdout.json docs/acceptance/embedding-relevance-baseline-2026-09-15.json docs/acceptance/embedding-evidence-evaluation-2026-09-15.json docs/acceptance/embedding-evidence-holdout-2026-09-15.json docs/plans/next-session-handoff.md docs/plans/summer-assessment-roadmap.md
+git add -p -- README.md src/app/api/chat/route.ts src/lib/deepseek.ts
+git commit -m "feat(chat): 增加知识证据核验并升级 Flash 模型"
+~~~
+
 ## 2026-09-15 Embedding 最新交接（优先于下方历史记录）
 
 ### 真实 Key 与闭环验证（2026-09-15）

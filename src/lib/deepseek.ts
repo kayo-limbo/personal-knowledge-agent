@@ -2,8 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import {
-  DEFAULT_DEEPSEEK_MODEL,
-  isDeepSeekModel,
+  resolveDeepSeekModel,
   type DeepSeekModel,
 } from "@/lib/deepseek-models";
 
@@ -19,9 +18,7 @@ const DEEPSEEK_ANTHROPIC_BASE_URL = "https://api.deepseek.com/anthropic";
  * 环境变量只控制页面初始选择；每次请求的模型仍会经过服务端白名单校验。
  */
 const configuredModel = process.env.DEEPSEEK_MODEL?.trim();
-export const DEEPSEEK_DEFAULT_MODEL: DeepSeekModel = isDeepSeekModel(configuredModel)
-  ? configuredModel
-  : DEFAULT_DEEPSEEK_MODEL;
+export const DEEPSEEK_DEFAULT_MODEL: DeepSeekModel = resolveDeepSeekModel(configuredModel);
 
 export function getDeepSeekClient(): Anthropic {
   const apiKey = process.env.DEEPSEEK_API_KEY?.trim();

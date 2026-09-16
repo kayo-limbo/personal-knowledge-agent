@@ -12,6 +12,30 @@ import {
   type AgentModelTurn,
 } from "../src/lib/knowledge-agent.ts";
 import type { KnowledgeSearchResult } from "../src/lib/knowledge-search.ts";
+import { KnowledgeEvidenceError } from "../src/lib/knowledge-evidence.ts";
+
+test("工具超时会取消实际检索调用，核验故障作为错误回填而非零结果", async () => {
+  let childSignal: AbortSignal | undefined;
+  let round = 0;
+  const timed = await runKnowledgeAgent({
+    initialMessages: [{ role: "user", content: "资料" }], signal: new AbortController().signal, toolTimeoutMs: 10,
+    requestModel: async () => ++round === 1 ? toolTurn("t", { query: "资料" }) : finalTurn("暂时无法核验"),
+    executeSearch: (_query, signal) => { childSignal = signal; return new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true })); },
+    formatToolResult: () => { throw new Error("失败不应格式化成空结果"); }, onTextDelta: () => {},
+  });
+  assert.equal(childSignal?.aborted, true);
+  assert.equal(timed.toolExecutions[0].status, "error");
+  round = 0;
+  const failed = await runKnowledgeAgent({
+    initialMessages: [{ role: "user", content: "资料" }], signal: new AbortController().signal,
+    requestModel: async () => ++round === 1 ? toolTurn("t", { query: "资料" }) : finalTurn("暂时无法核验"),
+    executeSearch: async () => { throw new KnowledgeEvidenceError(); },
+    formatToolResult: () => { throw new Error("失败不应格式化成空结果"); }, onTextDelta: () => {},
+  });
+  assert.equal(failed.toolExecutions[0].status, "error");
+  assert.match(failed.toolExecutions[0].error!, /不能据此判断资料不存在/);
+  assert.deepEqual(failed.sources, []);
+});
 
 function toolTurn(id: string, input: unknown): AgentModelTurn {
   return {

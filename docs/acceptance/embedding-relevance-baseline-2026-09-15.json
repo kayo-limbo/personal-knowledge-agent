@@ -1,0 +1,1320 @@
+{
+  "evaluatedAt": "2026-09-15T14:35:24.331Z",
+  "model": "text-embedding-v4",
+  "dimensions": 1024,
+  "minSimilarity": 0.35,
+  "corpus": "公开合成的 12 条知识，16 道有答案问题与 4 道无答案问题；不能代表真实用户资料整体质量",
+  "requests": 32,
+  "tokens": 1020,
+  "averageMilliseconds": 268,
+  "lexical": {
+    "hitAt1": 0.625,
+    "hitAt5": 0.875,
+    "mrrAt5": 0.7395833333333333,
+    "emptyCorrect": 2,
+    "unanswerableCount": 4
+  },
+  "hybrid": {
+    "hitAt1": 0.8125,
+    "hitAt5": 1,
+    "mrrAt5": 0.8802083333333334,
+    "emptyCorrect": 1,
+    "unanswerableCount": 4
+  },
+  "report": [
+    {
+      "query": "AbortController 的作用是什么？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "semanticScores": [
+        {
+          "key": "cancel",
+          "similarity": 0.6586358350921945
+        },
+        {
+          "key": "stream",
+          "similarity": 0.49580112174729396
+        },
+        {
+          "key": "git",
+          "similarity": 0.4235368760184197
+        },
+        {
+          "key": "agent",
+          "similarity": 0.4062171932329428
+        },
+        {
+          "key": "quota",
+          "similarity": 0.3675068993862338
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.36635438404355214
+        },
+        {
+          "key": "search",
+          "similarity": 0.3640062592025848
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.3549834576258989
+        }
+      ],
+      "milliseconds": 230,
+      "vectorMilliseconds": 228,
+      "lexical": {
+        "keys": [
+          "cancel"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "stream",
+          "git",
+          "agent",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "点停止以后怎样让模型别继续生成？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "semanticScores": [
+        {
+          "key": "agent",
+          "similarity": 0.5311398664456568
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.5288452225235237
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.4957707081046123
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.43058247657366044
+        },
+        {
+          "key": "quota",
+          "similarity": 0.3960208116775995
+        },
+        {
+          "key": "import",
+          "similarity": 0.38220246487252674
+        },
+        {
+          "key": "search",
+          "similarity": 0.38200161999468873
+        },
+        {
+          "key": "git",
+          "similarity": 0.3681587467146308
+        }
+      ],
+      "milliseconds": 284,
+      "vectorMilliseconds": 274,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "agent",
+          "cancel",
+          "prompt",
+          "deploy",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "离开聊天页面后还能避免继续消耗 token 吗？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "semanticScores": [
+        {
+          "key": "cancel",
+          "similarity": 0.6481657817413149
+        },
+        {
+          "key": "quota",
+          "similarity": 0.626116156578064
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.5728169679641724
+        },
+        {
+          "key": "stream",
+          "similarity": 0.5177956202273858
+        },
+        {
+          "key": "password",
+          "similarity": 0.48358699777203895
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.48128384351730347
+        },
+        {
+          "key": "pool",
+          "similarity": 0.450793981552124
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.4474833670278382
+        },
+        {
+          "key": "agent",
+          "similarity": 0.4193089008331299
+        },
+        {
+          "key": "git",
+          "similarity": 0.3994090915078473
+        },
+        {
+          "key": "search",
+          "similarity": 0.37728744745254517
+        },
+        {
+          "key": "import",
+          "similarity": 0.36136145225993155
+        }
+      ],
+      "milliseconds": 232,
+      "vectorMilliseconds": 232,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "quota",
+          "isolation",
+          "stream",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "用户取消回答时服务端要做什么？",
+      "expectedKeys": [
+        "cancel"
+      ],
+      "semanticScores": [
+        {
+          "key": "cancel",
+          "similarity": 0.5378713332337935
+        },
+        {
+          "key": "quota",
+          "similarity": 0.5099960717557692
+        },
+        {
+          "key": "stream",
+          "similarity": 0.48088021747349274
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.4666914482918816
+        },
+        {
+          "key": "agent",
+          "similarity": 0.4133054737241709
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.4118837345942542
+        },
+        {
+          "key": "search",
+          "similarity": 0.4066144349162114
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.3991802453750447
+        },
+        {
+          "key": "password",
+          "similarity": 0.37988172829503775
+        },
+        {
+          "key": "pool",
+          "similarity": 0.35976089119198607
+        }
+      ],
+      "milliseconds": 209,
+      "vectorMilliseconds": 209,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "cancel",
+          "import",
+          "agent",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "cancel",
+          "isolation",
+          "quota",
+          "stream",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "怎样防止看到别人的知识？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "semanticScores": [
+        {
+          "key": "search",
+          "similarity": 0.49132901430130005
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.426361620426178
+        },
+        {
+          "key": "import",
+          "similarity": 0.40008786916209116
+        },
+        {
+          "key": "agent",
+          "similarity": 0.3940272033214569
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.3856636124058259
+        },
+        {
+          "key": "git",
+          "similarity": 0.3847146699002588
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.36878747847042925
+        },
+        {
+          "key": "stream",
+          "similarity": 0.35163255314439157
+        }
+      ],
+      "milliseconds": 185,
+      "vectorMilliseconds": 184,
+      "lexical": {
+        "keys": [
+          "deploy",
+          "import"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "import",
+          "deploy",
+          "search",
+          "isolation",
+          "agent"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.25,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "按 Session userId 隔离查询是什么意思？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "semanticScores": [
+        {
+          "key": "isolation",
+          "similarity": 0.6424587155853948
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.5396977984725126
+        },
+        {
+          "key": "password",
+          "similarity": 0.5375889539718666
+        },
+        {
+          "key": "quota",
+          "similarity": 0.5307096559232277
+        },
+        {
+          "key": "pool",
+          "similarity": 0.47017493666261134
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.46343759865500933
+        },
+        {
+          "key": "stream",
+          "similarity": 0.4402582979048384
+        },
+        {
+          "key": "agent",
+          "similarity": 0.42161544690224284
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.39982531071751093
+        },
+        {
+          "key": "git",
+          "similarity": 0.3822705745697048
+        },
+        {
+          "key": "search",
+          "similarity": 0.38033684374909726
+        }
+      ],
+      "milliseconds": 188,
+      "vectorMilliseconds": 187,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "stream",
+          "quota",
+          "git"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "quota",
+          "stream",
+          "git",
+          "deploy"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "只把管理员入口藏起来安全吗？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "semanticScores": [
+        {
+          "key": "isolation",
+          "similarity": 0.6566983069957324
+        },
+        {
+          "key": "password",
+          "similarity": 0.488664062182419
+        },
+        {
+          "key": "search",
+          "similarity": 0.4553247418806119
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.4026701210337813
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.39673890529771416
+        },
+        {
+          "key": "git",
+          "similarity": 0.38525076088300225
+        },
+        {
+          "key": "pool",
+          "similarity": 0.38058159467091657
+        },
+        {
+          "key": "quota",
+          "similarity": 0.37220791743946635
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.3626736294426447
+        },
+        {
+          "key": "import",
+          "similarity": 0.3502867400304389
+        }
+      ],
+      "milliseconds": 216,
+      "vectorMilliseconds": 215,
+      "lexical": {
+        "keys": [
+          "prompt",
+          "pool",
+          "isolation"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.3333333333333333,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "prompt",
+          "pool",
+          "password",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "拿到另一位用户的资源编号能读取他的资料吗？",
+      "expectedKeys": [
+        "isolation"
+      ],
+      "semanticScores": [
+        {
+          "key": "isolation",
+          "similarity": 0.6558046155208854
+        },
+        {
+          "key": "search",
+          "similarity": 0.525587615300705
+        },
+        {
+          "key": "quota",
+          "similarity": 0.4865776316431043
+        },
+        {
+          "key": "import",
+          "similarity": 0.4599250924721203
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.45256138978925
+        },
+        {
+          "key": "stream",
+          "similarity": 0.4435678258972583
+        },
+        {
+          "key": "password",
+          "similarity": 0.4362481052431879
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.42365933374651576
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.4069792562443728
+        },
+        {
+          "key": "pool",
+          "similarity": 0.38471509400426496
+        },
+        {
+          "key": "agent",
+          "similarity": 0.3764349369484288
+        }
+      ],
+      "milliseconds": 189,
+      "vectorMilliseconds": 189,
+      "lexical": {
+        "keys": [
+          "isolation",
+          "deploy",
+          "stream",
+          "quota",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "isolation",
+          "quota",
+          "stream",
+          "deploy",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "Render 和 Neon 分别运行什么？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "semanticScores": [
+        {
+          "key": "deploy",
+          "similarity": 0.6216904891544883
+        },
+        {
+          "key": "pool",
+          "similarity": 0.48998320042986965
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.44006196618634186
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.40983730017169195
+        },
+        {
+          "key": "stream",
+          "similarity": 0.39515835671673716
+        },
+        {
+          "key": "password",
+          "similarity": 0.3829395771026638
+        },
+        {
+          "key": "agent",
+          "similarity": 0.3703206402254493
+        },
+        {
+          "key": "search",
+          "similarity": 0.3680013041497061
+        }
+      ],
+      "milliseconds": 243,
+      "vectorMilliseconds": 242,
+      "lexical": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "quota",
+          "prompt"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "agent",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "重新发布后以前的对话为什么还在？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "semanticScores": [
+        {
+          "key": "quota",
+          "similarity": 0.5117676258087158
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.5013015864728025
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.4790447950363159
+        },
+        {
+          "key": "stream",
+          "similarity": 0.4607046591395578
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.44659374495130044
+        },
+        {
+          "key": "search",
+          "similarity": 0.4390994906425476
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.4292227029800415
+        },
+        {
+          "key": "agent",
+          "similarity": 0.4249574542045593
+        },
+        {
+          "key": "password",
+          "similarity": 0.42026046393749406
+        },
+        {
+          "key": "import",
+          "similarity": 0.3824520479171254
+        },
+        {
+          "key": "git",
+          "similarity": 0.37677661318918454
+        },
+        {
+          "key": "pool",
+          "similarity": 0.3752896785736084
+        }
+      ],
+      "milliseconds": 204,
+      "vectorMilliseconds": 203,
+      "lexical": {
+        "keys": [
+          "prompt"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "prompt",
+          "quota",
+          "deploy",
+          "stream",
+          "cancel"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.3333333333333333,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "应用容器删除后资料会丢吗？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "semanticScores": [
+        {
+          "key": "deploy",
+          "similarity": 0.5868815183639526
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.44006919860839844
+        },
+        {
+          "key": "password",
+          "similarity": 0.4220053302046467
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.41012437222905773
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.4060942651657543
+        },
+        {
+          "key": "git",
+          "similarity": 0.38634643636069144
+        },
+        {
+          "key": "import",
+          "similarity": 0.3860853382298155
+        },
+        {
+          "key": "search",
+          "similarity": 0.3855287432670593
+        },
+        {
+          "key": "pool",
+          "similarity": 0.378096342086792
+        },
+        {
+          "key": "quota",
+          "similarity": 0.3693363070487976
+        }
+      ],
+      "milliseconds": 183,
+      "vectorMilliseconds": 183,
+      "lexical": {
+        "keys": [
+          "search",
+          "deploy",
+          "isolation",
+          "prompt"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "isolation",
+          "prompt",
+          "search",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "项目线上架构是什么？",
+      "expectedKeys": [
+        "deploy"
+      ],
+      "semanticScores": [
+        {
+          "key": "deploy",
+          "similarity": 0.45170365130018175
+        },
+        {
+          "key": "pool",
+          "similarity": 0.41700739911220686
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.3820251340277534
+        },
+        {
+          "key": "git",
+          "similarity": 0.3570296657970662
+        }
+      ],
+      "milliseconds": 230,
+      "vectorMilliseconds": 229,
+      "lexical": {
+        "keys": [
+          "deploy"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "deploy",
+          "pool",
+          "isolation",
+          "git"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "SSE 为什么需要 buffer？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "semanticScores": [
+        {
+          "key": "stream",
+          "similarity": 0.6255889162070305
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.46478162391021494
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.40888103299624
+        },
+        {
+          "key": "password",
+          "similarity": 0.39278054237366
+        },
+        {
+          "key": "git",
+          "similarity": 0.38647776842117576
+        },
+        {
+          "key": "pool",
+          "similarity": 0.37740840777208917
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.3720825238277039
+        },
+        {
+          "key": "search",
+          "similarity": 0.3605661905149342
+        }
+      ],
+      "milliseconds": 287,
+      "vectorMilliseconds": 287,
+      "lexical": {
+        "keys": [
+          "stream",
+          "import"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "cancel",
+          "import",
+          "deploy",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "文字一段段显示时怎么避免中文乱码？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "semanticScores": [
+        {
+          "key": "stream",
+          "similarity": 0.4971190096665099
+        },
+        {
+          "key": "password",
+          "similarity": 0.4284919500350983
+        },
+        {
+          "key": "import",
+          "similarity": 0.41825246810913386
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.3921361022117231
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.3760412111257845
+        },
+        {
+          "key": "git",
+          "similarity": 0.3713285624980953
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.36476304321068853
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.35811459172455085
+        },
+        {
+          "key": "search",
+          "similarity": 0.3564056370500116
+        }
+      ],
+      "milliseconds": 220,
+      "vectorMilliseconds": 220,
+      "lexical": {
+        "keys": [
+          "cancel",
+          "stream",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": true,
+        "reciprocalRank": 0.5,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "cancel",
+          "password",
+          "import",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "网络收到的一段数据就是一条完整消息吗？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "semanticScores": [
+        {
+          "key": "stream",
+          "similarity": 0.6307216726873356
+        },
+        {
+          "key": "quota",
+          "similarity": 0.4027118682861328
+        },
+        {
+          "key": "cancel",
+          "similarity": 0.3822041267813483
+        },
+        {
+          "key": "password",
+          "similarity": 0.3659881135232388
+        },
+        {
+          "key": "search",
+          "similarity": 0.3654196262359619
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.35281848907470703
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.3507997393608093
+        }
+      ],
+      "milliseconds": 223,
+      "vectorMilliseconds": 223,
+      "lexical": {
+        "keys": [
+          "stream",
+          "pool",
+          "deploy",
+          "password"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "password",
+          "deploy",
+          "pool",
+          "quota"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "怎么判断回答完成而非网络突然断了？",
+      "expectedKeys": [
+        "stream"
+      ],
+      "semanticScores": [
+        {
+          "key": "cancel",
+          "similarity": 0.549803690606466
+        },
+        {
+          "key": "stream",
+          "similarity": 0.5365597562122674
+        },
+        {
+          "key": "search",
+          "similarity": 0.4856812655925751
+        },
+        {
+          "key": "quota",
+          "similarity": 0.4627666175365448
+        },
+        {
+          "key": "agent",
+          "similarity": 0.4363495707511902
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.41595569252967834
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.41142548186475547
+        },
+        {
+          "key": "deploy",
+          "similarity": 0.40838539600372314
+        },
+        {
+          "key": "import",
+          "similarity": 0.38562945213142386
+        },
+        {
+          "key": "git",
+          "similarity": 0.38442901465719914
+        },
+        {
+          "key": "password",
+          "similarity": 0.3767339362660691
+        }
+      ],
+      "milliseconds": 186,
+      "vectorMilliseconds": 186,
+      "lexical": {
+        "keys": [
+          "stream",
+          "search"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "stream",
+          "search",
+          "cancel",
+          "quota",
+          "agent"
+        ],
+        "hitAt1": true,
+        "hitAt5": true,
+        "reciprocalRank": 1,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我的资料中记载的银行账户号码是多少？",
+      "expectedKeys": [],
+      "semanticScores": [
+        {
+          "key": "search",
+          "similarity": 0.4762758938937348
+        },
+        {
+          "key": "password",
+          "similarity": 0.45777217308780516
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.43572999579191307
+        },
+        {
+          "key": "quota",
+          "similarity": 0.41932679184356125
+        },
+        {
+          "key": "import",
+          "similarity": 0.39567576724128184
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.3568208388303735
+        }
+      ],
+      "milliseconds": 207,
+      "vectorMilliseconds": 207,
+      "lexical": {
+        "keys": [
+          "password",
+          "search",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "password",
+          "search",
+          "deploy",
+          "prompt",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "知识库里有没有记录我的血型？",
+      "expectedKeys": [],
+      "semanticScores": [
+        {
+          "key": "search",
+          "similarity": 0.4884710894192599
+        },
+        {
+          "key": "prompt",
+          "similarity": 0.44015306234360985
+        },
+        {
+          "key": "import",
+          "similarity": 0.39495652287939964
+        },
+        {
+          "key": "agent",
+          "similarity": 0.3845212619926077
+        },
+        {
+          "key": "password",
+          "similarity": 0.3711871129982003
+        },
+        {
+          "key": "isolation",
+          "similarity": 0.36941282384548735
+        }
+      ],
+      "milliseconds": 173,
+      "vectorMilliseconds": 173,
+      "lexical": {
+        "keys": [
+          "import",
+          "deploy"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      },
+      "hybrid": {
+        "keys": [
+          "import",
+          "search",
+          "deploy",
+          "prompt",
+          "agent"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我的护照什么时候到期？",
+      "expectedKeys": [],
+      "semanticScores": [
+        {
+          "key": "search",
+          "similarity": 0.3696271038499973
+        },
+        {
+          "key": "quota",
+          "similarity": 0.3619119987592725
+        }
+      ],
+      "milliseconds": 461,
+      "vectorMilliseconds": 461,
+      "lexical": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      },
+      "hybrid": {
+        "keys": [
+          "search",
+          "quota"
+        ],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": false
+      }
+    },
+    {
+      "query": "我昨天午饭吃了什么？",
+      "expectedKeys": [],
+      "semanticScores": [],
+      "milliseconds": 1000,
+      "vectorMilliseconds": 1000,
+      "lexical": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      },
+      "hybrid": {
+        "keys": [],
+        "hitAt1": false,
+        "hitAt5": false,
+        "reciprocalRank": 0,
+        "emptyCorrect": true
+      }
+    }
+  ]
+}
