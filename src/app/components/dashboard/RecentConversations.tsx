@@ -80,7 +80,7 @@ export default function RecentConversations({
 
                 <Link
                   key={conversation.id}
-                  href={`/dashboard/chat/${conversation.id}`}
+                  href={`/dashboard/chat?conversation=${encodeURIComponent(conversation.id)}`}
                   className="block"
                 >
                   <div

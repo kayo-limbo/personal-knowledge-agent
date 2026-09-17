@@ -13,7 +13,7 @@ interface PromptPageProps {
 }
 
 const fieldClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-100";
+  "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-100";
 
 export default async function PromptsPage({ searchParams }: PromptPageProps) {
   const session = await auth();
@@ -43,7 +43,7 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
         </p>
       )}
 
-      <section className="rounded-xl border bg-white p-5 shadow-sm">
+      <section className="rounded-xl border bg-card p-5 shadow-sm">
         <h2 className="text-lg font-semibold">新建 Prompt</h2>
         <form action={createPromptAction} className="mt-4 space-y-4">
           <label className="block space-y-1.5 text-sm font-medium">
@@ -54,11 +54,11 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
             <span>Prompt 内容</span>
             <textarea className={`${fieldClass} min-h-36 resize-y`} name="content" maxLength={8000} required placeholder="描述角色、任务、约束和输出格式" />
           </label>
-          <div className="flex flex-wrap gap-5 text-sm text-gray-700">
+          <div className="flex flex-wrap gap-5 text-sm text-foreground">
             <label className="flex items-center gap-2"><input type="checkbox" name="favorite" /> 收藏</label>
             <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" /> 公开意向（暂不对外分享）</label>
           </div>
-          <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700" type="submit">
+          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90" type="submit">
             保存 Prompt
           </button>
         </form>
@@ -70,12 +70,12 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
           <span className="text-sm text-muted-foreground">共 {prompts.length} 条</span>
         </div>
         {prompts.length === 0 ? (
-          <div className="rounded-xl border border-dashed bg-white p-10 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">
             还没有 Prompt，可先创建一条用于演示。
           </div>
         ) : (
           prompts.map((prompt) => (
-            <article key={prompt.id} className="rounded-xl border bg-white p-5 shadow-sm">
+            <article key={prompt.id} className="rounded-xl border bg-card p-5 shadow-sm">
               <form action={updatePromptAction} className="space-y-4">
                 <input type="hidden" name="id" value={prompt.id} />
                 <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
@@ -84,10 +84,10 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
                 </div>
                 <input className={fieldClass} name="title" defaultValue={prompt.title} maxLength={100} required aria-label="Prompt 标题" />
                 <textarea className={`${fieldClass} min-h-32 resize-y font-mono`} name="content" defaultValue={prompt.content} maxLength={8000} required aria-label="Prompt 内容" />
-                <div className="flex flex-wrap items-center gap-5 text-sm text-gray-700">
+                <div className="flex flex-wrap items-center gap-5 text-sm text-foreground">
                   <label className="flex items-center gap-2"><input type="checkbox" name="favorite" defaultChecked={prompt.favorite} /> 收藏</label>
                   <label className="flex items-center gap-2"><input type="checkbox" name="isPublic" defaultChecked={prompt.isPublic} /> 公开意向（暂不对外分享）</label>
-                  <button className="ml-auto rounded-lg border px-3 py-2 font-medium hover:bg-gray-50" type="submit">保存修改</button>
+                  <button className="ml-auto rounded-lg border px-3 py-2 font-medium hover:bg-muted/40" type="submit">保存修改</button>
                 </div>
               </form>
               <details className="mt-3 border-t pt-3 text-sm">
@@ -95,7 +95,7 @@ export default async function PromptsPage({ searchParams }: PromptPageProps) {
                 <form action={deletePromptAction} className="mt-3 flex items-center gap-3">
                   <input type="hidden" name="id" value={prompt.id} />
                   <span className="text-muted-foreground">删除后不可恢复，已有会话会保留但不再关联该 Prompt。</span>
-                  <button className="rounded-lg bg-red-600 px-3 py-2 font-medium text-white hover:bg-red-500" type="submit">确认删除</button>
+                  <button className="rounded-lg bg-red-600 px-3 py-2 font-medium text-primary-foreground hover:bg-red-500" type="submit">确认删除</button>
                 </form>
               </details>
             </article>

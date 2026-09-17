@@ -8,7 +8,7 @@ export default function SearchBar() {
   const [target, setTarget] = useState("/dashboard/knowledge");
   return (
     <form action={target} method="get" role="search" className="flex items-center gap-2">
-      <select aria-label="搜索范围" value={target} onChange={event => setTarget(event.target.value)} className="rounded-lg border bg-white px-2 py-1 text-sm">
+      <select aria-label="搜索范围" value={target} onChange={event => setTarget(event.target.value)} className="rounded-lg border bg-card px-2 py-1 text-sm">
         <option value="/dashboard/knowledge">知识库</option>
         <option value="/dashboard/history">对话标题</option>
       </select>

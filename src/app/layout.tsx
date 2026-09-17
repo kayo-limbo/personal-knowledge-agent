@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     // 使用 globals.css 中的系统字体栈，离线构建时不需要向 Google 下载字体。
-    <html lang="zh-CN" className="font-sans">
+    <html lang="zh-CN" className="font-sans" suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
       </body>

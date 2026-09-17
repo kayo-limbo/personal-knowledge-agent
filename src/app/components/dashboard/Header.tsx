@@ -11,8 +11,8 @@ interface Props {
 
 export default function Header({user}:Props){
     return (
-    <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b bg-background/80 px-8 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div>
+    <header className="sticky top-0 z-30 flex min-h-18 items-center justify-between border-b bg-background/80 px-3 md:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="hidden xl:block">
         <h1 className="text-lg font-semibold tracking-tight">
           个人知识智能助手
         </h1>
@@ -22,8 +22,8 @@ export default function Header({user}:Props){
         </p>
       </div>
 
-      <div className="flex items-center gap-6">
-        {user.role !== "GUEST" && <SearchBar />}
+      <div className="flex items-center w-full justify-end gap-3">
+        {user.role !== "GUEST" && <div className="hidden md:block"><SearchBar /></div>}
         <UserDropdown user={user} />
       </div>
     </header>

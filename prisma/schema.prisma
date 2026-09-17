@@ -17,6 +17,7 @@ model User {
   email        String   @unique
   passwordHash String
   name         String?
+  preferences  Json     @default("{}")
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
 

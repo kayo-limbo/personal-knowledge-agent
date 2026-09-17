@@ -9,8 +9,8 @@ import {
   Search,
   Sparkles,
   TriangleAlert,
-  User,
 } from "lucide-react";
+import { PersonalAvatar } from "@/app/components/dashboard/Personalization";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -42,7 +42,7 @@ function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
   const isWebSearch = toolCall.name === "webSearch";
 
   return (
-    <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+    <div className="flex items-start gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
       {status === "running" ? (
         <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-blue-500" />
       ) : status === "success" ? (
@@ -51,7 +51,7 @@ function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
         <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
       )}
       <div className="min-w-0">
-        <div className="flex items-center gap-1 font-medium text-slate-700">
+        <div className="flex items-center gap-1 font-medium text-foreground">
           {isWebSearch ? (
             <Globe2 className="h-3.5 w-3.5" />
           ) : (
@@ -65,7 +65,7 @@ function ToolCallStatus({ toolCall }: { toolCall: ToolCall }) {
               ? `${isWebSearch ? "联网搜索" : "知识库检索"}完成 · 命中 ${typeof resultCount === "number" ? resultCount : 0} 条`
               : `${isWebSearch ? "联网搜索" : "知识库检索"}失败${typeof error === "string" ? ` · ${error}` : ""}`}
         </div>
-        <p className="truncate text-slate-500">查询：{query}</p>
+        <p className="truncate text-muted-foreground">查询：{query}</p>
       </div>
     </div>
   );
@@ -82,14 +82,14 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
   if (messages.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-        <div className="mb-5 rounded-2xl bg-gray-900 p-4 text-white shadow-lg">
+        <div className="mb-5 rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg">
           <Sparkles className="h-7 w-7" />
         </div>
         <h2 className="text-2xl font-semibold">今天想整理或探索什么？</h2>
         <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
           你可以让 DeepSeek 解释概念、整理笔记或查询个人知识库；命中知识时，回答会显示引用来源。
         </p>
-        <span className="mt-5 rounded-full border bg-white px-3 py-1 text-xs text-muted-foreground">
+        <span className="mt-5 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
           当前选择：{modelLabel} · {thinkingMode === "enabled" ? "深度思考" : "普通模式"}
         </span>
       </div>
@@ -103,7 +103,7 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
         return (
           <article key={message.id} className={`flex gap-3 ${fromUser ? "justify-end" : "justify-start"}`}>
             {!fromUser && (
-              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white">
+              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Bot className="h-4 w-4" />
               </div>
             )}
@@ -111,8 +111,8 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
             <div
               className={`max-w-[82%] rounded-2xl px-4 py-3 leading-7 ${
                 fromUser
-                  ? "bg-gray-900 text-white"
-                  : "border bg-white text-gray-800 shadow-sm"
+                  ? "bg-primary text-primary-foreground"
+                  : "border bg-card text-foreground shadow-sm"
               }`}
             >
               {!fromUser && message.toolCalls && message.toolCalls.length > 0 && (
@@ -138,7 +138,7 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
                     ol: ({ children }) => <ol className="mb-3 list-decimal space-y-1 pl-5">{children}</ol>,
                     pre: ({ children }) => <pre className="my-3 overflow-x-auto rounded-xl bg-gray-950 p-4 text-sm text-gray-100">{children}</pre>,
                     code: ({ children }) => <code className="rounded bg-gray-100/10 px-1 py-0.5 font-mono text-sm">{children}</code>,
-                    blockquote: ({ children }) => <blockquote className="my-3 border-l-4 border-amber-400 pl-3 text-gray-500">{children}</blockquote>,
+                    blockquote: ({ children }) => <blockquote className="my-3 border-l-4 border-amber-400 pl-3 text-muted-foreground">{children}</blockquote>,
                   }}
                 >
                   {message.content}
@@ -147,8 +147,8 @@ export function ChatMessages({ messages, model, thinkingMode }: ChatMessagesProp
             </div>
 
             {fromUser && (
-              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-white">
-                <User className="h-4 w-4" />
+              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-card">
+                <PersonalAvatar className="h-8 w-8 text-sm" />
               </div>
             )}
           </article>

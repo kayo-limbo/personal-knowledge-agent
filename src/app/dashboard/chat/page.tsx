@@ -10,14 +10,14 @@ import { listChatPrompts } from "@/lib/services/prompt.service";
  * 只有真正需要交互的 ChatWorkspace 才进入浏览器 bundle。
  */
 interface ChatPageProps {
-  searchParams: Promise<{ conversation?: string }>;
+  searchParams: Promise<{ conversation?: string; new?: string }>;
 }
 
 export default async function ChatPage({ searchParams }: ChatPageProps) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const { conversation } = await searchParams;
+  const { conversation, new: fresh } = await searchParams;
   const bootstrap = await getChatBootstrap(session.user.id, conversation);
   const prompts = session.user.role === "GUEST" ? [] : await listChatPrompts(session.user.id);
   const initialConversationId = bootstrap.conversations.some((item) => item.id === conversation)
@@ -25,6 +25,7 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
     : undefined;
   return (
     <ChatWorkspace
+      startFresh={fresh === "1"}
       bootstrap={bootstrap}
       prompts={prompts}
       initialModel={DEEPSEEK_DEFAULT_MODEL}

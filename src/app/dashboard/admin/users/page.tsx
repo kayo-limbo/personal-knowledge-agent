@@ -23,15 +23,15 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
       {params.success && <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{params.success}</p>}
       {params.error && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{params.error}</p>}
 
-      <form className="flex gap-2 rounded-xl border bg-white p-4 shadow-sm" method="get">
-        <input className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm" name="query" defaultValue={params.query} placeholder="搜索邮箱或姓名" />
-        <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white" type="submit">搜索</button>
+      <form className="flex gap-2 rounded-xl border bg-card p-4 shadow-sm" method="get">
+        <input className="min-w-0 flex-1 rounded-lg border border-border px-3 py-2 text-sm" name="query" defaultValue={params.query} placeholder="搜索邮箱或姓名" />
+        <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">搜索</button>
         {params.query && <Link className="rounded-lg border px-4 py-2 text-sm font-medium" href="/dashboard/admin/users">清除</Link>}
       </form>
 
-      <div className="overflow-x-auto rounded-xl border bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl border bg-card shadow-sm">
         <table className="w-full min-w-[860px] text-left text-sm">
-          <thead className="border-b bg-gray-50 text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr><th className="px-4 py-3">用户</th><th className="px-4 py-3">数据</th><th className="px-4 py-3">注册时间</th><th className="px-4 py-3">角色</th></tr>
           </thead>
           <tbody className="divide-y">
@@ -43,10 +43,10 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
                 <td className="px-4 py-4">
                   <form action={updateUserRoleAction} className="flex items-center gap-2">
                     <input type="hidden" name="id" value={user.id} />
-                    <select className="rounded-lg border border-gray-200 bg-white px-3 py-2" name="role" defaultValue={user.role} disabled={user.id === session.user.id}>
+                    <select className="rounded-lg border border-border bg-card px-3 py-2" name="role" defaultValue={user.role} disabled={user.id === session.user.id}>
                       <option value="ADMIN">ADMIN</option><option value="USER">USER</option><option value="GUEST">GUEST</option>
                     </select>
-                    <button className="rounded-lg border px-3 py-2 font-medium hover:bg-gray-50 disabled:opacity-50" type="submit" disabled={user.id === session.user.id}>保存</button>
+                    <button className="rounded-lg border px-3 py-2 font-medium hover:bg-muted/40 disabled:opacity-50" type="submit" disabled={user.id === session.user.id}>保存</button>
                   </form>
                 </td>
               </tr>

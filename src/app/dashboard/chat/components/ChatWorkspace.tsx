@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChatBackground, SettingsButton } from "@/app/components/dashboard/Personalization";
 import { ConversationSidebar } from "./ConversationSidebar";
 import { ChatMessages } from "./ChatMessages";
 import { ChatComposer } from "./ChatComposer";
@@ -15,6 +16,7 @@ interface ChatWorkspaceProps {
   prompts: { id: string; title: string }[];
   initialModel: DeepSeekModel;
   initialConversationId?: string;
+  startFresh?: boolean;
 }
 
 async function readError(response: Response): Promise<string> {
@@ -27,7 +29,7 @@ async function readError(response: Response): Promise<string> {
   }
 }
 
-export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConversationId }: ChatWorkspaceProps) {
+export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConversationId, startFresh = false }: ChatWorkspaceProps) {
   const [input, setInput] = useState("");
   const [newPromptId, setNewPromptId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -58,14 +60,14 @@ export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConvers
     Object.entries(bootstrap.messagesByConversation).forEach(([id, list]) => {
       setMessages(id, list);
     });
-    setActiveConversation(initialConversationId ?? bootstrap.conversations[0]?.id ?? null);
+    setActiveConversation(startFresh ? null : initialConversationId ?? bootstrap.conversations[0]?.id ?? null);
     return () => {
       const controller = abortRef.current;
       abortRef.current = null;
       controller?.abort();
       setStreaming(false);
     };
-  }, [bootstrap, initialConversationId, reset, setActiveConversation, setConversations, setMessages, setStreaming]);
+  }, [bootstrap, initialConversationId, startFresh, reset, setActiveConversation, setConversations, setMessages, setStreaming]);
 
   function startNewConversation() {
     setError(null);
@@ -181,7 +183,7 @@ export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConvers
   }
 
   return (
-    <section className="flex h-[calc(100vh-5.5rem)] min-h-[560px] overflow-hidden rounded-xl border bg-gray-50 shadow-sm">
+    <section className="flex h-[calc(100vh-5.5rem)] min-h-[560px] overflow-hidden rounded-xl border bg-muted/40 shadow-sm">
       <ConversationSidebar
         conversations={conversations}
         activeId={activeConversationId}
@@ -190,8 +192,9 @@ export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConvers
         onNew={startNewConversation}
       />
       <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex justify-between gap-2 border-b bg-card px-3 py-2"><button onClick={startNewConversation} disabled={isStreaming} className="rounded-lg border px-3 text-sm md:invisible">新对话</button><SettingsButton tab="background">聊天背景</SettingsButton></div>
         {prompts.length > 0 && (
-          <label className="flex shrink-0 items-center gap-3 border-b bg-white px-5 py-2 text-sm">
+          <label className="flex shrink-0 items-center gap-3 border-b bg-card px-5 py-2 text-sm">
             <span>Prompt</span>
             <select aria-label="选择聊天 Prompt" className="min-w-0 flex-1 rounded-lg border px-2 py-1" disabled={isStreaming || !!activeConversationId}
               value={activeConversationId ? conversations.find(item => item.id === activeConversationId)?.promptId ?? "" : newPromptId}
@@ -202,9 +205,9 @@ export function ChatWorkspace({ bootstrap, prompts, initialModel, initialConvers
             <span className="text-xs text-muted-foreground">新建会话可切换</span>
           </label>
         )}
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <ChatBackground>
           <ChatMessages messages={messages} model={model} thinkingMode={thinkingMode} />
-        </div>
+        </ChatBackground>
         <ChatComposer
           value={input}
           isStreaming={isStreaming}

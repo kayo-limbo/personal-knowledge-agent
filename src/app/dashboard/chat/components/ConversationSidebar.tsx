@@ -20,7 +20,7 @@ export function ConversationSidebar({
   onNew,
 }: ConversationSidebarProps) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r bg-white/70">
+    <aside className="hidden w-64 md:flex shrink-0 flex-col border-r bg-card/70">
       <div className="border-b p-4">
         <Button className="h-10 w-full" onClick={onNew} disabled={disabled}>
           <MessageSquarePlus />
@@ -44,12 +44,12 @@ export function ConversationSidebar({
                 onClick={() => onSelect(conversation.id)}
                 className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                   activeId === conversation.id
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                 }`}
               >
                 <span className="block truncate font-medium">{conversation.title}</span>
-                <span className={`mt-1 block text-xs ${activeId === conversation.id ? "text-gray-300" : "text-gray-400"}`}>
+                <span className={`mt-1 block text-xs ${activeId === conversation.id ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {new Date(conversation.updatedAt).toLocaleDateString("zh-CN")}
                 </span>
               </button>
