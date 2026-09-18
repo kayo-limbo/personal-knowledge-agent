@@ -5,6 +5,7 @@ import { getDeepSeekClient } from "@/lib/deepseek";
 import {
   buildKnowledgeSourcesMarkdown,
   buildKnowledgeToolResult,
+  type KnowledgeSearchResult,
 } from "@/lib/knowledge-search";
 import {
   AGENT_TOTAL_TIMEOUT_MS,
@@ -282,7 +283,8 @@ export async function POST(request: Request) {
               };
             },
             // userId 只能来自服务端 Session，工具参数中没有也不接受该字段。
-            executeSearch: (query, toolSignal) => searchKnowledge(session.user.id, query, toolSignal, parsed.data.content),
+            executeSearch: (query: string, toolSignal: AbortSignal): Promise<KnowledgeSearchResult[]> =>
+              searchKnowledge(session.user.id, query, toolSignal, parsed.data.content),
             formatToolResult: buildKnowledgeToolResult,
             onTextDelta: (delta) => {
               fullText += delta;

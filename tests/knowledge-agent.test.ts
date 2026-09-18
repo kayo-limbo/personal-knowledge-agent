@@ -20,7 +20,12 @@ test("工具超时会取消实际检索调用，核验故障作为错误回填�
   const timed = await runKnowledgeAgent({
     initialMessages: [{ role: "user", content: "资料" }], signal: new AbortController().signal, toolTimeoutMs: 10,
     requestModel: async () => ++round === 1 ? toolTurn("t", { query: "资料" }) : finalTurn("暂时无法核验"),
-    executeSearch: (_query, signal) => { childSignal = signal; return new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true })); },
+    executeSearch: (_query: string, signal: AbortSignal): Promise<KnowledgeSearchResult[]> => {
+      childSignal = signal;
+      return new Promise<KnowledgeSearchResult[]>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    },
     formatToolResult: () => { throw new Error("失败不应格式化成空结果"); }, onTextDelta: () => {},
   });
   assert.equal(childSignal?.aborted, true);
