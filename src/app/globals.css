@@ -150,3 +150,47 @@
 .dark [data-background="paper"] { --scene: repeating-linear-gradient(0deg, transparent 0 23px, #d3bd9212 23px 24px), #2b2925; }
 button:not(:disabled), a, input[type="range"] { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+
+.chat-textarea:focus, .chat-textarea:focus-visible { outline: none; box-shadow: none; }
+.photo-import:focus-within { outline: 2px solid var(--ring); outline-offset: 3px; }
+.chat-backdrop { background-size: cover; background-position: center; background-repeat: no-repeat; }
+.home-viewport { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+.home-recent { flex: 1; grid-auto-rows: minmax(0, 1fr); }
+.home-recent-card { min-height: 0; display: flex; flex-direction: column; }
+.home-recent-card > :first-child { flex-shrink: 0; }
+.home-welcome, .home-stats { flex-shrink: 0; }
+.home-identity { max-width: 100%; }
+.home-tip { flex-shrink: 0; }
+.workspace-page, .settings-panel { animation: workspace-enter 180ms ease-out; }
+@keyframes workspace-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.personalization-dialog {
+  opacity: 0; transform: translateY(8px) scale(.98);
+  transition: opacity 180ms ease, transform 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
+}
+.personalization-dialog[open] { opacity: 1; transform: translateY(0) scale(1); }
+.personalization-dialog::backdrop { background: rgb(0 0 0 / 45%); opacity: 0; transition: opacity 180ms, display 180ms allow-discrete, overlay 180ms allow-discrete; }
+.personalization-dialog[open]::backdrop { opacity: 1; }
+@starting-style {
+  .personalization-dialog[open] { opacity: 0; transform: translateY(8px) scale(.98); }
+  .personalization-dialog[open]::backdrop { opacity: 0; }
+}
+.personalization-dialog button { transition: background-color 160ms, color 160ms, box-shadow 160ms; }
+@media (max-width: 640px), (max-height: 720px) {
+  .home-viewport { padding: 4px; gap: 8px; }
+  .home-identity > span { width: 40px; height: 40px; }
+  .home-identity h1 { font-size: 16px; }
+  .home-identity p { display: none; }
+  .home-welcome { padding: 10px; }
+  .home-welcome a, .home-welcome button { padding: 8px 10px; font-size: 12px; }
+  .home-stats a { padding: 8px; }
+  .home-stats svg, .home-tip { display: none; }
+  .home-stats p { font-size: 12px; }
+  .home-stats p:first-child { font-size: 18px; }
+  .home-recent-card { padding: 10px; }
+  .home-recent-card > :first-child { margin-bottom: 6px; }
+  .home-recent-card h2 { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-page, .settings-panel { animation: none; }
+  .personalization-dialog, .personalization-dialog::backdrop, .personalization-dialog button, nav a { transition: none; }
+}

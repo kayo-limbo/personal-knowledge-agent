@@ -107,7 +107,7 @@ export function ChatComposer({
             </select>
           </label>
         </div>
-        <div className="flex items-end gap-3 rounded-2xl border bg-card p-3 shadow-sm focus-within:ring-2 focus-within:ring-gray-300">
+        <div className="flex items-end gap-3 rounded-2xl border bg-card p-3 shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring/25">
           <textarea
             value={value}
             onChange={(event) => onChange(event.target.value)}
@@ -115,7 +115,8 @@ export function ChatComposer({
             placeholder="输入消息，Enter 发送，Shift + Enter 换行"
             rows={2}
             maxLength={12000}
-            className="max-h-44 min-h-12 flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none"
+            aria-label="聊天消息"
+            className="chat-textarea max-h-44 min-h-12 flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none"
           />
           {isStreaming ? (
             <Button size="icon-lg" variant="outline" onClick={onStop} aria-label="停止生成">

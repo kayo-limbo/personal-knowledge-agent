@@ -15,3 +15,14 @@ test("旧账号的空配置和损坏配置使用安全默认值", () => {
   for (const value of [{}, null, { theme: "dark" }, "invalid"]) assert.deepEqual(readPreferences(value), defaultPreferences);
   assert.equal(readPreferences({ ...defaultPreferences, theme: "dark" }).theme, "dark");
 });
+
+test("照片设置向后兼容，拒绝远程地址、SVG 和超限内容", () => {
+  const legacy = { theme: "dark", avatar: "cat", background: "sage", overlay: 40 };
+  const restored = readPreferences(legacy);
+  assert.equal(restored.theme, "dark");
+  assert.equal(restored.background, "sage");
+  assert.equal(restored.avatarPhoto, null);
+  for (const photo of ["https://example.test/photo.jpg", "data:image/svg+xml;base64,PHN2Zz4=", "data:image/jpeg;base64,invalid", "data:image/jpeg;base64,/9j/" + "A".repeat(450_000)]) {
+    assert.equal(profileSchema.safeParse({ name: "用户", preferences: { ...defaultPreferences, backgroundPhoto: photo } }).success, false);
+  }
+});

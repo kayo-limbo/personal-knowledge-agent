@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { readPreferences } from "@/lib/personalization";
 import { PersonalizationProvider } from "@/app/components/dashboard/Personalization";
 import Header from "@/app/components/dashboard/Header";
+import { WorkspaceContent } from "@/app/components/dashboard/WorkspaceContent";
 
 
 // Inline nav items to workaround Turbopack RSC compilation issue
@@ -50,7 +51,7 @@ export default async function DashboardLayout({
       <Sidebar items={filteredNavItems} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header user={session.user} />
-        <main className="min-h-0 flex-1 overflow-y-auto p-2">{children}</main>
+        <WorkspaceContent>{children}</WorkspaceContent>
       </div>
     </div>
     </PersonalizationProvider>
